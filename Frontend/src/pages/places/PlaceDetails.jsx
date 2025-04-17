@@ -4,9 +4,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import RatingPlace from "../../components/RatingPlace";
 import { useNavigate } from "react-router-dom";
-import { MapPinIcon, StarIcon, HeartIcon } from "lucide-react";
+import { MapPinIcon, StarIcon, HeartIcon, Clock, Ticket, Map, CameraIcon } from "lucide-react";
 import { toast } from "sonner";
-
 
 const categoryImages = {
   متاحف:
@@ -26,15 +25,17 @@ const categoryImages = {
 const PlaceDetails = () => {
   const [museums, setMuseums] = useState([]);
   const [selectedMuseum, setSelectedMuseum] = useState(null);
-  const { id } = useParams(); // استخراج ID من الـ URL
+  const { id } = useParams();
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [relatedPlaces, setRelatedPlaces] = useState([]); // إضافة حالة للأماكن المرتبطة
+  const [relatedPlaces, setRelatedPlaces] = useState([]);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
 
   const navigate = useNavigate();
-  // ✅ جلب بيانات المكان حسب ID
+
   useEffect(() => {
     const fetchPlaceDetails = async () => {
       try {
@@ -56,27 +57,59 @@ const PlaceDetails = () => {
     fetchPlaceDetails();
   }, [id]);
 
-  // ✅ جلب الأماكن المرتبطة بالفئة بعد تحميل place
   useEffect(() => {
     if (!place || !place.categories || place.categories.length === 0) return;
 
-    const category = encodeURIComponent(place.categories[0]); // استخدام أول فئة
+    const category = encodeURIComponent(place.categories[0]);
     console.log("🔍 Fetching related places for category:", category);
 
     axios
       .get(`http://localhost:9527/places/category/${category}`)
       .then((response) => {
         console.log("✅ Related places data received:", response.data);
-        setRelatedPlaces(response.data.slice(0, 6)); // عرض أول 6 أماكن مشابهة
+        setRelatedPlaces(response.data.slice(0, 6));
       })
       .catch((error) =>
         console.error("❌ Error fetching related places:", error)
       );
-  }, [place]); // يتم تشغيله عند تحديث place
+  }, [place]);
 
-  if (loading) return <p>جارٍ التحميل...</p>;
-  if (error) return <p>{error}</p>;
-  if (!place) return <p>لم يتم العثور على المكان.</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-4"></div>
+        <p className="text-xl text-blue-600 font-semibold">جارٍ التحميل...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex justify-center items-center h-screen bg-red-50">
+      <div className="bg-white p-8 rounded-xl shadow-lg border-r-4 border-red-500">
+        <p className="text-xl text-red-600">{error}</p>
+        <button 
+          onClick={() => navigate(-1)}
+          className="mt-4 px-6 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+        >
+          العودة للخلف
+        </button>
+      </div>
+    </div>
+  );
+  
+  if (!place) return (
+    <div className="flex justify-center items-center h-screen bg-gray-50">
+      <div className="bg-white p-8 rounded-xl shadow-lg">
+        <p className="text-xl text-gray-600">لم يتم العثور على المكان.</p>
+        <button 
+          onClick={() => navigate("/")}
+          className="mt-4 px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
+        >
+          العودة للرئيسية
+        </button>
+      </div>
+    </div>
+  );
 
   const handleClick = () => {
     if (place.is_free) {
@@ -85,13 +118,13 @@ const PlaceDetails = () => {
       navigate(`/pay/${place._id}`);
     }
   };
-  
 
   const handleNearbyPlaces = () => {
     if (!navigator.geolocation) {
-      return alert("متصفحك لا يدعم تحديد الموقع الجغرافي");
+      return toast.error("متصفحك لا يدعم تحديد الموقع الجغرافي");
     }
   
+    toast.loading("جاري تحديد موقعك...");
     navigator.geolocation.getCurrentPosition(async (position) => {
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
@@ -105,1359 +138,335 @@ const PlaceDetails = () => {
         });
   
         const nearbyPlaces = res.data;
-        setNearbyPlaces(nearbyPlaces);  // خزن الأماكن في الحالة (state)
+        setNearbyPlaces(nearbyPlaces);
+        toast.success("تم العثور على أماكن قريبة!");
+        
+        // Scroll to nearby places section or show modal
+        const section = document.getElementById("nearby-places");
+        if (section) section.scrollIntoView({ behavior: "smooth" });
       } catch (error) {
         console.error("❌ خطأ في جلب الأماكن القريبة:", error);
-        alert("حدث خطأ أثناء جلب الأماكن القريبة");
+        toast.error("حدث خطأ أثناء جلب الأماكن القريبة");
       }
+    }, () => {
+      toast.error("تعذر تحديد موقعك الجغرافي");
     });
   };
-  
-
 
   const getCategoryImage = (category) => {
-    return categoryImages[category] || categoryImages["museums"]; // الافتراضي هو متاحف في حالة عدم وجود تصنيف
+    return categoryImages[category] || categoryImages["متاحف"];
   };
 
   return (
     <>
-      {/*  START */}
-      <section
-        className="museums-section"
+      {/* Hero Section */}
+      <div 
+        className="relative h-96 bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${place.images?.[0]})`,
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/80 flex flex-col justify-end">
+          <div className="container mx-auto px-4 py-16">
+            <div className="flex items-center space-x-2 space-x-reverse rtl:space-x-reverse mb-2">
+              <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold">
+                {place.is_free ? "مجاني" : `${place.ticket_price} دينار`}
+              </span>
+              <div className="flex items-center text-yellow-400">
+                <StarIcon className="w-5 h-5 fill-current" />
+                <span className="ms-1 text-white font-semibold">{place.rating}</span>
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-md mb-2">{place.name}</h1>
+            <p className="text-xl text-gray-200 max-w-2xl">{place.short_description}</p>
+            
+            <div className="flex gap-2 mt-4 flex-wrap">
+              {place.categories.map((category, index) => (
+                <span
+                  key={index}
+                  className="bg-white/20 backdrop-blur-sm text-white border border-white/30 px-4 py-1.5 rounded-full text-sm font-medium"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Gallery */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                  <CameraIcon className="w-6 h-6 mr-2 text-blue-600" />
+                  <span>معرض الصور</span>
+                </h2>
+                
+                <div className="relative mb-4 rounded-xl overflow-hidden aspect-video">
+                  <img 
+                    src={place.images?.[activeImageIndex] || place.images?.[0]} 
+                    alt={place.name}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                  
+                  <button 
+                    onClick={() => setShowGalleryModal(true)}
+                    className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition"
+                  >
+                    عرض كل الصور
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2">
+                  {place.images?.slice(0, 4).map((img, idx) => (
+                    <div 
+                      key={idx}
+                      className={`cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        activeImageIndex === idx ? 'border-blue-500' : 'border-transparent'
+                      }`}
+                      onClick={() => setActiveImageIndex(idx)}
+                    >
+                      <img 
+                        src={img} 
+                        alt={`${place.name} - ${idx+1}`}
+                        className="w-full h-24 object-cover hover:opacity-90 transition"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">وصف المكان</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {place.detailed_description}
+                </p>
+              </div>
+            </div>
+
+            {/* Rating Section */}
+            <div className="mt-8 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl shadow-xl p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">قيّم زيارتك</h2>
+              {place && <RatingPlace placeId={place._id} />}
+            </div>
+          </div>
+
+          {/* Right Column - Info */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <div className="bg-[#115173] text-white p-6 rounded-2xl shadow-xl mb-6">
+                <h3 className="text-xl font-bold mb-6 text-center pb-4 border-b border-white/20">معلومات المكان</h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="bg-white/10 p-2 rounded-lg mr-3">
+                      <Ticket className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-gray-300 text-sm">سعر التذكرة</h4>
+                      <p className="font-semibold">{place.is_free ? "مجاني" : `${place.ticket_price} دينار`}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="bg-white/10 p-2 rounded-lg mr-3">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-gray-300 text-sm">ساعات العمل</h4>
+                      <p className="font-semibold">{place.working_hours}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="bg-white/10 p-2 rounded-lg mr-3">
+                      <MapPinIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-gray-300 text-sm">الموقع</h4>
+                      <p className="font-semibold">{place.city || "الأردن"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleClick}
+                  className="w-full mt-6 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition duration-300 flex items-center justify-center"
+                >
+                  <Ticket className="w-5 h-5 mr-2" />
+                  {place.is_free ? "الدخول مجاني" : "شراء التذكرة"}
+                </button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">خيارات إضافية</h3>
+                  
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleNearbyPlaces}
+                      className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 p-4 rounded-xl transition border border-gray-200"
+                    >
+                      <span className="font-medium">أماكن قريبة مني</span>
+                      <MapPinIcon className="w-5 h-5 text-blue-600" />
+                    </button>
+                    
+                    <a
+                      href={place.location ? `https://www.google.com/maps?q=${place.location.latitude},${place.location.longitude}` : "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 p-4 rounded-xl transition border border-gray-200"
+                    >
+                      <span className="font-medium">عرض على الخريطة</span>
+                      <Map className="w-5 h-5 text-blue-600" />
+                    </a>
+                    
+                    <button
+                      onClick={() => {
+                        const section = document.getElementById("similar-places");
+                        if (section) section.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 p-4 rounded-xl transition border border-gray-200"
+                    >
+                      <span className="font-medium">أماكن مشابهة</span>
+                      <StarIcon className="w-5 h-5 text-blue-600" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Similar Places */}
+      <section 
+        className="relative py-16 md:py-24 bg-cover bg-center bg-fixed"
         id="similar-places"
         style={{
           backgroundImage: `url(${
-            place && place.categories && place.categories.length > 0
-              ? getCategoryImage(place.categories[0])
+            place?.categories?.length > 0 
+              ? getCategoryImage(place.categories[0]) 
               : categoryImages["متاحف"]
-          })`,
+          })`
         }}
       >
-        <div
-          className="container"
-          style={{
-            marginTop: 50,
-            position: "relative",
-            zIndex: 2,
-            paddingBottom: 50,
-          }}
-        >
-          <h1
-            className="text-white text-center mb-4"
-            style={{
-              fontSize: "2.5rem",
-              fontWeight: "bold",
-              color: "#fff",
-              fontFamily: "var(--font-family-titel)",
-            }}
-          >
-            أماكن مشابهة
-          </h1>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 to-black/90 z-10"></div>
 
-          <div
-            className="row"
-            id="museumCards"
-            style={{
-              justifyContent: "center",
-              width: "100%",
-              alignItems: "stretch",
-              gap: "20px",
-              margin: "0 auto",
-              maxWidth: "1200px",
-            }}
-          >
+        <div className="container relative z-20 mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-white/10 backdrop-blur-sm text-yellow-300 px-4 py-1 rounded-full text-sm font-medium mb-4">استكشف المزيد</span>
+            <h2 className="text-white text-3xl md:text-4xl font-bold mb-4">أماكن مشابهة قد تعجبك</h2>
+            <p className="text-gray-300 max-w-2xl mx-auto">استكشف المزيد من الأماكن المشابهة التي قد تناسب اهتماماتك</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {relatedPlaces.length > 0 ? (
               relatedPlaces.map((relatedPlace, index) => (
-                <div
-                  className="col-lg-3 col-md-4 col-sm-6"
-                  key={index}
-                  style={{ padding: "10px" }}
-                >
-                  <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group h-full w-60 flex flex-col">
-                    <div className="relative flex-1">
-                      <img
-                        src={relatedPlace.images}
-                        alt={relatedPlace.name}
-                        className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <button className="bg-white/30 backdrop-blur-md p-2 rounded-full hover:bg-white/50 transition">
-                          <HeartIcon className="w-5 h-5 text-white" />
-                        </button>
-                      </div>
-                      <div className="absolute bottom-0 right-0 left-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
-                            <img
-                              src={relatedPlace.images}
-                              alt={relatedPlace.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <span className="text-white text-sm font-medium mr-2 truncate">
-                            {relatedPlace.name}
-                          </span>
-                        </div>
-                      </div>
+                <div key={index} className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-105 hover:border-white/30">
+                  <div className="relative">
+                    <img
+                      src={relatedPlace.images}
+                      alt={relatedPlace.name}
+                      className="w-full h-56 object-cover"
+                    />
+                    <div className="absolute top-3 right-3">
+                      <button className="bg-white/30 backdrop-blur-md p-2 rounded-full hover:bg-white/50 transition">
+                        <HeartIcon className="w-5 h-5 text-white" />
+                      </button>
                     </div>
-                    <div className="p-4 flex flex-col flex-grow">
-                      <h3 className="font-bold text-lg mb-2 truncate">
-                        {relatedPlace.name}
-                      </h3>
-                      <div className="flex items-center text-gray-500 mb-3">
-                        <MapPinIcon className="w-4 h-4 ml-1 flex-shrink-0" />
-                        <span className="text-sm truncate">
-                          {relatedPlace.short_description || "الموقع"}
+                    <div className="absolute bottom-0 right-0 left-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
+                          <img
+                            src={relatedPlace.images}
+                            alt={relatedPlace.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-white text-sm font-medium mr-2 truncate">
+                          {relatedPlace.name}
                         </span>
                       </div>
-                      <div className="mt-auto flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            {relatedPlace.season}
-                          </span>
-                          <span className="text-gray-500 text-sm">
-                            {relatedPlace.price}
-                          </span>
-                        </div>
-                        <Link
-                          to={`/places/${relatedPlace._id}`}
-                          className="text-indigo-600 text-sm font-medium hover:text-indigo-800 whitespace-nowrap"
-                        >
-                          عرض التفاصيل
-                        </Link>
+                    </div>
+                  </div>
+                  <div className="p-4 text-white">
+                    <h3 className="font-bold text-lg mb-2">{relatedPlace.name}</h3>
+                    <div className="flex items-center text-gray-300 mb-3">
+                      <MapPinIcon className="w-4 h-4 ml-1 flex-shrink-0" />
+                      <span className="text-sm truncate">
+                        {relatedPlace.short_description || "الموقع"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-yellow-400/20 text-yellow-300 text-xs font-medium px-2.5 py-0.5 rounded">
+                          {relatedPlace.season || "متاح"}
+                        </span>
                       </div>
+                      <Link
+                        to={`/places/${relatedPlace._id}`}
+                        className="text-blue-300 text-sm font-medium hover:text-blue-200 whitespace-nowrap hover:underline"
+                      >
+                        عرض التفاصيل
+                      </Link>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-white text-center col-12">
-                لا توجد أماكن مشابهة متاحة.
-              </p>
+              <div className="col-span-full text-center">
+                <p className="text-white text-lg">
+                  لا توجد أماكن مشابهة متاحة حالياً.
+                </p>
+              </div>
             )}
           </div>
         </div>
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1,
-          }}
-        ></div>
       </section>
 
-      <style jsx>{`
-        .museums-section {
-          padding: 60px 0;
-          position: relative;
-          background-size: cover;
-          background-position: center;
-          background-attachment: fixed;
-          min-height: auto;
-        }
-
-        @media (max-width: 992px) {
-          .museums-section {
-            padding: 40px 0;
-          }
-
-          h1 {
-            font-size: 2rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .museums-section {
-            padding: 30px 0;
-            background-attachment: scroll;
-          }
-
-          #museumCards {
-            gap: 15px;
-          }
-
-          h1 {
-            font-size: 1.8rem;
-          }
-        }
-
-        @media (max-width: 576px) {
-          .museums-section {
-            padding: 20px 0;
-          }
-
-          h1 {
-            font-size: 1.6rem;
-          }
-
-          #museumCards {
-            gap: 10px;
-          }
-        }
-      `}</style>
-      {/* end */}
-
-
-
-
-
-
-      <>
-        <div className="container mt-5">
-          <div className="content-container">
-            {/* كارد المعلومات */}
-            <div className="info-card">
-              <h2 className="text-center mb-3 "> {place.name}</h2>
-              <p className="text-center text-muted"> {place.city} </p>
-              <div className="rating mb-3 text-center">
-                <i className="fas fa-star" /> ⭐ {place.rating}
-              </div>
-              <div className="about mb-3">
-                <h3 className="text-center">{place.name}</h3>
-                <p>
-                  {place.short_description}
-                  {place.detailed_description}
-                </p>
-              </div>
-              <div className="details">
-                <div className="detail">
-                  <h4>التذاكر</h4>
-                  <p>
-                    {" "}
-                    {place.ticket_price === 0
-                      ? "مجاني"
-                      : `${place.ticket_price} دينار`}{" "}
-                  </p>
-                </div>
-                <div className="detail">
-                  <h4>ساعات العمل</h4>
-                  <p>{place.working_hours} </p>
-                </div>
-                <div className="detail">
-                  <h4>الموقع</h4>
-                  <p>الموقع الجغرافي</p>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-2">
-                {place.categories.map((category, index) => (
-                  <span
-                    key={index}
-                    className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full"
-                  >
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* حاوية الصور */}
-            {/* حاوية الصور */}
-            <div className="image-container">
-              {/* الصورة الرئيسية */}
-              <div className="main-image">
-                <img
-                  src={place.images?.[0]} // عرض أول صورة من `images`
-                  alt="سيارة رئيسية"
-                  className="img-fluid main-car"
-                />
-              </div>
-
-              {/* الصور الصغيرة */}
-              <div className="small-images">
-                {place.images?.slice(1, 3).map(
-                  (
-                    img,
-                    index // عرض أول صورتين بعد الصورة الرئيسية
-                  ) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={`صورة ${index + 1}`}
-                      className="img-fluid smaller-car"
-                    />
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-          {/* معرض السيارات */}
-          <div className="container py-5">
-            <h2
-              className="text-center mb-4"
-              style={{ color: "#11374d", fontWeight: "bold" }}
+      {/* Gallery Modal */}
+      {showGalleryModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-4xl">
+            <button 
+              onClick={() => setShowGalleryModal(false)}
+              className="absolute top-0 right-0 bg-white text-black w-10 h-10 rounded-full flex items-center justify-center"
             >
-              استمتع بمشاهدة مجموعة من الصور التي تسلط الضوء على جمال{" "}
-              {place.name}
-            </h2>
-
-            {/* شبكة الصور من `gallery` */}
-            <div
-              className="row justify-content-center gallery"
-              style={{ height: "600px", overflowY: "auto" }}
-            >
-              {place.gallery?.map((src, index) => (
-                <div className="col-md-6 col-lg-4 mb-4" key={index}>
-                  <div className="img-container">
-                    <img
-                      src={src}
-                      alt={`Car ${index + 1}`}
-                      className="img-fluid"
-                    />
-                  </div>
+              ✕
+            </button>
+            
+            <div className="bg-white rounded-xl overflow-hidden">
+              <div className="p-4 border-b">
+                <h3 className="text-xl font-bold">معرض صور {place.name}</h3>
+              </div>
+              
+              <div className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[...place.images || [], ...(place.gallery || [])].map((src, index) => (
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition">
+                      <img
+                        src={src}
+                        alt={`صورة ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onClick={() => setActiveImageIndex(index)}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-
-          {/* حول المكان */}
-          <div className="container mt-5">
-            <h1 style={{ color: "#11374d", textAlign: "center" }}>
-              حول المكان
-            </h1>
-
-            {/* خيارات المعلومات والحجز */}
-            <div className="options text-center grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              <button
-                onClick={handleClick}
-                className="option block bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-              >
-                شراء التذكرة
-              </button>
-              <div>
-      <div
-        className="option bg-gray-200 py-2 rounded-lg cursor-pointer hover:bg-gray-300 transition"
-        data-info="أماكن قريبة مني"
-        onClick={handleNearbyPlaces}
-      >
-        أماكن قريبة مني
-      </div>
-
-      {/* عرض الأماكن القريبة */}
-      {/* <div id="nearby-places">
-  {nearbyPlaces.length > 0 ? (
-    nearbyPlaces.map((place, index) => (
-      <div key={index} className="place-item">
-        <h3>{place.name}</h3>
-        <p>{place.description}</p> 
-        <p>المسافة: {place.distance} كم</p> 
-      </div>
-    ))
-  ) : (
-    <div>{alert('لا توجد أماكن قريبة حالياً')}</div>
-  )}
-</div> */}
-
-    </div>
-              {/* <div
-                className="option bg-gray-200 py-2 rounded-lg"
-                data-info="وسائل النقل"
-              >
-                وسائل النقل المتاحة
-              </div> */}
-              <div
-  className="option bg-gray-200 py-2 rounded-lg cursor-pointer"
-  onClick={() => {
-    const section = document.getElementById("top-rated-places");
-    if (section) section.scrollIntoView({ behavior: "smooth" });
-  }}
->
-  الأعلى تقييماً
-</div>
-              <div
-  className="option bg-gray-200 py-2 rounded-lg no-underline cursor-pointer"
-  data-info="الخريطة التفاعلية"
->
-  <a
-    href={`https://www.google.com/maps?q=${place.location.latitude},${place.location.longitude}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block text-center text-blue-700 hover:underline"
-  >
-    عرض الموقع على الخريطة
-  </a>
-</div>
-<div
-  className="option bg-gray-200 py-2 rounded-lg cursor-pointer"
-  data-info="إقتراح أماكن مشابهة"
-  onClick={() => {
-    const section = document.getElementById("similar-places");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-  }}
->
-  إقتراح أماكن مشابهة
-</div>
-            </div>
-
-            {/* <div className="map-container mt-5">
-    <h3 className="text-center">الموقع على الخريطة:</h3>
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.916163524317!2d-122.08424968469273!3d37.42199997982585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMznCsDI1JzEwLjEiTiAxMjLCsDA1JzA0LjYiVw!5e0!3m2!1sen!2sjo!4v1617161586892!5m2!1sen!2sjo"
-      width="100%"
-      height="300"
-      allowFullScreen=""
-      loading="lazy"
-      className="rounded-lg shadow-lg"
-    ></iframe>
-  </div> */}
-
-            {/* قسم التقييم */}
-            {/* قسم التقييم */}
-            <div>
-              {/* معلومات المكان الأخرى */}
-              {place && <RatingPlace placeId={place._id} />}
-            </div>
-          </div>
-
-          {/* CSS داخلي */}
-          <style jsx>{`
-            .content-container {
-              display: flex;
-              gap: 20px;
-              align-items: flex-start;
-              flex-direction: row-reverse;
-            }
-
-            .info-card {
-              flex: 1.5;
-              background: #11374d;
-              color: #fff;
-              padding: 15px; /* Reduced padding */
-              border-radius: 10px;
-              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .info-card h2 {
-              font-size: 1.5em; /* Reduced font size */
-              color: #ffd700;
-            }
-
-            .rating {
-              color: #ffd700;
-              font-size: 1.1em; /* Reduced font size */
-            }
-
-            .about {
-              font-size: 0.9em; /* Adjusted font size */
-            }
-
-            .details {
-              margin-top: 15px; /* Reduced margin */
-            }
-
-            .details .detail {
-              margin-bottom: 10px; /* Reduced margin */
-            }
-
-            .details h4 {
-              margin-bottom: 5px;
-              font-size: 1em; /* Reduced font size */
-              color: #ffd700;
-            }
-
-            .map-button .btn {
-              background-color: #ffd700;
-              color: #000;
-              border: none;
-              font-weight: bold;
-            }
-
-            .map-button .btn:hover {
-              background-color: #ffa500;
-            }
-
-            .image-container {
-              flex: 2;
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
-            }
-
-            .main-image img {
-              width: 90%;
-              height: 300px; /* Reduced height */
-              border-radius: 15px;
-              border: 1px solid #ffd700;
-              transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .main-image img:hover {
-              transform: scale(1.05);
-              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            }
-
-            .small-images {
-              display: flex;
-              gap: 10px;
-              width: 90%;
-            }
-
-            .small-images img {
-              flex: 1;
-              height: 120px; /* Reduced height */
-              border: 1px solid #ffd700;
-              border-radius: 15px;
-              transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .small-images img:hover {
-              transform: scale(1.1);
-              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            }
-
-            .img-container {
-              position: relative;
-              overflow: hidden;
-              border-radius: 15px;
-              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-              transition: transform 0.3s ease;
-            }
-
-            .img-container img {
-              width: 100%;
-              height: auto;
-              transition: transform 0.4s ease, opacity 0.4s ease;
-              border: 1px solid rgba(0, 0, 0, 0.1);
-            }
-
-            .img-container:hover img {
-              transform: scale(1.05);
-              opacity: 0.9;
-            }
-
-            .gallery {
-              height: 600px; /* Fixed height for the gallery */
-              overflow-y: auto; /* Allow scrolling if necessary */
-            }
-
-            @media (max-width: 768px) {
-              .content-container {
-                flex-direction: column;
-              }
-
-              .small-images {
-                flex-direction: row;
-              }
-            }
-
-            @media (max-width: 480px) {
-              .content-container {
-                gap: 20px;
-              }
-
-              .info-card {
-                padding: 10px; /* Reduced padding */
-              }
-
-              .info-card h2 {
-                font-size: 1.2em; /* Reduced font size */
-              }
-
-              .rating {
-                font-size: 0.8em; /* Reduced font size */
-              }
-
-              .details h4 {
-                font-size: 0.8em; /* Reduced font size */
-              }
-
-              .main-image img {
-                height: 200px; /* Reduced height */
-              }
-
-              .small-images img {
-                height: 80px; /* Reduced height */
-              }
-            }
-
-            .options {
-              display: flex;
-              flex-wrap: wrap;
-              justify-content: center;
-            }
-
-            .option {
-              cursor: pointer;
-              padding: 10px 15px; /* Adjusted padding */
-              margin: 10px;
-              background-color: #ffd700;
-              border-radius: 8px;
-              text-align: center;
-              font-family: "Arial", sans-serif;
-              font-size: 16px; /* Adjusted font size */
-              color: #11374d;
-              transition: background-color 0.3s ease, transform 0.2s ease;
-            }
-
-            .option:hover {
-              background-color: #ffa500;
-              transform: scale(1.05);
-            }
-
-            .rating-section {
-              margin-top: 40px;
-              text-align: center;
-              font-family: "Arial", sans-serif;
-              color: #11374d;
-            }
-
-            .star-rating {
-              font-size: 30px;
-              cursor: pointer;
-            }
-
-            .star {
-              margin: 0 5px;
-              color: gray;
-              transition: color 0.3s;
-            }
-
-            #rating-result {
-              margin-top: 10px;
-              font-size: 18px;
-            }
-          `}</style>
         </div>
-      </>
+      )}
     </>
   );
 };
 
 export default PlaceDetails;
-
-4;
-
-// import { Link } from "react-router-dom";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-// import React, { useState, useEffect } from "react";
-// import RatingPlace from "../../components/RatingPlace";
-// import { useNavigate } from "react-router-dom";
-
-// const PlaceDetails = () => {
-//   const [museums, setMuseums] = useState([]);
-//   const [selectedMuseum, setSelectedMuseum] = useState(null);
-//   const { id } = useParams(); // استخراج ID من الـ URL
-//   const [place, setPlace] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [relatedPlaces, setRelatedPlaces] = useState([]); // إضافة حالة للأماكن المرتبطة
-//   const navigate = useNavigate();
-//   // ✅ جلب بيانات المكان حسب ID
-//   useEffect(() => {
-//     const fetchPlaceDetails = async () => {
-//       try {
-//         console.log("🔍 Fetching from:", `http://localhost:9527/places/${id}`);
-//         const response = await axios.get(`http://localhost:9527/places/${id}`);
-//         console.log("✅ Data received:", response.data);
-//         setPlace(response.data);
-//       } catch (err) {
-//         console.error(
-//           "❌ Error fetching place details:",
-//           err.response?.data || err.message
-//         );
-//         setError("حدث خطأ أثناء جلب البيانات.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchPlaceDetails();
-//   }, [id]);
-
-//   // ✅ جلب الأماكن المرتبطة بالفئة بعد تحميل place
-//   // ✅ جلب الأماكن المرتبطة بالفئة بعد تحميل place
-//   useEffect(() => {
-//     if (!place || !place.categories || place.categories.length === 0) return;
-
-//     const category = encodeURIComponent(place.categories[0]); // استخدام أول فئة
-//     console.log("🔍 Fetching related places for category:", category);
-
-//     axios
-//       .get(`http://localhost:9527/places/category/${category}`)
-//       .then((response) => {
-//         console.log("✅ Related places data received:", response.data);
-//         setRelatedPlaces(response.data.slice(0, 6)); // عرض أول 6 أماكن مشابهة
-//       })
-//       .catch((error) =>
-//         console.error("❌ Error fetching related places:", error)
-//       );
-//   }, [place]); // يتم تشغيله عند تحديث place
-
-//   if (loading) return <p>جارٍ التحميل...</p>;
-//   if (error) return <p>{error}</p>;
-//   if (!place) return <p>لم يتم العثور على المكان.</p>;
-
-//   const handleClick = () => {
-//     if (place.is_free) {
-//       alert("لا يوجد حاجة لحجز تذاكر لهذا الموقع، يمكنك الذهاب مباشرة!");
-//     } else {
-//       navigate(`/pay/${place._id}`);
-//     }
-//   };
-
-//   return (
-//     <>
-//       {/* MUSEUM START */}
-//       <section className="museums-section">
-//         <div
-//           className="container"
-//           style={{ marginTop: 100, position: "relative", zIndex: 2 }}
-//         >
-//           <h1
-//             className="text-white text-center mb-5"
-//             style={{
-//               fontSize: "3rem",
-//               fontWeight: "bold",
-//               color: "#fff",
-//               fontFamily: "var(--font-family-titel)",
-//             }}
-//           >
-//             أماكن مشابهة
-//           </h1>
-//           <div
-//             className="search-favorite d-flex justify-content-between align-items-center mb-4"
-//             style={{ marginBottom: "20px" }}
-//           >
-//             <div className="search-bar" style={{ marginLeft: "auto" }}>
-//               <input
-//                 type="text"
-//                 className="form-control"
-//                 placeholder="ابحث عن المتحف"
-//                 id="searchInput"
-//                 style={{
-//                   borderRadius: "5px",
-//                   padding: "10px",
-//                   border: "1px solid #ddd",
-//                   width: "100%",
-//                   maxWidth: "300px",
-//                 }}
-//               />
-//             </div>
-//           </div>
-//           <div
-//             className="row"
-//             id="museumCards"
-//             style={{
-//               justifyContent: "center",
-//               width: "100%",
-//               alignItems: "center",
-//             }}
-//           >
-//             {relatedPlaces.length > 0 ? (
-//               relatedPlaces.map((place, index) => (
-//                 <div className="col-md-4 col-sm-6 mb-4" key={index}>
-//                   <div
-//                     className="product-card"
-//                     style={{
-//                       background: "rgba(255, 255, 255, 0.9)",
-//                       borderRadius: "15px",
-//                       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
-//                       overflow: "hidden",
-//                       transition: "transform 0.3s, box-shadow 0.3s",
-//                       position: "relative",
-//                       maxWidth: "250px",
-//                       height: "400px",
-//                       margin: "auto",
-//                     }}
-//                   >
-//                     <span
-//                       style={{
-//                         backgroundColor: "rgba(255, 193, 7, 0.8)",
-//                         color: "#000",
-//                         padding: "5px 10px",
-//                         borderRadius: "10px",
-//                         position: "absolute",
-//                         top: "10px",
-//                         left: "10px",
-//                         zIndex: 1,
-//                       }}
-//                     >
-//                       {place.season}
-//                     </span>
-
-//                     <img
-//                       src={place.images}
-//                       alt={place.name}
-//                       style={{
-//                         width: "100%",
-//                         height: "150px",
-//                         objectFit: "cover",
-//                       }}
-//                     />
-
-//                     <div
-//                       className="card-body"
-//                       style={{ padding: "10px", textAlign: "center" }}
-//                     >
-//                       <h3
-//                         className="card-title"
-//                         style={{
-//                           fontSize: "1.3em",
-//                           margin: "10px 0",
-//                           color: "#333",
-//                         }}
-//                       >
-//                         {place.name}
-//                       </h3>
-//                       <div
-//                         style={{
-//                           color: "#666",
-//                           margin: "5px 0",
-//                           fontSize: "0.9em",
-//                         }}
-//                       >
-//                         📍 الموقع
-//                       </div>
-//                       <p
-//                         className="card-text"
-//                         style={{
-//                           color: "#666",
-//                           margin: "5px 0",
-//                           fontSize: "0.8em",
-//                         }}
-//                       >
-//                         {place.description}
-//                       </p>
-//                       <div
-//                         className="price"
-//                         style={{
-//                           fontWeight: "bold",
-//                           margin: "5px 0",
-//                           color: "#e74c3c",
-//                         }}
-//                       >
-//                         {place.price}
-//                       </div>
-//                     </div>
-
-//                     <div
-//                       style={{
-//                         display: "flex",
-//                         justifyContent: "space-between",
-//                         padding: "10px",
-//                         borderTop: "1px solid #ddd",
-//                       }}
-//                     >
-//                       <a
-//                         href="favorite"
-//                         target="_blank"
-//                         style={{
-//                           cursor: "pointer",
-//                           color: "#FFD700",
-//                           fontSize: "1.5rem",
-//                         }}
-//                       >
-//                         <i className="bx bx-heart-circle"></i>
-//                       </a>
-//                       <a
-//                         href="more-details.html"
-//                         className="btn btn-primary"
-//                         style={{
-//                           backgroundColor: "rgb(17, 81, 115)",
-//                           border: "none",
-//                           color: "white",
-//                           padding: "5px 8px",
-//                           borderRadius: "5px",
-//                           fontSize: "0.8em",
-//                         }}
-//                       >
-//                         المزيد
-//                       </a>
-//                     </div>
-//                   </div>
-//                 </div>
-//               ))
-//             ) : (
-//               <p className="text-white text-center">
-//                 لا توجد أماكن مشابهة متاحة.
-//               </p>
-//             )}
-//           </div>
-//         </div>
-//         <div
-//           style={{
-//             position: "absolute",
-//             top: 0,
-//             left: 0,
-//             width: "100%",
-//             height: "100%",
-//             backgroundColor: "rgba(0, 0, 0, 0.5)",
-//             zIndex: 1,
-//           }}
-//         ></div>
-//       </section>
-
-//       <style jsx>{`
-//         .museums-section {
-//           padding: 100px 0;
-//           position: relative;
-//           background-image: url("https://i.pinimg.com/736x/df/51/0b/df510b0f6a90123515b2e77d1ef45416.jpg");
-//           background-size: cover;
-//           background-position: center;
-//           background-attachment: fixed;
-//           height: 200vh;
-//         }
-
-//         @media (max-width: 1200px) {
-//           .product-card {
-//             max-width: 230px; // Further reduced for medium screens
-//             height: 350px; // Adjusted height
-//           }
-//         }
-
-//         @media (max-width: 992px) {
-//           .product-card {
-//             max-width: 200px; // Further reduced for medium screens
-//             height: 300px; // Adjusted height
-//           }
-//         }
-
-//         @media (max-width: 768px) {
-//           .product-card {
-//             max-width: 180px; // Further reduced for smaller screens
-//             height: 250px; // Adjusted height
-//           }
-//         }
-
-//         @media (max-width: 576px) {
-//           .product-card {
-//             max-width: 150px; // Further reduced for extra small screens
-//             height: 220px; // Adjusted height
-//           }
-//         }
-
-//         @media (max-width: 400px) {
-//           .product-card {
-//             max-width: 100%;
-//             height: auto;
-//           }
-//         }
-
-//         @media (max-width: 768px) {
-//           .museums-section {
-//             height: 650vh;
-//           }
-
-//           h1 {
-//             font-size: 2rem;
-//           }
-
-//           .search-bar {
-//             max-width: 100%;
-//           }
-
-//           .product-card {
-//             max-width: 90%;
-//           }
-//         }
-
-//         @media (max-width: 576px) {
-//           .product-card {
-//             max-width: 100%;
-//           }
-
-//           h1 {
-//             font-size: 1.8rem;
-//           }
-
-//           .card-title {
-//             font-size: 1.2em; // Further reduced title size
-//           }
-//         }
-//       `}</style>
-//       {/* end */}
-
-//       <>
-//         <div className="container mt-5">
-//           <div className="content-container">
-//             {/* كارد المعلومات */}
-//             <div className="info-card">
-//               <h2 className="text-center mb-3"> {place.name}</h2>
-//               <p className="text-center text-muted"> {place.city} </p>
-//               <div className="rating mb-3 text-center">
-//                 <i className="fas fa-star" /> ⭐ {place.rating}
-//               </div>
-//               <div className="about mb-3">
-//                 <h3 className="text-center">عن المتحف</h3>
-//                 <p>
-//                   {place.short_description}
-//                   {place.detailed_description}
-//                 </p>
-//               </div>
-//               <div className="details">
-//                 <div className="detail">
-//                   <h4>التذاكر</h4>
-//                   <p>
-//                     {" "}
-//                     {place.ticket_price === 0
-//                       ? "مجاني"
-//                       : `${place.ticket_price} دينار`}{" "}
-//                   </p>
-//                 </div>
-//                 <div className="detail">
-//                   <h4>ساعات العمل</h4>
-//                   <p>{place.working_hours} </p>
-//                 </div>
-//                 <div className="detail">
-//                   <h4>الموقع</h4>
-//                   <p>الموقع الجغرافي</p>
-//                 </div>
-//               </div>
-//               <div className="flex gap-2 mt-2">
-//                 {place.categories.map((category, index) => (
-//                   <span
-//                     key={index}
-//                     className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full"
-//                   >
-//                     {category}
-//                   </span>
-//                 ))}
-//               </div>
-//             </div>
-
-//             {/* حاوية الصور */}
-//             {/* حاوية الصور */}
-//             <div className="image-container">
-//               {/* الصورة الرئيسية */}
-//               <div className="main-image">
-//                 <img
-//                   src={place.images?.[0]} // عرض أول صورة من `images`
-//                   alt="سيارة رئيسية"
-//                   className="img-fluid main-car"
-//                 />
-//               </div>
-
-//               {/* الصور الصغيرة */}
-//               <div className="small-images">
-//                 {place.images?.slice(1, 3).map(
-//                   (
-//                     img,
-//                     index // عرض أول صورتين بعد الصورة الرئيسية
-//                   ) => (
-//                     <img
-//                       key={index}
-//                       src={img}
-//                       alt={`صورة ${index + 1}`}
-//                       className="img-fluid smaller-car"
-//                     />
-//                   )
-//                 )}
-//               </div>
-//             </div>
-//           </div>
-//           {/* معرض السيارات */}
-//           <div className="container py-5">
-//             <h2
-//               className="text-center mb-4"
-//               style={{ color: "#11374d", fontWeight: "bold" }}
-//             >
-//               استمتع بمشاهدة مجموعة من الصور التي تسلط الضوء على جمال{" "}
-//               {place.name}
-//             </h2>
-
-//             {/* شبكة الصور من `gallery` */}
-//             <div
-//               className="row justify-content-center gallery"
-//               style={{ height: "600px", overflowY: "auto" }}
-//             >
-//               {place.gallery?.map((src, index) => (
-//                 <div className="col-md-6 col-lg-4 mb-4" key={index}>
-//                   <div className="img-container">
-//                     <img
-//                       src={src}
-//                       alt={`Car ${index + 1}`}
-//                       className="img-fluid"
-//                     />
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-
-//           {/* حول المكان */}
-//           <div className="container mt-5">
-//             <h1 style={{ color: "#11374d", textAlign: "center" }}>
-//               حول المكان
-//             </h1>
-
-//             {/* خيارات المعلومات والحجز */}
-//             <div className="options text-center grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-//               <button
-//                 onClick={handleClick}
-//                 className="option block bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-//               >
-//                 شراء التذكرة
-//               </button>
-//               <div
-//                 className="option bg-gray-200 py-2 rounded-lg"
-//                 data-info="الأماكن القريبة"
-//               >
-//                 الأماكن القريبة
-//               </div>
-//               <div
-//                 className="option bg-gray-200 py-2 rounded-lg"
-//                 data-info="وسائل النقل"
-//               >
-//                 وسائل النقل المتاحة
-//               </div>
-//               <div
-//                 className="option bg-gray-200 py-2 rounded-lg no-underline cursor-pointer"
-//                 data-info="الخريطة التفاعلية"
-//               >
-//                 <a
-//                   href="https://www.google.com/maps"
-//                   target="_blank"
-//                   rel="noopener noreferrer"
-//                 >
-//                   عرض الموقع على الخريطة
-//                 </a>
-//               </div>
-//               <div
-//                 className="option bg-gray-200 py-2 rounded-lg"
-//                 data-info="إقتراح أماكن مشابهة"
-//               >
-//                 إقتراح أماكن مشابهة
-//               </div>
-//             </div>
-
-//             {/* <div className="map-container mt-5">
-//     <h3 className="text-center">الموقع على الخريطة:</h3>
-//     <iframe
-//       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.916163524317!2d-122.08424968469273!3d37.42199997982585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMznCsDI1JzEwLjEiTiAxMjLCsDA1JzA0LjYiVw!5e0!3m2!1sen!2sjo!4v1617161586892!5m2!1sen!2sjo"
-//       width="100%"
-//       height="300"
-//       allowFullScreen=""
-//       loading="lazy"
-//       className="rounded-lg shadow-lg"
-//     ></iframe>
-//   </div> */}
-
-//             {/* قسم التقييم */}
-//             {/* قسم التقييم */}
-//             <div>
-//               {/* معلومات المكان الأخرى */}
-//               {place && <RatingPlace placeId={place._id} />}
-//             </div>
-//           </div>
-
-//           {/* CSS داخلي */}
-//           <style jsx>{`
-//             .content-container {
-//               display: flex;
-//               gap: 20px;
-//               align-items: flex-start;
-//               flex-direction: row-reverse;
-//             }
-
-//             .info-card {
-//               flex: 1.5;
-//               background: #11374d;
-//               color: #fff;
-//               padding: 15px; /* Reduced padding */
-//               border-radius: 10px;
-//               box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-//             }
-
-//             .info-card h2 {
-//               font-size: 1.5em; /* Reduced font size */
-//               color: #ffd700;
-//             }
-
-//             .rating {
-//               color: #ffd700;
-//               font-size: 1.1em; /* Reduced font size */
-//             }
-
-//             .about {
-//               font-size: 0.9em; /* Adjusted font size */
-//             }
-
-//             .details {
-//               margin-top: 15px; /* Reduced margin */
-//             }
-
-//             .details .detail {
-//               margin-bottom: 10px; /* Reduced margin */
-//             }
-
-//             .details h4 {
-//               margin-bottom: 5px;
-//               font-size: 1em; /* Reduced font size */
-//               color: #ffd700;
-//             }
-
-//             .map-button .btn {
-//               background-color: #ffd700;
-//               color: #000;
-//               border: none;
-//               font-weight: bold;
-//             }
-
-//             .map-button .btn:hover {
-//               background-color: #ffa500;
-//             }
-
-//             .image-container {
-//               flex: 2;
-//               display: flex;
-//               flex-direction: column;
-//               gap: 10px;
-//             }
-
-//             .main-image img {
-//               width: 90%;
-//               height: 300px; /* Reduced height */
-//               border-radius: 15px;
-//               border: 1px solid #ffd700;
-//               transition: transform 0.3s ease, box-shadow 0.3s ease;
-//             }
-
-//             .main-image img:hover {
-//               transform: scale(1.05);
-//               box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-//             }
-
-//             .small-images {
-//               display: flex;
-//               gap: 10px;
-//               width: 90%;
-//             }
-
-//             .small-images img {
-//               flex: 1;
-//               height: 120px; /* Reduced height */
-//               border: 1px solid #ffd700;
-//               border-radius: 15px;
-//               transition: transform 0.3s ease, box-shadow 0.3s ease;
-//             }
-
-//             .small-images img:hover {
-//               transform: scale(1.1);
-//               box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-//             }
-
-//             .img-container {
-//               position: relative;
-//               overflow: hidden;
-//               border-radius: 15px;
-//               box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-//               transition: transform 0.3s ease;
-//             }
-
-//             .img-container img {
-//               width: 100%;
-//               height: auto;
-//               transition: transform 0.4s ease, opacity 0.4s ease;
-//               border: 1px solid rgba(0, 0, 0, 0.1);
-//             }
-
-//             .img-container:hover img {
-//               transform: scale(1.05);
-//               opacity: 0.9;
-//             }
-
-//             .gallery {
-//               height: 600px; /* Fixed height for the gallery */
-//               overflow-y: auto; /* Allow scrolling if necessary */
-//             }
-
-//             @media (max-width: 768px) {
-//               .content-container {
-//                 flex-direction: column;
-//               }
-
-//               .small-images {
-//                 flex-direction: row;
-//               }
-//             }
-
-//             @media (max-width: 480px) {
-//               .content-container {
-//                 gap: 20px;
-//               }
-
-//               .info-card {
-//                 padding: 10px; /* Reduced padding */
-//               }
-
-//               .info-card h2 {
-//                 font-size: 1.2em; /* Reduced font size */
-//               }
-
-//               .rating {
-//                 font-size: 0.8em; /* Reduced font size */
-//               }
-
-//               .details h4 {
-//                 font-size: 0.8em; /* Reduced font size */
-//               }
-
-//               .main-image img {
-//                 height: 200px; /* Reduced height */
-//               }
-
-//               .small-images img {
-//                 height: 80px; /* Reduced height */
-//               }
-//             }
-
-//             .options {
-//               display: flex;
-//               flex-wrap: wrap;
-//               justify-content: center;
-//             }
-
-//             .option {
-//               cursor: pointer;
-//               padding: 10px 15px; /* Adjusted padding */
-//               margin: 10px;
-//               background-color: #ffd700;
-//               border-radius: 8px;
-//               text-align: center;
-//               font-family: "Arial", sans-serif;
-//               font-size: 16px; /* Adjusted font size */
-//               color: #11374d;
-//               transition: background-color 0.3s ease, transform 0.2s ease;
-//             }
-
-//             .option:hover {
-//               background-color: #ffa500;
-//               transform: scale(1.05);
-//             }
-
-//             .rating-section {
-//               margin-top: 40px;
-//               text-align: center;
-//               font-family: "Arial", sans-serif;
-//               color: #11374d;
-//             }
-
-//             .star-rating {
-//               font-size: 30px;
-//               cursor: pointer;
-//             }
-
-//             .star {
-//               margin: 0 5px;
-//               color: gray;
-//               transition: color 0.3s;
-//             }
-
-//             #rating-result {
-//               margin-top: 10px;
-//               font-size: 18px;
-//             }
-//           `}</style>
-//         </div>
-//       </>
-//     </>
-//   );
-// };
-
-// export default PlaceDetails;

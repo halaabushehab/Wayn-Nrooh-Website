@@ -1,213 +1,202 @@
-import { useState, useEffect, useReducer } from "react";
-import { Lock, Mail, User, Eye, EyeOff, X, Facebook } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Lock, Mail, User, Eye, EyeOff, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import Cookies from "js-cookie";
 
 export default function AuthForm() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const dispatch = useDispatch();
-    const loading = useSelector((state) => state.auth.loading);
-    const error = useSelector((state) => state.auth.error);
-    const navigate = useNavigate(); // للتنقل بعد التسجيل الناجح
     const [user, setUser] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isLogin, setIsLogin] = useState(true);
-
+    const [isLoggedIn, setIsLoggedIn] = useState(false);    const error = useSelector((state) => state.auth.error);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
-      name: '', // تأكد من وجود خاصية name
-      email: '',
-      password: '',
-      showPassword: false,
+        username: '',
+        email: '',
+        password: '',
     });
-  console.log(formData); // عرض القيم داخل formData
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
+    const [animate, setAnimate] = useState(false);
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
-  const [animate, setAnimate] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
-
-  useEffect(() => {
-    setAnimate(true);
-  }, []);
-
-  useEffect(() => {
-    setAnimate(false);
-    setTimeout(() => setAnimate(true), 10);
-  }, [isSignUp]);
-
-  // ===================================================
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-
-  const handleChange = (e) => {
-    setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-    });
-};
-
-const validateForm = () => {
-    let errors = {};
-    const { username, email, password } = formData;
-
-    if (!username) errors.username = "الاسم مطلوب.";
-    if (!email) errors.email = "البريد الإلكتروني مطلوب.";
-    if (!password) errors.password = "كلمة المرور مطلوبة.";
-
-    if (email && !emailPattern.test(email)) {
-        errors.email = "صيغة البريد الإلكتروني غير صحيحة.";
-    }
-    if (typeof password !== "string" || !password.trim()) {
-        setError("كلمة المرور يجب أن تكون نصًا.");
-        return;
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-};
-
-const handleRegister = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
-
-  const { username, email, password } = formData;
-  const url = "http://localhost:9527/api/auth/register";
-  const data = { username, email, password: String(password) };
-
-  try {
-    const response = await axios.post(url, data);
-
-    // تخزين معلومات المستخدم مثل تسجيل الدخول
-    const userData = response.data;
-    localStorage.setItem("token", userData.token);
-    localStorage.setItem("username", userData.username);
-    localStorage.setItem("email", userData.email);
-    localStorage.setItem("userId", userData.userId);
-    localStorage.setItem("isAdmin", userData.isAdmin);
-
-    // عرض رسالة نجاح
-    Swal.fire({
-      title: `مرحبًا ${userData.username}! 👋`,
-      text: "تم إنشاء الحساب بنجاح! تم تسجيل الدخول تلقائيًا.",
-      icon: "success",
-      confirmButtonText: "استكشاف الموقع",
-      background: "linear-gradient(to right, #022C43, #FFD700)",
-      color: "#fff",
-    });
-
-    setUser(userData);
-    setIsLoggedIn(true);
-
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      showPassword: false
-    });
-
-    // ✅ توجيه المستخدم مباشرة إلى الصفحة الرئيسية
-    setTimeout(() => {
-      navigate("/");
-    }, 100);
-
-  } catch (err) {
-    console.error("Error:", err.response?.data || err.message);
-    if (err.response?.data?.message === "Email already in use") {
-      setError("هذا البريد الإلكتروني مستخدم بالفعل.");
-    } else {
-      setError("فشل التسجيل. حاول مرة أخرى.");
-    }
-  }
-};
+    useEffect(() => {
+        setAnimate(false);
+        setTimeout(() => setAnimate(true), 10);
+    }, [isSignUp]);
 
 
-const handleLogin = async (e) => {
-    e.preventDefault();
-    const { email, password } = formData;
-  
-    try {
-        console.log("📤 Sending login data:", { email, password });
-  
-        // إرسال الطلب إلى السيرفر
-        const response = await axios.post("http://localhost:9527/api/auth/login", 
-            { email, password }, 
-            { withCredentials: true }
-        );
-  
-        // استخراج بيانات المستخدم من الاستجابة
-        const userData = response.data;
-        console.log("✅ User data received:", userData);
-  
-        if (userData) {
-            const isAdmin = userData.isAdmin;
-  
-            // تحديث حالة المستخدم
-            setUser(userData);
-            setIsLoggedIn(true); // ✅ تحديث حالة تسجيل الدخول
-  
-            // تخزين البيانات في localStorage
-            localStorage.setItem("token", userData.token);
-            localStorage.setItem("username", userData.username);
-            localStorage.setItem("email", userData.email);
-            localStorage.setItem("userId", userData.userId);
-            localStorage.setItem("isAdmin", isAdmin);
-  
-            // 🔹 رسالة ترحيب مخصصة حسب الصلاحية
-            Swal.fire({
-                title: isAdmin ? 
-                    `مرحبًا ${userData.username}! (المشرف)` : 
-                    `مرحبًا ${userData.username}! 👋`,
-                text: isAdmin ? 
-                    "مرحبًا بك في لوحة التحكم" : 
-                    "أهلاً بك في موقع 'وين نروح'! استمتع باستكشاف أفضل الوجهات.",
-                icon: "success",
-                confirmButtonText: "ابدأ الآن!",
-                background: isAdmin ? 
-                    "linear-gradient(to right, #022C43, #FFD700)" : 
-                    "linear-gradient(to right, rgb(220, 228, 233), #022C43, #FFD700)",
-                color: "#fff",
-            });
-  
-            // ✅ إخفاء الفورم عن طريق مسح بياناته
-            setFormData({
-                name: '',
-                email: '',
-                password: '',
-                showPassword: false
-            });
-  
-            // ✅ إعادة التوجيه بعد تسجيل الدخول
-            setTimeout(() => {
-                // التوجيه إلى الصفحة الرئيسية بدلاً من صفحة login
-                navigate("/home"); // 🔹 نقل المستخدم إلى الصفحة الرئيسية بعد تسجيل الدخول
-            }, 1500); // ⏳ تأخير بسيط لتحسين التجربة بعد الرسالة
-  
-        } else {
-            throw new Error("المستخدم غير موجود في الرد من السيرفر");
-        }
-  
-    } catch (error) {
-        console.error("❌ Error:", error.response ? error.response.data : error.message);
-  
-        Swal.fire({
-            title: "فشل تسجيل الدخول",
-            text: "يرجى التحقق من بيانات الدخول والمحاولة مجددًا.",
-            icon: "error",
-            confirmButtonText: "حسناً",
-            background: "#022C43",
-            color: "#FFD700",
+    useEffect(() => {
+      const token = Cookies.get("token");
+      const userCookie = Cookies.get("user");
+    
+      if (token && userCookie) {
+          const userData = JSON.parse(userCookie);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          setUser(userData);
+          setIsLoggedIn(true);
+          setIsOpen(false); // إضافة هذا السطر لإخفاء الفورم
+          console.log("✅ User is still logged in after refresh:", userData);
+      } else {
+          console.log("🔴 User is not logged in.");
+          setUser(null);
+          setIsLoggedIn(false);
+      }
+    }, []);
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
         });
-    }
+    };
+
+    const validateForm = () => {
+        const { username, email, password } = formData;
+        if (isSignUp && !username) {
+            Swal.fire("خطأ", "الاسم مطلوب.", "error");
+            return false;
+        }
+        if (!email) {
+            Swal.fire("خطأ", "البريد الإلكتروني مطلوب.", "error");
+            return false;
+        }
+        if (!password) {
+            Swal.fire("خطأ", "كلمة المرور مطلوبة.", "error");
+            return false;
+        }
+        if (email && !emailPattern.test(email)) {
+            Swal.fire("خطأ", "صيغة البريد الإلكتروني غير صحيحة.", "error");
+            return false;
+        }
+        return true;
+    };
+
+    const handleRegister = async (e) => {
+      e.preventDefault();
+      if (!validateForm()) return;
+  
+      try {
+          const response = await axios.post("http://localhost:9527/api/auth/register", formData);
+          const userData = response.data;
+  
+          // ✅ تخزين جميع البيانات في كوكي واحدة مثل login
+          Cookies.set("user", JSON.stringify({
+              token: userData.token,
+              username: userData.username,
+              email: userData.email,
+              userId: userData.userId,
+              isAdmin: userData.isAdmin || false,
+          }), { expires: 7 });
+  
+          // ✅ تعيين التوكن للهيدر
+          axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+  
+          Swal.fire({
+              title: `مرحبًا ${userData.username}! 👋`,
+              text: "تم إنشاء الحساب بنجاح! تم تسجيل الدخول تلقائيًا.",
+              icon: "success",
+              confirmButtonText: "استكشاف الموقع",
+          }).then(() => {
+              setIsOpen(false); // إغلاق الفورم بعد التسجيل
+              window.location.reload();
+              navigate("/");
+          });
+  
+          // إعادة تعيين النموذج
+          setFormData({
+              username: '',
+              email: '',
+              password: '',
+              showPassword: false,
+          });
+  
+      } catch (err) {
+          console.error("Error:", err.response?.data || err.message);
+          Swal.fire({
+              title: "فشل التسجيل",
+              text: "حدث خطأ أثناء التسجيل. حاول مجددًا.",
+              icon: "error",
+          });
+      }
+  };
+  
+
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      const { email, password } = formData;
+      axios.defaults.withCredentials = true;
+  
+      try {
+          console.log("📤 Sending login data:", { email, password });
+  
+          const response = await axios.post("http://localhost:9527/api/auth/login", 
+              { email, password }, 
+              { withCredentials: true }
+          );
+  
+          const userData = response.data;
+          const token = userData.token;
+  
+          console.log("✅ User data received:", userData);
+  
+          if (token) {
+              // ✅ تخزين كل البيانات في كوكي واحدة باسم user
+              Cookies.set("user", JSON.stringify({
+                  token: token,
+                  username: userData.username,
+                  email: userData.email,
+                  userId: userData.userId, // إذا كانت موجودة
+                  isAdmin: userData.isAdmin || false, // إذا كانت موجودة
+              }), { expires: 7 });
+              setIsOpen(false);
+              // تعيين التوكن للهيدر
+              axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  
+              // إعادة تعيين النموذج
+              setFormData({
+                  username: '',
+                  email: '',
+                  password: '',
+                  showPassword: false,
+              });
+              window.location.reload();
+
+          }
+      } catch (error) {
+          console.error("❌ Error:", error.response ? error.response.data : error.message);
+          Swal.fire({
+              title: "فشل تسجيل الدخول",
+              text: "يرجى التحقق من بيانات الدخول والمحاولة مجددًا.",
+              icon: "error",
+              confirmButtonText: "حسناً",
+              background: "#022C43",
+              color: "#FFD700",
+          });
+      }
   };
   
   
 
 
+useEffect(() => {
+  const token = Cookies.get("token");
+  const userCookie = Cookies.get("user");
+
+  if (token && userCookie) {
+      const userData = JSON.parse(userCookie);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser (userData);
+      setIsLoggedIn(true);
+      console.log("✅ User is still logged in after refresh:", userData);
+  } else {
+      console.log("🔴 User is not logged in.");
+      setUser (null);
+      setIsLoggedIn(false);
+  }
+}, []);
 
 
 

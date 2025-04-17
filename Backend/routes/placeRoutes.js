@@ -16,7 +16,7 @@ router.get("/count", placeController.getPlaceCount);
 router.get("/:id", placeController.getPlaceById);
 
 // ✅ إضافة مكان جديد
-router.post("/", authMiddleware, upload.array('images', 5), placeController.addPlace);
+// router.post("/", authMiddleware, upload.array('images', 5), placeController.addPlace);
 // ✅ جلب الأماكن حسب المدينة
 router.get("/city/:city", placeController.getPlacesByCity);
 
@@ -26,23 +26,29 @@ router.get("/category/:category", placeController.getPlacesByCategory);
 // ✅ جلب الأماكن حسب الموسم
 router.get("/season/:season", placeController.getPlacesBySeason);
 
+// 🔍 ترقيم + فلترة + بحث
+router.get("/filtered/search", placeController.getFilteredPlaces);
+
+
+
+
+
+
+
+
 // ✅ فلترة الأماكن
-router.get("/filter", placeController.getPlaces);
+// router.get("/filter", placeController.getPlaces);
 
-// ✅ فلترة الأماكن مع الترقيم
-router.get("/filtered", placeController.getFilteredPlaces);
+// // ✅ فلترة الأماكن مع الترقيم
+// router.get("/filtered", placeController.getFilteredPlaces);
 
-
+// router.patch("/:id/status", placeController.updatePlaceStatus);
 // router.get("/suitable-options",placeController.getUniqueSuitableFor); // استخدمها كـ callback function
-
-
-
 // الراوت الخاص بالأماكن القريبة
-router.get('/nearby', getNearbyPlaces); // استخدام الدالة هنا
+// router.get('/nearby', getNearbyPlaces); // استخدام الدالة هنا
 // تحديث حالة المكان (للأدمن فقط)
-router.patch("/:id/status", placeController.updatePlaceStatus);
-router.put("/update/:id", placeController.updatePlace); // 🔹 تحديث مكان
-router.delete("/soft-delete/:id", placeController.softDeletePlace); // 🔹 حذف ناعم
-router.put("/restore/:id", placeController.restorePlace); // 🔹 استعادة مكان محذوف
+// router.put("/update/:id", placeController.updatePlace); // 🔹 تحديث مكان
+// router.delete("/soft-delete/:id", placeController.softDeletePlace); // 🔹 حذف ناعم
+// router.put("/restore/:id", placeController.restorePlace); // 🔹 استعادة مكان محذوف
 
 module.exports = router;
