@@ -136,10 +136,12 @@ const CityPage = () => {
     return filtered.slice(startIndex, endIndex);
   };
 
+
+
   return (
     <>
       {/* Hero section end */}
-      <section className="relative w-full h-[50vh] flex items-center justify-center bg-[#FFFFFF] my-15">
+      <section className="relative w-full h-[60vh] flex items-center justify-center bg-[#FFFFFF] my-15">
         {/* Background Video */}
         <video
           className="absolute top-0 left-0 w-full h-full object-cover"
@@ -162,7 +164,7 @@ const CityPage = () => {
         {/* Hero Content */}
         <div className="relative z-10 text-center px-6 max-w-4xl animate-fade-in-up">
           <h1
-            className="text-5xl md:text-7xl font-extrabold mb-4 text-[#FFD700] drop-shadow-xl tracking-wider"
+            className="text-5xl md:text-12xl font-extrabold mb-4 text-white drop-shadow-xl tracking-wider"
             style={{ fontFamily: "'Tajawal', sans-serif" }}
           >
             مرحباً بك في مدن الأردن
@@ -308,203 +310,10 @@ const CityPage = () => {
               </p>
             )}
           </div>
-
-          {/* Pagination */}
-          <div className="flex justify-center mt-8">
-            {Array.from(
-              {
-                length: Math.ceil(
-                  getDisplayedPlaces().filter((place) =>
-                    place.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  ).length / placesPerPage
-                ),
-              },
-              (_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`mx-2 px-4 py-2 rounded-lg transition-colors ${
-                    currentPage === i + 1
-                      ? "bg-blue-800 text-white"
-                      : "bg-yellow-500 text-white hover:bg-yellow-600"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              )
-            )}
-          </div>
         </div>
       </div>
     </>
   );
-};
-
-const sectionStyle = {
-  backgroundImage:
-    "url(https://i0.wp.com/familyinjordan.com/wp-content/uploads/2018/07/IMG_20180623_154944.jpg?fit=750%2C563&ssl=1)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  padding: "100px 0",
-};
-
-const bigCardStyle = {
-  backgroundColor: "rgba(26, 55, 77, 0.8)", // شفافية خفيفة
-  borderRadius: "15px",
-  padding: "20px",
-  maxWidth: "800px",
-  margin: "0 auto",
-  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-};
-
-const buttonContainerStyle = {
-  display: "flex",
-  overflowX: "auto",
-  padding: "10px 0",
-  justifyContent: "center",
-  gap: "10px",
-};
-
-const buttonStyle = {
-  whiteSpace: "nowrap",
-  flexShrink: "0",
-  backgroundColor: "#FFD700",
-  color: "#000",
-  borderRadius: "8px",
-  padding: "10px 15px",
-  fontSize: "1em",
-  fontWeight: "bold",
-  textDecoration: "none",
-  transition: "background-color 0.3s ease, transform 0.2s",
-};
-
-const buttonHoverStyle = {
-  backgroundColor: "#FFC107",
-  color: "#fff",
-  transform: "scale(1.05)",
-};
-
-const styles = {
-  cardContainer: {
-    backgroundColor: "white",
-    borderRadius: "15px",
-    width: "300px",
-    height: "500px",
-    margin: "10px",
-    overflow: "hidden",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    textAlign: "right",
-    direction: "rtl",
-    position: "relative",
-  },
-  seasonTag: {
-    position: "absolute",
-    top: "10px",
-    left: "10px",
-    // backgroundColor: "",
-    color: "white",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    fontSize: "1.2rem",
-  },
-  favoriteIconContainer: {
-    position: "absolute",
-    top: "10px",
-    right: "10px",
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    //   backgroundColor: "rgba(255, 255, 255, 0.8)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  favoriteIcon: {
-    fontSize: "3rem",
-    color: "#FFD700",
-  },
-  cardImage: {
-    width: "100%",
-    height: "200px",
-    objectFit: "cover",
-  },
-  cardBody: {
-    padding: "20px",
-    height: "calc(100% - 200px)",
-  },
-  cardTitle: {
-    fontSize: "1.25em",
-    marginBottom: "15px",
-    fontWeight: "bold",
-  },
-  locationIcons: {
-    display: "flex",
-    justifyContent: "right",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
-  rating: {
-    display: "flex",
-    alignItems: "center",
-    color: "#f5a623",
-    fontSize: "1em",
-  },
-  detailsButton: {
-    backgroundColor: "#115173",
-    color: "white",
-    border: "none",
-    padding: "10px 20px",
-    fontSize: "1em",
-    borderRadius: "5px",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-    display: "block",
-    textAlign: "center",
-    marginTop: "10px",
-  },
-  relatedGifts: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)", // 4 كارد في كل سطر
-    gap: "20px", // تباعد بين الكروت
-    justifyContent: "start",
-    direction: "rtl", // بدء من اليمين
-    padding: "20px",
-  },
-
-  "@media (max-width: 1024px)": {
-    cardContainer: {
-      flex: "1 1 calc(33.33% - 20px)", // 3 كروت في كل سطر
-    },
-  },
-  "@media (max-width: 768px)": {
-    cardContainer: {
-      flex: "1 1 calc(50% - 20px)", // 2 كارت في كل سطر
-    },
-  },
-  "@media (max-width: 480px)": {
-    relatedGifts: {
-      display: "grid",
-      gridTemplateColumns: "repeat(1, 1fr)", // كارت واحد في كل سطر
-      justifyContent: "center",
-      padding: "20px",
-    },
-    "@media (max-width: 1024px)": {
-      gridTemplateColumns: "repeat(3, 1fr)", // 3 كروت في السطر
-    },
-
-    /* عند تصغير الشاشة إلى 768px */
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "repeat(2, 1fr)", // 2 كارد في السطر
-    },
-
-    /* عند تصغير الشاشة إلى 480px */
-    "@media (max-width: 480px)": {
-      gridTemplateColumns: "repeat(1, 1fr)", // كارد واحد في كل سطر
-      justifyContent: "center",
-    },
-  },
 };
 
 export default CityPage;
