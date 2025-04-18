@@ -107,151 +107,150 @@ const getAdminSuggestions = async (req, res) => {
 };
 
 
-// Get all suggestions
-// Get all suggestions
-const getSuggestions = async (req, res) => {
-  try {
-    const { status } = req.query;
-    const filter = { deleted: false }; // التأكد من استبعاد الاقتراحات المحذوفة
+// // Get all suggestion
+// const getSuggestions = async (req, res) => {
+//   try {
+//     const { status } = req.query;
+//     const filter = { deleted: false }; // التأكد من استبعاد الاقتراحات المحذوفة
 
-    // إذا تم تمرير status، يمكن إضافة filter إضافي
-    if (status) {
-      filter.status = status;
-    }
+//     // إذا تم تمرير status، يمكن إضافة filter إضافي
+//     if (status) {
+//       filter.status = status;
+//     }
 
-    const suggestions = await Suggestion.find(filter)
-      .populate('user', 'username email')
-      .sort({ createdAt: -1 });
+//     const suggestions = await Suggestion.find(filter)
+//       .populate('user', 'username email')
+//       .sort({ createdAt: -1 });
 
-    res.json(suggestions);
-  } catch (err) {
-    console.error("❌ Error getting suggestions:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
+//     res.json(suggestions);
+//   } catch (err) {
+//     console.error("❌ Error getting suggestions:", err);
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 
 
-// Update suggestion status
-const updateSuggestionStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
+// // Update suggestion status
+// const updateSuggestionStatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { status } = req.body;
 
-    if (!['approved', 'rejected', 'pending'].includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
+//     if (!['approved', 'rejected', 'pending'].includes(status)) {
+//       return res.status(400).json({ message: "Invalid status value" });
+//     }
 
-    const suggestion = await Suggestion.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+//     const suggestion = await Suggestion.findByIdAndUpdate(
+//       id,
+//       { status },
+//       { new: true }
+//     );
 
-    if (!suggestion) {
-      return res.status(404).json({ message: "Suggestion not found" });
-    }
-    if (!status) {
-      return res.status(400).json({ message: "Status is required" });
-    }
+//     if (!suggestion) {
+//       return res.status(404).json({ message: "Suggestion not found" });
+//     }
+//     if (!status) {
+//       return res.status(400).json({ message: "Status is required" });
+//     }
 
-    // إذا تمت الموافقة، سيتم نقل بيانات الاقتراح إلى مجموعة الأماكن
-    if (status === 'approved') {
-      const placeData = {
-        name: suggestion.placeName,
-        description: suggestion.description,
-        city: suggestion.city,
-        workingHours: suggestion.workingHours,
-        rating: suggestion.rating,
-        ticket_price: suggestion.ticketPrice,
-        categories: suggestion.categories,
-        contact: suggestion.contact,
-        images: suggestion.images,
-      };
+//     // إذا تمت الموافقة، سيتم نقل بيانات الاقتراح إلى مجموعة الأماكن
+//     if (status === 'approved') {
+//       const placeData = {
+//         name: suggestion.placeName,
+//         description: suggestion.description,
+//         city: suggestion.city,
+//         workingHours: suggestion.workingHours,
+//         rating: suggestion.rating,
+//         ticket_price: suggestion.ticketPrice,
+//         categories: suggestion.categories,
+//         contact: suggestion.contact,
+//         images: suggestion.images,
+//       };
 
-      // استدعاء دالة addPlace لإضافة المكان الجديد
-      const newPlaceResponse = await addPlace({ body: placeData }); // تأكد من استيراد الدالة
+//       // استدعاء دالة addPlace لإضافة المكان الجديد
+//       const newPlaceResponse = await addPlace({ body: placeData }); // تأكد من استيراد الدالة
 
-      // بعد إضافة المكان بنجاح، يمكن حذف الاقتراح من مجموعة suggestions (اختياري)
-      await Suggestion.findByIdAndDelete(id); // إذا أردت حذف الاقتراح بعد الموافقة عليه
+//       // بعد إضافة المكان بنجاح، يمكن حذف الاقتراح من مجموعة suggestions (اختياري)
+//       await Suggestion.findByIdAndDelete(id); // إذا أردت حذف الاقتراح بعد الموافقة عليه
 
-      return res.json({
-        message: 'Suggestion approved and added to places successfully',
-        suggestion,
-        place: newPlaceResponse.place, // إرجاع المكان الجديد
-      });
-    }
+//       return res.json({
+//         message: 'Suggestion approved and added to places successfully',
+//         suggestion,
+//         place: newPlaceResponse.place, // إرجاع المكان الجديد
+//       });
+//     }
 
-    res.json({
-      message: `Suggestion ${status} successfully`,
-      suggestion,
-    });
+//     res.json({
+//       message: `Suggestion ${status} successfully`,
+//       suggestion,
+//     });
 
-  } catch (err) {
-    console.error("❌ Error updating suggestion status:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
+//   } catch (err) {
+//     console.error("❌ Error updating suggestion status:", err);
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 
-// Delete suggestion
-const deleteSuggestion = async (req, res) => {
-  try {
-    const { id } = req.params;
+// // Delete suggestion
+// const deleteSuggestion = async (req, res) => {
+//   try {
+//     const { id } = req.params;
 
-    // العثور على الاقتراح وتحديث حالة الحذف إلى true
-    const suggestion = await Suggestion.findByIdAndUpdate(id, { deleted: true }, { new: true });
+//     // العثور على الاقتراح وتحديث حالة الحذف إلى true
+//     const suggestion = await Suggestion.findByIdAndUpdate(id, { deleted: true }, { new: true });
 
-    if (!suggestion) {
-      return res.status(404).json({ message: "Suggestion not found" });
-    }
+//     if (!suggestion) {
+//       return res.status(404).json({ message: "Suggestion not found" });
+//     }
 
-    res.json({ message: "Suggestion marked as deleted successfully" });
+//     res.json({ message: "Suggestion marked as deleted successfully" });
 
-  } catch (err) {
-    console.error("❌ Error deleting suggestion:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
+//   } catch (err) {
+//     console.error("❌ Error deleting suggestion:", err);
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 
-// دالة لإضافة اقتراح إلى الأماكن
-const addPlaceFromSuggestion = async (req, res) => {
-  const { id } = req.params;  // الحصول على ID الاقتراح من الـ URL
+// // دالة لإضافة اقتراح إلى الأماكن
+// const addPlaceFromSuggestion = async (req, res) => {
+//   const { id } = req.params;  // الحصول على ID الاقتراح من الـ URL
 
-  try {
-      // إيجاد الاقتراح باستخدام الـ ID
-      const suggestion = await Suggestion.findById(id);
+//   try {
+//       // إيجاد الاقتراح باستخدام الـ ID
+//       const suggestion = await Suggestion.findById(id);
 
-      if (!suggestion) {
-          return res.status(404).json({ message: 'Suggestion not found' });
-      }
+//       if (!suggestion) {
+//           return res.status(404).json({ message: 'Suggestion not found' });
+//       }
 
-      // حذف الاقتراح من الكولكشن
-      await Suggestion.findByIdAndDelete(id);
+//       // حذف الاقتراح من الكولكشن
+//       await Suggestion.findByIdAndDelete(id);
 
-      // إضافة الاقتراح كمكان جديد
-      const newPlace = new Place({
-          name: suggestion.name,
-          location: suggestion.location,
-          description: suggestion.description,
-          image: suggestion.image,  // يمكنك إضافة بيانات إضافية حسب الحاجة
-      });
+//       // إضافة الاقتراح كمكان جديد
+//       const newPlace = new Place({
+//           name: suggestion.name,
+//           location: suggestion.location,
+//           description: suggestion.description,
+//           image: suggestion.image,  // يمكنك إضافة بيانات إضافية حسب الحاجة
+//       });
 
-      // حفظ المكان الجديد في الكولكشن
-      await newPlace.save();
+//       // حفظ المكان الجديد في الكولكشن
+//       await newPlace.save();
 
-      res.status(201).json({ message: 'Place added successfully' });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-  }
-};
+//       res.status(201).json({ message: 'Place added successfully' });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
 
 
 module.exports = {
   verifyTokenAndPermissions,
   createSuggestion,
   getAdminSuggestions,
-  getSuggestions,
-  updateSuggestionStatus,
-  deleteSuggestion,
-  addPlaceFromSuggestion
+  // getSuggestions,
+  // updateSuggestionStatus,
+  // deleteSuggestion,
+  // addPlaceFromSuggestion
 };

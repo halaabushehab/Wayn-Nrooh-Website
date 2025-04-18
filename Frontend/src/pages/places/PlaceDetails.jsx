@@ -6,6 +6,7 @@ import RatingPlace from "../../components/RatingPlace";
 import { useNavigate } from "react-router-dom";
 import { MapPinIcon, StarIcon, HeartIcon, Clock, Ticket, Map, CameraIcon } from "lucide-react";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 
 const categoryImages = {
   متاحف:
@@ -33,8 +34,19 @@ const PlaceDetails = () => {
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
+
+
+
+  useEffect(() => {
+    const storedUserId = Cookies.get("userId");
+    setUserId(storedUserId);
+    console.log("📦 userId from cookies:", storedUserId);
+  }, []);
+  
+
 
   useEffect(() => {
     const fetchPlaceDetails = async () => {
@@ -74,6 +86,9 @@ const PlaceDetails = () => {
       );
   }, [place]);
 
+
+
+  
   if (loading) return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-50 to-indigo-50">
       <div className="flex flex-col items-center">
@@ -156,6 +171,12 @@ const PlaceDetails = () => {
   const getCategoryImage = (category) => {
     return categoryImages[category] || categoryImages["متاحف"];
   };
+
+
+
+
+
+
 
   return (
     <>
@@ -252,6 +273,7 @@ const PlaceDetails = () => {
             {/* Rating Section */}
             <div className="mt-8 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl shadow-xl p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">قيّم زيارتك</h2>
+           
               {place && <RatingPlace placeId={place._id} />}
             </div>
           </div>

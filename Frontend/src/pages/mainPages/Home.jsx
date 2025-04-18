@@ -19,19 +19,22 @@ const Home = () => {
       {/* ***** HERO Section ***** */}
       {/* <HeroSection /> */}
       {/* ***** Categories Section ***** */}
-      {/* <CategorySection /> */}
+      <CategorySection />
 
       {/* ***** About Section ***** */}
-      {/* <AboutSection /> */}
+      <AboutSection />
       
       {/* ***** Explore Jordan Section ***** */}
+      <div className="my-50">
       <ExploreJordanSection />
+
+         </div>
       
       {/* ***** Jordan Destinations Section ***** */}
       {/* <JordanDestinations /> */}
       
       {/* ***** Seasonal Destinations Section ***** */}
-      {/* <SeasonalDestinations /> */}
+      <SeasonalDestinations />
       
       {/* ***** Map Section ***** */}
       {/* <MapSection /> */}

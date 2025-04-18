@@ -1,4 +1,5 @@
 const Place = require("../models/places");
+const User = require("../models/user"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
 
 // ✅ جلب جميع الأماكن
@@ -6,15 +7,80 @@ exports.getAllPlaces = async (req, res) => {
   try {
     const places = await Place.find({
       $or: [
-        { status: "proveed" }, // الأماكن التي حالتها proveed
-        { status: { $exists: false } } // الأماكن التي ليس لها حالة
+        { status: "approved" },
+        { status: { $exists: false } }
       ]
-    }); 
+    });
     res.status(200).json(places);
   } catch (error) {
     res.status(500).json({ message: "خطأ في جلب الأماكن", error });
   }
 };
+
+// ✅ إضافة مكان جديد (فقط للكولكشن: places)
+exports.addPlace = async (req, res) => {
+  try {
+    // تحقق من الحقول الإلزامية
+    if (!req.body.name || !req.body.city || !req.body.detailed_description) {
+      return res.status(400).json({ message: "❌ الاسم، المدينة، والوصف مطلوبون!" });
+    }
+
+    const placeData = {
+      name: req.body.name,
+      short_description: req.body.short_description || "",  // اختياري
+      detailed_description: req.body.detailed_description,
+      city: req.body.city,
+      location: {
+        latitude: req.body.latitude ? parseFloat(req.body.latitude) : undefined,
+        longitude: req.body.longitude ? parseFloat(req.body.longitude) : undefined,
+        address: req.body.address || "غير محدد"  // عنوان افتراضي إذا لم يتم تقديمه
+      },
+      working_hours: req.body.working_hours || "غير محدد",  // اختياري
+      ticket_price: Number(req.body.ticket_price) || 0,  // اختياري
+      price: Number(req.body.price) || 0,  // اختياري
+      best_season: req.body.best_season || "any",  // اختياري
+      requires_tickets: req.body.requires_tickets === 'true',  // اختياري
+      is_free: req.body.is_free === 'true',  // اختياري
+      categories: req.body.categories ? JSON.parse(req.body.categories) : [],  // اختياري
+      suitable_for: req.body.suitable_for ? JSON.parse(req.body.suitable_for) : [],  // اختياري
+      contact: req.body.contact ? JSON.parse(req.body.contact) : {},  // اختياري
+      status: "pending",
+      isDeleted: false,
+      createdAt: new Date()
+    };
+
+    // ✅ الصور
+    if (req.files && req.files.length > 0) {
+      placeData.images = req.files.slice(0, 3).map(file => ({
+        path: `/uploads/add/${file.filename}`,
+        caption: file.originalname
+      }));
+
+      placeData.gallery = req.files.slice(3).map(file => ({
+        path: `/uploads/add/${file.filename}`,
+        caption: file.originalname
+      }));
+    } else {
+      // إذا لم يتم إرسال صور، اترك الحقل فارغًا أو قم بتعيين قيمة افتراضية
+      placeData.images = [];
+      placeData.gallery = [];
+    }
+
+    const place = new Place(placeData);
+    await place.save();
+
+    res.status(201).json({
+      message: "✅ تم حفظ المكان بنجاح",
+      place
+    });
+
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ message: "❌ حدث خطأ أثناء المعالجة", error: err.message });
+  }
+};
+
+
 
 // ✅ جلب عدد الأماكن
 exports.getPlaceCount = async (req, res) => {
@@ -22,111 +88,24 @@ exports.getPlaceCount = async (req, res) => {
     const count = await Place.countDocuments();
     res.status(200).json({ count });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "خطأ في جلب عدد الأماكن", error: error.message });
+    res.status(500).json({ message: "خطأ في جلب عدد الأماكن", error: error.message });
   }
-};
-
-// ✅ إضافة مكان جديد
-exports.addPlace = (req, res) => {
-  console.log("Received data:", req.body);
-
-  const {
-    name,
-    short_description,
-    detailed_description,
-    city,
-    location,
-    working_hours,
-    ticket_price,
-    categories,
-    best_season,
-    is_outdoor,
-    is_free,
-    suitable_for,
-    status,
-  } = req.body;
-
-  // إذا الصور ما تم رفعها
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "Images are required" });
-  }
-
-  // استخراج روابط الصور من multer
-  const uploadedImages = req.files.map(
-    (file) => `/uploads/suggestions/${file.filename}`
-  );
-
-  // التحقق من الحقول المطلوبة
-  if (
-    !name ||
-    !short_description ||
-    !detailed_description ||
-    !city ||
-    !location ||
-    !location.latitude ||
-    !location.longitude ||
-    !working_hours ||
-    !ticket_price ||
-    !categories ||
-    !best_season ||
-    is_outdoor === undefined ||
-    is_free === undefined ||
-    !suitable_for
-  ) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  // إنشاء وحفظ المكان الجديد
-  const newPlace = new Place({
-    name,
-    short_description,
-    detailed_description,
-    city,
-    location,
-    working_hours,
-    ticket_price,
-    categories,
-    best_season,
-    is_outdoor,
-    is_free,
-    suitable_for,
-    images: uploadedImages, // استخدام الصور المرفوعة
-    status,
-  });
-
-  newPlace
-    .save()
-    .then((place) => res.status(201).json(place))
-    .catch((err) =>
-      res.status(500).json({ error: "Error creating place", details: err })
-    );
 };
 
 // ✅ جلب تفاصيل المكان حسب الـ ID
 exports.getPlaceById = async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "❌ المعرف غير صالح." });
     }
-
     const place = await Place.findById(id);
-
     if (!place) {
       return res.status(404).json({ message: "❌ المكان غير موجود." });
     }
-
     res.status(200).json(place);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "❌ حدث خطأ أثناء جلب تفاصيل المكان.",
-        error: error.message,
-      });
+    res.status(500).json({ message: "❌ حدث خطأ أثناء جلب تفاصيل المكان.", error: error.message });
   }
 };
 
@@ -134,39 +113,21 @@ exports.getPlaceById = async (req, res) => {
 exports.getPlacesByCity = async (req, res) => {
   try {
     const { city } = req.params;
-    const places = await Place.find({
-      city,
-      status: "approved" // فلترة الأماكن بحالة approved فقط
-    });
-
+    const places = await Place.find({ city, status: "approved" });
     res.status(200).json(places);
   } catch (error) {
-    res.status(500).json({
-      message: "خطأ في جلب الأماكن لهذه المدينة",
-      error: error.message
-    });
+    res.status(500).json({ message: "خطأ في جلب الأماكن لهذه المدينة", error: error.message });
   }
 };
-
-
-
-
 
 // ✅ جلب الأماكن حسب التصنيف
 exports.getPlacesByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-    const places = await Place.find({ categories: { $in: [category.trim()] } });
-
-    if (places.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "لا توجد أماكن متاحة لهذه الفئة" });
-    }
-
+    const places = await Place.find({ categories: category, status: "approved" });
     res.status(200).json(places);
   } catch (error) {
-    res.status(500).json({ message: "حدث خطأ في الخادم" });
+    res.status(500).json({ message: "خطأ في جلب الأماكن حسب التصنيف", error: error.message });
   }
 };
 
@@ -208,93 +169,26 @@ exports.getPlacesBySeason = async (req, res) => {
 };
 
 
-// ✅ الفلترة مع الترقيم (Pagination)
+// ✅ البحث + الفلترة
 exports.getFilteredPlaces = async (req, res) => {
   try {
-    let {
-      city,
-      category,
-      season,
-      status = "approved",  // افتراضيّاً approved
-      search,               // باراميتر البحث
-      page = 1,
-      limit = 8
-    } = req.query;
+    const { city, category, season, freeOnly } = req.query;
+    const filter = { status: "approved" };
 
-    const filters = { status }; 
+    if (city) filter.city = city;
+    if (category) filter.categories = category;
+    if (season) filter.best_season = season;
+    if (freeOnly === "true") filter.is_free = true;
 
-    if (city)     filters.city = city;
-    if (category) filters.categories = { $in: [category] };
-    if (season) {
-      filters.$or = [
-        { best_season: { $regex: season, $options: "i" } },
-        { best_season: "طوال السنة" },
-      ];
-    }
-    if (search) {
-      // فلترة الاسم بمطابقة جزئية غير حسّاسة لحالة الحروف
-      filters.name = { $regex: search.trim(), $options: "i" };
-    }
-
-    page  = parseInt(page);
-    limit = parseInt(limit);
-    const skip = (page - 1) * limit;
-
-    // إجمالي الأماكن المطابقة
-    const totalPlaces = await Place.countDocuments(filters);
-    const totalPages  = Math.ceil(totalPlaces / limit);
-
-    // جلب الصفحة المطلوبة
-    const places = await Place
-      .find(filters)
-      .skip(skip)
-      .limit(limit);
-
-    res.status(200).json({
-      totalPlaces,
-      totalPages,
-      currentPage: page,
-      places,
-    });
+    const places = await Place.find(filter);
+    res.status(200).json(places);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "❌ حدث خطأ في الخادم", error: error.message });
+    res.status(500).json({ message: "خطأ في الفلترة والبحث", error: error.message });
   }
 };
 
-exports.updatePlaceStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "❌ المعرف غير صالح." });
-    }
 
-    const validStatuses = ["معلق", "منشور", "محذوف"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "❌ حالة غير صالحة." });
-    }
-
-    const place = await Place.findByIdAndUpdate(id, { status }, { new: true });
-
-    if (!place) {
-      return res.status(404).json({ message: "❌ المكان غير موجود." });
-    }
-
-    res
-      .status(200)
-      .json({ message: `✅ تم تحديث حالة المكان إلى ${status}!`, place });
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "❌ حدث خطأ أثناء تحديث حالة المكان.",
-        error: error.message,
-      });
-  }
-};
 
 // exports.getPendingPlaces = async (req, res) => {
 //   try {
