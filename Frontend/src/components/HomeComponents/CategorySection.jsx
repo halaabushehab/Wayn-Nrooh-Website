@@ -22,8 +22,8 @@ const CategorySection = () => {
 
 
 
-
-
+  // "أماكن أثرية",
+  // منتزهات
   const categories = [
     { id: 'مطاعم', name: 'مطاعم', icon: <UtensilsIcon className="w-5 h-5" /> },
     { id: 'متاحف', name: 'متاحف', icon: <LandmarkIcon className="w-5 h-5" /> },

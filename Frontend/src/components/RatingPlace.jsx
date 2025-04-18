@@ -2,6 +2,9 @@ import { Toaster, toast } from 'sonner';
 import { Star, Sparkles } from 'lucide-react';
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
+
+
 
 export default function RatingComponent({ placeId, title = 'قيم تجربتك' }) {
   const [userId, setUserId] = useState(null);
@@ -13,16 +16,32 @@ export default function RatingComponent({ placeId, title = 'قيم تجربتك'
   const [average, setAverage] = useState(0);
   const [comment, setComment] = useState("");
 
-  // استرجاع بيانات المستخدم من localStorage عند التحميل
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    const storedUsername = localStorage.getItem("username");
-    console.log("🔄 بيانات المستخدم:", storedUserId, storedUsername);
-    setUserId(storedUserId);
-    setUsername(storedUsername);
-  }, []);
+   // استرجاع بيانات المستخدم من الكوكيز عند التحميل
+   useEffect(() => {
+    const loadUserFromCookies = () => {
+      const userCookie = Cookies.get("user");  // استرجاع الكوكيز "user"
+      if (userCookie) {
+        try {
+          const parsedUser = JSON.parse(userCookie);  // محاولة تحويل الكوكيز إلى JSON
+          console.log("🔄 بيانات المستخدم من الكوكيز:", parsedUser);
 
+          if (parsedUser && parsedUser.userId && parsedUser.username) {
+            setUserId(parsedUser.userId);
+            setUsername(parsedUser.username);
+          }
+        } catch (error) {
+          console.error("❌ خطأ في قراءة الكوكيز:", error);
+          Cookies.remove("user");  // إذا كانت الكوكيز تالفة، احذفها
+        }
+      }
+    };
+
+    loadUserFromCookies();
+  }, []);  // يتم التنفيذ عند تحميل الصفحة
   // جلب التقييمات عند تحميل الصفحة
+ 
+ 
+ 
   useEffect(() => {
     if (!placeId) return;
 

@@ -14,7 +14,6 @@ const placeSchema = new mongoose.Schema({
   ticket_price: { type: Number, required: true },
   categories: [{ type: String, required: true }], // قائمة الفئات (منتزهات، طبيعة..)
   best_season: { type: String, required: true }, // الموسم الأنسب للزيارة
-  is_outdoor: { type: Boolean, required: true },
   is_free: { type: Boolean, required: true },
   suitable_for: [{ type: String, required: true }], // الفئات المستهدفة (عائلات، أطفال..)
   contact: {

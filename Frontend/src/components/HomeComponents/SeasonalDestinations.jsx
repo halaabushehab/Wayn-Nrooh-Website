@@ -8,7 +8,7 @@ import {
   StarIcon,
   HeartIcon,
   ChevronRightIcon,
-  Loader2Icon,
+  
 } from "lucide-react";
 
 const SeasonalSection = () => {
@@ -182,7 +182,7 @@ const SeasonalSection = () => {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-20">
-            <Loader2Icon className="w-12 h-12 text-indigo-500 animate-spin" />
+            <MapPinIcon className="w-12 h-12 text-indigo-500 animate-spin" />
           </div>
         )}
 
