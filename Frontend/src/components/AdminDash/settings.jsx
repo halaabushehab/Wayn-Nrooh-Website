@@ -1,162 +1,249 @@
-// import React from 'react';
-// import { FileText, TrendingUp, Users, ChevronRight, PieChart } from 'lucide-react';
-// import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
-// import jsPDF from 'jspdf';
-// import html2canvas from 'html2canvas';
+import React, { useState, useEffect } from 'react';
+import { User, Bell, Shield, Globe, CreditCard, HelpCircle, ChevronRight } from 'lucide-react';
+import jwt_decode from 'jwt-decode';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// const Reports = () => {
-  
-//   const donationTrends = [
-//     { month: 'يناير', donations: 5000 },
-//     { month: 'فبراير', donations: 7000 },
-//     { month: 'مارس', donations: 6000 },
-//     { month: 'أبريل', donations: 8000 },
-//     { month: 'مايو', donations: 9000 },
-//   ];
-
-//   const donorDemographics = [
-//     { name: '18-24 سنة', value: 30 },
-//     { name: '25-34 سنة', value: 45 },
-//     { name: '35-44 سنة', value: 20 },
-//     { name: '45+ سنة', value: 5 },
-//   ];
-
-//   const campaignPerformance = [
-//     { name: 'حملة التعليم', donations: 12000, donors: 150 },
-//     { name: 'حملة الصحة', donations: 8000, donors: 100 },
-//     { name: 'حملة الإغاثة', donations: 15000, donors: 200 },
-//   ];
-
-//   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'];
-
-  
-//   const exportToPDF = () => {
-//     const input = document.getElementById('reports-content');
-
-//     html2canvas(input).then((canvas) => {
-//       const imgData = canvas.toDataURL('image/png');
-//       const pdf = new jsPDF('p', 'mm', 'a4'); 
-//       const imgWidth = 210; 
-//       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-//       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-//       pdf.save('reports.pdf');
-//     });
-//   };
-
-//   return (
-//     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden" dir="rtl">
-//       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-//         <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-//           <TrendingUp size={20} className="text-blue-600" />
-//           التقارير والتحليلات
-//         </h2>
-//         <div className="flex items-center text-sm text-gray-500 font-medium">
-//           <span>آخر تحديث اليوم</span>
-//         </div>
-//       </div>
-
-//       <div id="reports-content" className="p-5">
-//         {/* Donation Trends Chart */}
-//         <div className="bg-gray-50 rounded-xl p-5 shadow-sm transition-all hover:shadow-md hover:bg-blue-50 border border-gray-200 mb-6">
-//           <div className="flex items-center justify-between mb-4">
-//             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-//               <TrendingUp size={16} className="text-green-600" />
-//               اتجاهات التبرعات
-//             </h3>
-//             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">+10% هذا الشهر</span>
-//           </div>
-//           <ResponsiveContainer width="100%" height={300}>
-//             <BarChart data={donationTrends}>
-//               <XAxis dataKey="month" />
-//               <YAxis />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="donations" fill="#10B981" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </div>
-
-//         {/* Donor Demographics */}
-//         <div className="bg-gray-50 rounded-xl p-5 shadow-sm transition-all hover:shadow-md hover:bg-indigo-50 border border-gray-200 mb-6">
-//           <div className="flex items-center justify-between mb-4">
-//             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-//               <Users size={16} className="text-blue-600" />
-//               توزيع المتبرعين حسب العمر
-//             </h3>
-//           </div>
-//           <ResponsiveContainer width="100%" height={300}>
-//             <RechartsPieChart>
-//               <Pie
-//                 data={donorDemographics}
-//                 cx="50%"
-//                 cy="50%"
-//                 outerRadius={100}
-//                 fill="#8884d8"
-//                 dataKey="value"
-//                 label
-//               >
-//                 {donorDemographics.map((entry, index) => (
-//                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-//                 ))}
-//               </Pie>
-//               <Tooltip />
-//               <Legend />
-//             </RechartsPieChart>
-//           </ResponsiveContainer>
-//         </div>
-
-//         {/* Campaign Performance */}
-//         <div className="bg-gray-50 rounded-xl p-5 shadow-sm transition-all hover:shadow-md hover:bg-purple-50 border border-gray-200 mb-6">
-//           <div className="flex items-center justify-between mb-4">
-//             <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-//               <PieChart size={16} className="text-purple-600" />
-//               أداء الحملات
-//             </h3>
-//           </div>
-//           <ul className="space-y-3">
-//             {campaignPerformance.map((campaign) => (
-//               <li key={campaign.name} className="flex items-center justify-between py-2 px-3 bg-white rounded-lg shadow-sm">
-//                 <span className="text-gray-800 font-medium">{campaign.name}</span>
-//                 <div className="flex items-center">
-//                   <span className="text-purple-600 font-bold">JD {campaign.donations.toLocaleString()}</span>
-//                   <ChevronRight size={16} className="mr-2 text-gray-400" />
-//                 </div>
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
-
-//         {/* Export Button */}
-//         <div className="mt-8">
-//           <button
-//             onClick={exportToPDF}
-//             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-sm hover:cursor-pointer"
-//           >
-//             <FileText size={16} />
-//             تصدير كـ PDF
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Reports;
-import React, { useState } from 'react'
-import {
-  User,
-  Bell,
-  Shield,
-  Globe,
-  CreditCard,
-  HelpCircle,
-  ChevronRight,
-} from 'lucide-react'
 export default function SettingsTab() {
-  const [activeTab, setActiveTab] = useState('profile')
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [notificationSettings, setNotificationSettings] = useState({
+    newBookings: true,
+    payments: true,
+    messages: false,
+    reviews: true,
+    systemAlerts: true,
+    newPlaces: true,
+    updates: false
+  });
+
+  // جلب بيانات المستخدم من الكوكيز بشكل صحيح
+  const [userCookie, setUserCookie] = useState(null);
+  const [decodedToken, setDecodedToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const loadUserFromCookies = () => {
+      const cookie = Cookies.get('user');
+      if (cookie) {
+        try {
+          const parsedUser = JSON.parse(cookie);
+          setUserCookie(parsedUser);
+          
+          if (parsedUser.token) {
+            const decoded = jwt_decode(parsedUser.token);
+            setDecodedToken(decoded);
+            setUserId(decoded.userId);
+            setIsAdmin(decoded.isAdmin || false);
+            
+            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
+          }
+        } catch (error) {
+          console.error("Error parsing user cookie:", error);
+          Cookies.remove('user');
+        }
+      }
+    };
+
+    loadUserFromCookies();
+  }, []);
+
+  const [userData, setUserData] = useState({
+    username: '',
+    email: '',
+    phone: '',
+    city: '',
+    bio: '',
+    photo: '',
+    role: '',
+  });
+
+  const [tempData, setTempData] = useState({ ...userData });
+  const [tempProfileImage, setTempProfileImage] = useState('/default-profile.png');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (!userCookie || !userId) {
+          throw new Error('No user data found');
+        }
+
+        const response = await axios.get(`http://localhost:9527/api/auth/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${userCookie.token}`,
+          },
+        });
+
+        if (response.data) {
+          const data = {
+            username: response.data.username || decodedToken?.username || '',
+            email: response.data.email || decodedToken?.email || '',
+            phone: response.data.phone || '',
+            city: response.data.city || '',
+            bio: response.data.bio || '',
+            photo: response.data.photo || '',
+            role: response.data.role || (isAdmin ? 'admin' : 'user'),
+          };
+          setUserData(data);
+          setTempData(data);
+          setTempProfileImage(response.data.photo || '/default-profile.png');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        if (decodedToken) {
+          const fallbackData = {
+            username: decodedToken.username || '',
+            email: decodedToken.email || '',
+            phone: '',
+            city: '',
+            bio: '',
+            photo: '',
+            role: isAdmin ? 'admin' : 'user',
+          };
+          setUserData(fallbackData);
+          setTempData(fallbackData);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (userId && userCookie) {
+      fetchUserData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [userCookie, userId, isAdmin, decodedToken]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTempData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setTempProfileImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!userCookie || !userCookie.token) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('username', tempData.username);
+    formData.append('email', tempData.email);
+    formData.append('phone', tempData.phone);
+    formData.append('city', tempData.city);
+    formData.append('bio', tempData.bio);
+
+    if (selectedFile) {
+      formData.append('photo', selectedFile);
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:9527/api/auth/profile/me/${userId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${userCookie.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      setUserData(tempData);
+      setIsEditing(false);
+      toast.success('تم تحديث الملف الشخصي بنجاح');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('حدث خطأ أثناء تحديث الملف الشخصي');
+    }
+  };
+
+  const handleCancel = () => {
+    setTempData(userData);
+    setIsEditing(false);
+  };
+
+  const handleNotificationToggle = (setting) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting]
+    }));
+  };
+
+  const saveNotificationSettings = async () => {
+    try {
+      await axios.put(
+        `http://localhost:9527/api/auth/notifications/${id}`,
+        { notifications: notificationSettings },
+        {
+          headers: {
+            Authorization: `Bearer ${parsedCookie.token}`,
+          },
+        }
+      );
+      toast.success('تم حفظ إعدادات الإشعارات بنجاح');
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+      toast.error('حدث خطأ أثناء حفظ الإعدادات');
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
+
+  const SettingsSidebarItem = ({ icon, text, active, onClick }) => (
+    <button
+      className={`flex items-center justify-between w-full p-3 rounded-md transition-colors ${
+        active ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-100'
+      }`}
+      onClick={onClick}
+    >
+      <div className="flex items-center">
+        <span className="ml-3">{icon}</span>
+        <span>{text}</span>
+      </div>
+      <ChevronRight size={16} />
+    </button>
+  );
+
+  const NotificationSetting = ({ title, description, settingKey }) => (
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <div>
+        <h4 className="font-medium">{title}</h4>
+        <p className="text-sm text-gray-500">{description}</p>
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          className="sr-only peer"
+          checked={notificationSettings[settingKey]}
+          onChange={() => handleNotificationToggle(settingKey)}
+        />
+        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+      </label>
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <ToastContainer position="top-right" rtl={true} />
       <div className="grid grid-cols-1 lg:grid-cols-4">
         <div className="p-6 border-l border-gray-200">
           <h1 className="text-2xl font-bold mb-6">الإعدادات</h1>
@@ -175,27 +262,9 @@ export default function SettingsTab() {
             />
             <SettingsSidebarItem
               icon={<Shield size={18} />}
-              text="الأمان والخصوصية"
+              text="الأمان"
               active={activeTab === 'security'}
               onClick={() => setActiveTab('security')}
-            />
-            <SettingsSidebarItem
-              icon={<Globe size={18} />}
-              text="اللغة والمنطقة"
-              active={activeTab === 'language'}
-              onClick={() => setActiveTab('language')}
-            />
-            <SettingsSidebarItem
-              icon={<CreditCard size={18} />}
-              text="طرق الدفع"
-              active={activeTab === 'payment'}
-              onClick={() => setActiveTab('payment')}
-            />
-            <SettingsSidebarItem
-              icon={<HelpCircle size={18} />}
-              text="المساعدة والدعم"
-              active={activeTab === 'help'}
-              onClick={() => setActiveTab('help')}
             />
           </div>
         </div>
@@ -204,38 +273,60 @@ export default function SettingsTab() {
             <div>
               <h2 className="text-xl font-bold mb-6">إعدادات الملف الشخصي</h2>
               <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWFufGVufDB8fDB8fHww&auto=format&fit=crop&w=150&q=80"
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full"
-                />
-                <div className="mr-6">
-                  <h3 className="font-bold text-lg">أحمد محمد</h3>
-                  <p className="text-gray-500">مدير النظام</p>
-                  <button className="mt-2 text-blue-600 text-sm font-medium">
-                    تغيير الصورة
-                  </button>
+                <div className="relative">
+                  <img
+                    src={tempProfileImage}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  {isEditing && (
+                    <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </label>
+                  )}
+                </div>
+                <div className="mr-4">
+                  <h3 className="text-lg font-semibold">{tempData.username}</h3>
+                  <p className="text-gray-600">{tempData.role === 'admin' ? 'مدير' : 'مستخدم'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الاسم الأول
+                    اسم المستخدم
                   </label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    defaultValue="أحمد"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الاسم الأخير
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    defaultValue="محمد"
+                    name="username"
+                    value={tempData.username}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -244,8 +335,11 @@ export default function SettingsTab() {
                   </label>
                   <input
                     type="email"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    defaultValue="ahmed@example.com"
+                    name="email"
+                    value={tempData.email}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -254,139 +348,162 @@ export default function SettingsTab() {
                   </label>
                   <input
                     type="tel"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    defaultValue="+971 55 123 4567"
+                    name="phone"
+                    value={tempData.phone}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    المدينة
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={tempData.city}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    العنوان
+                    نبذة عنك
                   </label>
                   <textarea
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    rows={3}
-                    defaultValue="دبي، الإمارات العربية المتحدة"
+                    name="bio"
+                    value={tempData.bio}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    rows="3"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
-                <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md ml-2">
-                  إلغاء
-                </button>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md">
-                  حفظ التغييرات
-                </button>
+              <div className="mt-6 flex justify-end space-x-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      onClick={handleSaveProfile}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      حفظ التغييرات
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    تعديل الملف الشخصي
+                  </button>
+                )}
               </div>
             </div>
           )}
+
           {activeTab === 'notifications' && (
             <div>
               <h2 className="text-xl font-bold mb-6">إعدادات الإشعارات</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-medium mb-4">
-                    إشعارات البريد الإلكتروني
-                  </h3>
-                  <div className="space-y-4">
+                  <h3 className="font-medium mb-4">إشعارات البريد الإلكتروني</h3>
+                  <div className="space-y-3">
                     <NotificationSetting
                       title="الحجوزات الجديدة"
                       description="إشعار عند وجود حجز جديد"
-                      enabled={true}
+                      settingKey="newBookings"
                     />
                     <NotificationSetting
                       title="الدفعات"
                       description="إشعار عند اكتمال الدفع"
-                      enabled={true}
+                      settingKey="payments"
                     />
                     <NotificationSetting
                       title="الرسائل"
                       description="إشعار عند استلام رسالة جديدة"
-                      enabled={false}
+                      settingKey="messages"
                     />
                     <NotificationSetting
                       title="تقييمات المستخدمين"
                       description="إشعار عند وجود تقييم جديد"
-                      enabled={true}
+                      settingKey="reviews"
                     />
                   </div>
                 </div>
                 <div>
                   <h3 className="font-medium mb-4">إشعارات التطبيق</h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <NotificationSetting
                       title="تنبيهات النظام"
                       description="إشعارات مهمة حول النظام"
-                      enabled={true}
+                      settingKey="systemAlerts"
                     />
                     <NotificationSetting
                       title="الأماكن الجديدة"
                       description="إشعار عند إضافة مكان جديد"
-                      enabled={true}
+                      settingKey="newPlaces"
                     />
                     <NotificationSetting
                       title="التحديثات"
                       description="إشعار عند توفر تحديثات جديدة"
-                      enabled={false}
+                      settingKey="updates"
                     />
                   </div>
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md">
+                <button
+                  onClick={saveNotificationSettings}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
                   حفظ التغييرات
                 </button>
               </div>
             </div>
           )}
-          {activeTab !== 'profile' && activeTab !== 'notifications' && (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-              <p>المحتوى قيد الإنشاء</p>
+
+          {activeTab === 'security' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">إعدادات الأمان</h2>
+              <div className="space-y-6">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-medium mb-2">المصادقة الثنائية</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    قم بتمكين المصادقة الثنائية لحسابك لمزيد من الأمان
+                  </p>
+                  <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                    تفعيل المصادقة الثنائية
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }
-function SettingsSidebarItem({ icon, text, active, onClick }) {
-  return (
-    <button
-      className={`flex items-center justify-between w-full p-3 rounded-md transition-colors ${active ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-100'}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center">
-        <span className="ml-3">{icon}</span>
-        <span>{text}</span>
-      </div>
-      <ChevronRight size={16} />
-    </button>
-  )
-}
-function NotificationSetting({ title, description, enabled }) {
-  const [isEnabled, setIsEnabled] = useState(enabled)
-  return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h4 className="font-medium">{title}</h4>
-        <p className="text-sm text-gray-500">{description}</p>
-      </div>
-      <div className="relative">
-        <input
-          type="checkbox"
-          className="sr-only"
-          checked={isEnabled}
-          onChange={() => setIsEnabled(!isEnabled)}
-          id={`toggle-${title}`}
-        />
-        <label
-          htmlFor={`toggle-${title}`}
-          className={`block w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}
-        >
-          <span
-            className={`block w-4 h-4 mt-1 mr-1 bg-white rounded-full transition-transform duration-200 ease-in-out ${isEnabled ? 'transform -translate-x-6' : ''}`}
-          ></span>
-        </label>
-      </div>
-    </div>
-  )
-}
+
+
+
+{/* <SettingsSidebarItem
+icon={<Shield size={18} />}
+text="الأمان والخصوصية"
+active={activeTab === 'security'}
+onClick={() => setActiveTab('security')}
+/>
+<SettingsSidebarItem
+icon={<Globe size={18} />}
+text="اللغة والمنطقة"
+active={activeTab === 'language'}
+onClick={() => setActiveTab('language')}
+/> */}

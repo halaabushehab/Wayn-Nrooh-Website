@@ -16,17 +16,24 @@ export const EditPasswordModal = ({ onClose }) => {
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // التأكد من وجود token صالح
-  const token = localStorage.getItem('token')
-  let decodedToken = null
-  if (token) {
-    try {
-      decodedToken = jwt_decode(token)
-    } catch (error) {
-      setError('رمز الدخول غير صالح أو منتهي الصلاحية')
-      return
+  // دالة استخراج التوكن من الكوكيز
+  function getTokenFromUserCookie() {
+    const userCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('user='));
+  
+    if (userCookie) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
+        return userData.token;
+      } catch (error) {
+        console.error("Error decoding user cookie:", error);
+        return null;
+      }
     }
+    return null;
   }
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -43,33 +50,42 @@ export const EditPasswordModal = ({ onClose }) => {
     setIsLoading(true)
     setError('')
     setSuccess('')
-
-    // Basic validation
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setError('جميع الحقول مطلوبة')
-      setIsLoading(false)
-      return
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('كلمة المرور الجديدة غير متطابقة')
-      setIsLoading(false)
-      return
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setError('كلمة المرور يجب أن تكون 8 أحرف على الأقل')
-      setIsLoading(false)
-      return
-    }
-
-    // التأكد من وجود الـ token قبل إجراء الطلب
+  
+    const token = getTokenFromUserCookie();
+    console.log("🔑 Token from user cookie:", token);
+  
     if (!token) {
       setError('يرجى تسجيل الدخول أولاً')
       setIsLoading(false)
       return
     }
-
+  
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setError('جميع الحقول مطلوبة')
+      setIsLoading(false)
+      return
+    }
+  
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError('كلمة المرور الجديدة غير متطابقة')
+      setIsLoading(false)
+      return
+    }
+  
+    if (passwordData.newPassword.length < 8) {
+      setError('كلمة المرور يجب أن تكون 8 أحرف على الأقل')
+      setIsLoading(false)
+      return
+    }
+  
+    if (!validatePasswordStrength(passwordData.newPassword)) {
+      setError('يجب أن تحتوي كلمة المرور على حروف كبيرة وصغيرة وأرقام ورموز')
+      setIsLoading(false)
+      return
+    }
+  
+    console.log("🔥 Token from cookies:", token)
+  
     try {
       const response = await axios.put(
         "http://localhost:9527/api/auth/change-password",
@@ -81,11 +97,12 @@ export const EditPasswordModal = ({ onClose }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          withCredentials: true, // ✅ مهم لو السيرفر يستخدم الكوكيز مع CORS
         }
-      );
-      
-      console.log('Response:', response.data); // تسجيل الاستجابة للتأكد
-
+      )
+  
+      console.log('Response:', response.data)
+  
       if (response.data.success) {
         setSuccess('تم تغيير كلمة المرور بنجاح')
         setTimeout(() => {
@@ -95,9 +112,9 @@ export const EditPasswordModal = ({ onClose }) => {
     } catch (error) {
       console.error('Error changing password:', error)
       if (error.response) {
-        console.error('Response data:', error.response.data); // تسجيل بيانات الخطأ من الاستجابة
+        console.error('Response data:', error.response.data)
         if (error.response.status === 401) {
-          setError('كلمة المرور الحالية غير صحيحة')
+          setError('كلمة المرور الحالية غير صحيحة أو انتهت الجلسة، يرجى تسجيل الدخول من جديد')
         } else {
           setError('حدث خطأ أثناء تغيير كلمة المرور')
         }
@@ -108,8 +125,15 @@ export const EditPasswordModal = ({ onClose }) => {
       setIsLoading(false)
     }
   }
+  
 
-  return (
+  const validatePasswordStrength = (password) => {
+    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    return strongRegex.test(password)
+  }
+
+
+return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
         <div className="flex justify-between items-center p-6 border-b border-gray-200">

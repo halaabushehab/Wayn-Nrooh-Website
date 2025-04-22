@@ -9,7 +9,7 @@ const AboutSection = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:9527/places/count")
+      .get("http://localhost:9527/api/places/count")
       .then((response) => {
         setPlaceCount(response.data.count);
         console.log("📥 Response:", response);

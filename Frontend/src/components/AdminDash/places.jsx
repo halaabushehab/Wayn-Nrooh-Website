@@ -18,9 +18,8 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Places() {
   const [filter, setFilter] = useState('all');
-  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [approvedPlaces, setApprovedPlaces] = useState([]);
+  const [places, setPlaces] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 6,
@@ -38,34 +37,33 @@ export default function Places() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [suggestionsRes, placesRes] = await Promise.all([
-          axios.get(`http://localhost:9527/api/suggestions/admin?status=${filter === 'all' ? '' : filter}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        let url = `http://localhost:9527/api/places/`;
+        
+        // Add filter if not 'all'
+        if (filter !== 'all') {
+          url += `&status=${filter}`;
+        }
+
+        const [placesRes, statsRes] = await Promise.all([
+          axios.get(url, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           }),
-          axios.get('http://localhost:9527/places', {
+          axios.get('http://localhost:9527/api/places/status', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
         ]);
 
-        // Process suggestions
-        if (suggestionsRes.data && Array.isArray(suggestionsRes.data.suggestions)) {
-          setSuggestions(suggestionsRes.data.suggestions);
+        // Process places
+        if (placesRes.data && Array.isArray(placesRes.data.places)) {
+          setPlaces(placesRes.data.places);
           setPagination({
             ...pagination,
-            total: suggestionsRes.data.count,
-            totalPages: Math.ceil(suggestionsRes.data.count / pagination.limit)
+            total: placesRes.data.total,
+            totalPages: placesRes.data.totalPages
           });
         }
 
-        // Process approved places
-        if (placesRes.data && Array.isArray(placesRes.data)) {
-          setApprovedPlaces(placesRes.data);
-        }
-
-        // Fetch stats (optional)
-        const statsRes = await axios.get('http://localhost:9527/places/stats', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        // Process stats
         setStats(statsRes.data);
 
       } catch (error) {
@@ -83,7 +81,7 @@ export default function Places() {
   const handleApprove = async (id) => {
     try {
       const response = await axios.patch(
-        `http://localhost:9527/api/suggestions/${id}/status`, 
+        `http://localhost:9527/api/places/${id}/status`, 
         { status: 'approved' }, 
         {
           headers: {
@@ -92,28 +90,23 @@ export default function Places() {
         }
       );
   
-      // تحديث واجهة المستخدم
-      setSuggestions(suggestions.filter(s => s._id !== id)); // إزالة الاقتراح من قائمة الاقتراحات
+      // Update UI
+      setPlaces(places.map(p => 
+        p._id === id ? { ...p, status: 'approved' } : p
+      ));
   
-      // إضافة المكان المعتمد إلى قائمة الأماكن المعتمدة
-      if (response.data.place) {
-        setApprovedPlaces([response.data.place, ...approvedPlaces]); // إضافة المكان الجديد
-      }
-  
-      toast.success('Place approved and added successfully');
+      toast.success('Place approved successfully');
     } catch (error) {
-      toast.error('Failed to approve suggestion');
+      toast.error('Failed to approve place');
       console.error('Error:', error);
     }
   };
-  
-  
 
   // Handle rejection
   const handleReject = async (id) => {
     try {
       await axios.patch(
-        `http://localhost:9527/api/suggestions/${id}/status`, 
+        `http://localhost:9527/api/places/${id}/status`, 
         { status: 'rejected' }, 
         {
           headers: {
@@ -123,38 +116,33 @@ export default function Places() {
       );
 
       // Update UI
-      setSuggestions(suggestions.map(s => 
-        s._id === id ? { ...s, status: 'rejected' } : s
+      setPlaces(places.map(p => 
+        p._id === id ? { ...p, status: 'rejected' } : p
       ));
-      toast.success('Suggestion rejected successfully');
+      toast.success('Place rejected successfully');
     } catch (error) {
-      toast.error('Failed to reject suggestion');
+      toast.error('Failed to reject place');
       console.error('Error:', error);
     }
   };
 
-  // Handle soft delete
-  const handleSoftDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this suggestion?')) return;
-  
-    try {
-      await axios.delete(
-        `http://localhost:9527/api/suggestions/${id}`, 
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-  
-      // Update UI
-      setSuggestions(suggestions.filter(s => s._id !== id));
-      toast.success('Suggestion deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete suggestion');
-      console.error('Error:', error);
-    }
-  };
+ // Handle soft delete
+const handleSoftDelete = async (id) => {
+  if (!window.confirm('Are you sure you want to delete this place?')) return;
+
+  try {
+    await axios.delete(`http://localhost:9527/places/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+
+    // Update UI
+    setPlaces(places.filter(p => p._id !== id));
+    toast.success('Place deleted successfully');
+  } catch (error) {
+    toast.error('Failed to delete place');
+    console.error('Error:', error);
+  }
+};
 
   
   // Handle edit
@@ -175,8 +163,8 @@ export default function Places() {
     <div className="space-y-6 p-6 bg-gray-50">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Suggested Places</h1>
-          <p className="text-gray-500">Review and manage user-submitted place suggestions</p>
+          <h1 className="text-2xl font-bold text-gray-800">Places Management</h1>
+          <p className="text-gray-500">Manage all places in the system</p>
         </div>
         <button 
           className="bg-[#115173] hover:bg-[#053F5E] text-white px-4 py-2 rounded-lg flex items-center transition-colors"
@@ -240,8 +228,8 @@ export default function Places() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {suggestions.length > 0 ? (
-                suggestions.map((place) => (
+              {places.length > 0 ? (
+                places.map((place) => (
                   <PlaceCard
                     key={place._id}
                     place={place}
@@ -261,33 +249,8 @@ export default function Places() {
               )}
             </div>
 
-            {/* Approved places list */}
-            <div className="mt-8">
-              <h2 className="text-lg font-bold mb-4 text-gray-800">Approved Places</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {approvedPlaces.length > 0 ? (
-                  approvedPlaces.map((place) => (
-                    <PlaceCard
-                      key={place._id}
-                      place={place}
-                      isApproved={true}
-                      onDelete={() => handleSoftDelete(place._id)}
-                      onEdit={() => handleEdit(place._id)}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-3 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center text-gray-500">
-                      <MapPin className="h-12 w-12 mb-4 text-gray-300" />
-                      <p className="text-lg">No approved places yet</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div> 
-
             {/* Pagination */}
-            {suggestions.length > 0 && (
+            {places.length > 0 && (
               <div className="mt-8 flex justify-center">
                 <div className="flex space-x-2 space-x-reverse">
                   <button 
@@ -384,14 +347,14 @@ export default function Places() {
   );
 }
 
-function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = false }) {
+function PlaceCard({ place, onApprove, onReject, onDelete, onEdit }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
       <div className="relative h-48">
         {place.images?.length > 0 ? (
           <img 
             src={place.images[0].path || place.images[0]} 
-            alt={place.placeName || place.name} 
+            alt={place.name} 
             className="w-full h-full object-cover"
           />
         ) : (
@@ -401,7 +364,7 @@ function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = 
         )}
         
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-medium">
-          {place.categories?.[0] || place.category || 'Uncategorized'}
+          {place.category || 'Uncategorized'}
         </div>
         
         <div className={`absolute top-3 left-3 px-2 py-1 rounded-md text-xs font-medium ${
@@ -410,16 +373,15 @@ function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = 
           'bg-amber-100 text-amber-800'
         }`}>
           {place.status === 'approved' ? 'Approved' : 
-           place.status === 'rejected' ? 'Rejected' : 
-           isApproved ? 'Approved' : 'Pending'}
+           place.status === 'rejected' ? 'Rejected' : 'Pending'}
         </div>
       </div>
       
       <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-800">{place.placeName || place.name}</h3>
+        <h3 className="font-bold text-lg text-gray-800">{place.name}</h3>
         <div className="flex items-center text-gray-500 text-sm mt-1">
           <MapPin size={14} className="ml-1" />
-          {place.city || 'Location not specified'}
+          {place.location?.city || 'Location not specified'}
         </div>
         
         <div className="mt-3 text-sm text-gray-600 line-clamp-2">
@@ -428,8 +390,8 @@ function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = 
         
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-center text-sm">
-            <span className="text-gray-500">Suggested by:</span>
-            <span className="font-medium mr-1">{place.user?.username || 'User'}</span>
+            <span className="text-gray-500">Created by:</span>
+            <span className="font-medium mr-1">{place.createdBy?.username || 'Admin'}</span>
           </div>
           
           <div className="flex items-center text-gray-500 text-sm">
@@ -438,8 +400,16 @@ function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = 
           </div>
         </div>
         
-        {!isApproved && place.status === 'pending' ? (
-          <div className="mt-4 flex space-x-2 space-x-reverse">
+        <div className="mt-4 flex space-x-2 space-x-reverse">
+          <button
+            onClick={onEdit}
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+          >
+            <Edit size={16} />
+            <span>Edit</span>
+          </button>
+          
+          {place.status !== 'approved' ? (
             <button
               onClick={onApprove}
               className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
@@ -447,32 +417,24 @@ function PlaceCard({ place, onApprove, onReject, onDelete, onEdit, isApproved = 
               <CheckCircle2 size={16} />
               <span>Approve</span>
             </button>
+          ) : (
             <button
               onClick={onReject}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition-colors"
             >
               <XCircle size={16} />
               <span>Reject</span>
             </button>
-          </div>
-        ) : (
-          <div className="mt-4 flex space-x-2 space-x-reverse">
-            <button
-              onClick={onEdit}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-            >
-              <Edit size={16} />
-              <span>Edit</span>
-            </button>
-            <button
-              onClick={onDelete}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <Trash2 size={16} />
-              <span>Delete</span>
-            </button>
-          </div>
-        )}
+          )}
+          
+          <button
+            onClick={onDelete}
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <Trash2 size={16} />
+            <span>Delete</span>
+          </button>
+        </div>
       </div>
     </div>
   );

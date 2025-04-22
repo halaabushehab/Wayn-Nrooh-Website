@@ -14,6 +14,8 @@ import Contact from "./pages/mainPages/Contact.jsx";
 import SeasonalDestinations from "./components/HomeComponents/SeasonalDestinations.jsx";
 import SeasonPage from "./pages/places/seasonPage.jsx";
 import Payments from "./pages/mainPages/Payments.jsx";
+import ExploreJordanSection from "././components/HomeComponents/ExploreJordanSection.jsx";
+
 // Pages - Places
 import CityPage from "./pages/places/palces.jsx";
 import PlaceDetails from "./pages/places/PlaceDetails.jsx";
@@ -47,7 +49,8 @@ const AppContent = () => {
           {/* Places Routes */}
           <Route path="/places" element={<CityPage />} />
           <Route path="/place-details/:id" element={<PlaceDetails />} />
-          
+          <Route path="/suggest" element={<ExploreJordanSection />} />
+
           {/* User Routes */}
           <Route path="/ProfilePage/:id" element={<ProfilePage />} />
           <Route path="/Register" element={<Register />} />

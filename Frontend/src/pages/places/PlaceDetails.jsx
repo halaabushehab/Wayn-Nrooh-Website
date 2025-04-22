@@ -51,8 +51,8 @@ const PlaceDetails = () => {
   useEffect(() => {
     const fetchPlaceDetails = async () => {
       try {
-        console.log("🔍 Fetching from:", `http://localhost:9527/places/${id}`);
-        const response = await axios.get(`http://localhost:9527/places/${id}`);
+        console.log("🔍 Fetching from:", `http://localhost:9527/api/places/${id}`);
+        const response = await axios.get(`http://localhost:9527/api/places/${id}`);
         console.log("✅ Data received:", response.data);
         setPlace(response.data);
       } catch (err) {
@@ -76,7 +76,7 @@ const PlaceDetails = () => {
     console.log("🔍 Fetching related places for category:", category);
 
     axios
-      .get(`http://localhost:9527/places/category/${category}`)
+      .get(`http://localhost:9527/api/places/category/${category}`)
       .then((response) => {
         console.log("✅ Related places data received:", response.data);
         setRelatedPlaces(response.data.slice(0, 6));
@@ -145,7 +145,7 @@ const PlaceDetails = () => {
       const userLng = position.coords.longitude;
   
       try {
-        const res = await axios.get("http://localhost:9527/places/nearby", {
+        const res = await axios.get("http://localhost:9527/api/places/nearby", {
           params: {
             lat: userLat,
             lng: userLng,
@@ -224,7 +224,7 @@ const PlaceDetails = () => {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                  <CameraIcon className="w-6 h-6 mr-2 text-blue-600" />
+          
                   <span>معرض الصور</span>
                 </h2>
                 
@@ -235,12 +235,12 @@ const PlaceDetails = () => {
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                   
-                  <button 
+                  {/* <button 
                     onClick={() => setShowGalleryModal(true)}
                     className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition"
                   >
                     عرض كل الصور
-                  </button>
+                  </button> */}
                 </div>
                 
                 <div className="grid grid-cols-4 gap-2">
@@ -492,3 +492,5 @@ const PlaceDetails = () => {
 };
 
 export default PlaceDetails;
+
+

@@ -131,7 +131,7 @@ const Navbar = () => {
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img className="h-10 md:h-12 w-auto" src={logo} alt="Logo" />
+            <img className="h-15 md:h-15 w-auto" src={logo} alt="Logo" />
           </Link>
 
           {/* Mobile Menu Button */}
@@ -276,16 +276,7 @@ const Navbar = () => {
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-[#115173] rounded-md shadow-lg z-50 overflow-hidden">
-                    {user.isAdmin && (
-                      <Link
-                        to="/AdminDash"
-                        className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a] transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <FaCog className="ml-2" />
-                        لوحة التحكم
-                      </Link>
-                    )}
+                    
                     <Link
                       to={user.isAdmin ? "/AdminDash" : `/ProfilePage/${user.userId}`}
                       className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a] transition-colors"

@@ -57,7 +57,7 @@ const PaymentSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["card", "stripe", "zaincash"],
+      enum: ["card", "stripe"],
       required: true,
     },
     payment_status: {
@@ -81,7 +81,7 @@ const PaymentSchema = new mongoose.Schema(
     currency: { // العملة
       type: String,
       required: true,
-      default: "USD", // افتراض العملة هي الدولار
+      default: "JD", // افتراض العملة هي الدينار
     },
   },
   { timestamps: true }

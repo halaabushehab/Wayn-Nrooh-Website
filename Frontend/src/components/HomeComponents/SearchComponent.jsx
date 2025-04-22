@@ -22,7 +22,7 @@ const RefinedSearchComponent = ({ setSearchResults }) => {
     setSearchResults(data);
 console.log("✅ البيانات بعد التحديث:", data);
     const queryParams = new URLSearchParams(filters).toString();
-    const url = `http://localhost:9527/places?${queryParams}`;
+    const url = `http://localhost:9527/api/places?${queryParams}`;
 
     console.log("🔍 البحث باستخدام الرابط:", url); // ✅ طباعة الرابط لمعرفة القيم المرسلة
 

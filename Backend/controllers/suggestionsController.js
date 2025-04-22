@@ -2,7 +2,7 @@ const Suggestion = require('../models/Suggestion');
 const Place = require('../models/places');
 const User = require('../models/user'); 
 const jwt = require('jsonwebtoken');
-const upload = require('../utils/upload');
+const upload = require('../middleware/uploadMiddleware');
 const { addPlace } = require('./placeController'); // تأكد من المسار الصحيح
 // Middleware to verify token and permissions
 const verifyTokenAndPermissions = (req, res, next) => {

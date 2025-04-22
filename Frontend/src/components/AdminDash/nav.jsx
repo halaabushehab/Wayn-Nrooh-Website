@@ -1,6 +1,7 @@
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bell, Search } from "lucide-react"
+import Cookies from 'js-cookie'
+import jwt_decode from 'jwt-decode'
 
 export default function NavBar() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -11,12 +12,41 @@ export default function NavBar() {
   ])
 
   const [showNotifications, setShowNotifications] = useState(false)
-  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [userData, setUserData] = useState(null)
+
+  // جلب بيانات المستخدم من الكوكيز
+  useEffect(() => {
+    const loadUserData = () => {
+      const userCookie = Cookies.get('user')
+      if (userCookie) {
+        try {
+          const parsedUser = JSON.parse(userCookie)
+          if (parsedUser.token) {
+            const decoded = jwt_decode(parsedUser.token)
+            setUserData({
+              username: decoded.username || 'مستخدم',
+              isAdmin: decoded.isAdmin || false
+            })
+          }
+        } catch (error) {
+          console.error("Error parsing user cookie:", error)
+        }
+      }
+    }
+
+    loadUserData()
+  }, [])
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const markAllAsRead = () => {
     setNotifications(notifications.map((n) => ({ ...n, read: true })))
+  }
+
+  const handleNotificationClick = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? {...n, read: true} : n
+    ))
   }
 
   return (
@@ -61,7 +91,8 @@ export default function NavBar() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-3 border-b border-gray-100 hover:bg-gray-50 ${!notification.read ? "bg-blue-50" : ""}`}
+                  className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.read ? "bg-blue-50" : ""}`}
+                  onClick={() => handleNotificationClick(notification.id)}
                 >
                   <div className="flex justify-between">
                     <p className={`text-sm ${!notification.read ? "font-semibold" : ""}`}>{notification.text}</p>
@@ -77,48 +108,15 @@ export default function NavBar() {
         )}
       </div>
 
-      {/* User Menu */}
-      <div className="relative mr-4">
-        <button
-          className="flex items-center space-x-2 rtl:space-x-reverse focus:outline-none focus:ring-2 focus:ring-[#115173] rounded-md p-1"
-          onClick={() => setShowUserMenu(!showUserMenu)}
-        >
-          <div className="w-8 h-8 rounded-full bg-[#022C43] flex items-center justify-center text-white">
-            <span>أ</span>
-          </div>
-          <span className="text-sm font-medium">أحمد المدير</span>
-          <svg
-            className="w-4 h-4 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </button>
-
-        {showUserMenu && (
-          <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50">
-            <div className="py-1">
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                الملف الشخصي
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                الإعدادات
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                المساعدة
-              </a>
-              <div className="border-t border-gray-100"></div>
-              <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                تسجيل الخروج
-              </a>
-            </div>
-          </div>
-        )}
+      {/* User Info (without dropdown) */}
+      <div className="flex items-center mr-4">
+        <div className="w-8 h-8 rounded-full bg-[#022C43] flex items-center justify-center text-white">
+          <span>{userData?.username?.charAt(0) || 'م'}</span>
+        </div>
+        <span className="text-sm font-medium mr-2">
+          {userData?.username || 'مستخدم'} {userData?.isAdmin ? '' : ''}
+        </span>
       </div>
     </div>
   )
 }
-

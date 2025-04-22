@@ -8,11 +8,12 @@ const ratingRoutes = require('./routes/ratingRoutes');
 const articleRoutes = require('./routes/ArticleRoutes');
 const paymentRoutes = require("./routes/paymentRoutes");
 const suggestionsRoutes = require('./routes/suggestionsRoutes');
+// const subscribeRoutes   = require('./routes/subscribe');
 
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const upload = require('./utils/upload'); // ✅ هذا فيه إعدادات multer المخصصة
+const upload = require('./middleware/uploadMiddleware'); // ✅ هذا فيه إعدادات multer المخصصة
 
 require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -39,8 +40,6 @@ app.use(express.json()); // لتحليل الطلبات التي تحتوي عل
 // تقديم الملفات من مجلد uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// تقديم الملفات من مجلد public
-app.use('/public', express.static(path.join(__dirname, 'public')));
 
 
 // ✅ Nodemailer transporter
@@ -61,13 +60,14 @@ connectDB();
 
 // ✅ استخدام المسارات
 app.use("/api/auth", authRoutes);
-app.use("/places", placeRoutes);
+app.use("/api/places", placeRoutes);
 app.use("/api", messageroutes);
 app.use('/api', commentRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use("/api", paymentRoutes);
 app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
+// app.use("/api/subscribe", subscribeRoutes);
 
 // ✅ مسار تجريبي للتسجيل
 app.post('/api/auth/register', (req, res) => {
