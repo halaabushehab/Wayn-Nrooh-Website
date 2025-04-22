@@ -3,9 +3,67 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 require("dotenv").config();
 const mongoose = require('mongoose');
-const upload = require('../utils/upload');
+const upload = require('../middleware/uploadMiddleware');
 const passport = require("passport");
 const Joi = require("joi");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Google login
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: "Google token is required" });
+    }
+
+    // التحقق من صحة token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,  // التأكد من أن الـ client ID يتطابق مع الـ Google Client ID في البيئة
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, sub, picture } = payload; // "sub" هو معرف المستخدم في Google
+
+    // التحقق من وجود المستخدم في قاعدة البيانات باستخدام الـ email
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // إذا لم يكن المستخدم موجودًا، قم بإنشاء حساب جديد
+      user = new User({
+        username: name,
+        email: email,
+        googleId: sub,
+        photo: picture,  // تخزين الصورة من Google إذا كانت موجودة
+        isActivated: true,  // تعيين حالة التفعيل
+      });
+
+      await user.save();  // حفظ المستخدم في قاعدة البيانات
+    }
+
+    // توليد الـ JWT
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },  // تضمين الـ userId و الـ username في الـ payload
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }  // تعيين مدة صلاحية الـ token (هنا 1 يوم)
+    );
+
+    // إرجاع الـ token مع بيانات المستخدم
+    res.status(200).json({
+      message: "Google login successful",
+      token,
+      user_id: user._id,
+      username: user.username,  // يمكنك إرجاع اسم المستخدم أيضًا إذا أردت
+      email: user.email,
+      photo: user.photo,  // إرجاع الصورة إذا كانت موجودة
+    });
+  } catch (error) {
+    console.error("❌ Google login error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // تحقق من صحة بيانات التسجيل
 const validateRegisterInput = (data) => {
@@ -166,24 +224,6 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-// Get all users
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find({});
-    console.log("Fetched users:", users);
-    const userCount = users.length;
-
-    res.status(200).json({
-      message: "Users fetched successfully",
-      users,
-      userCount,
-    });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 const getUserById = async (req, res) => {
   try {
     console.log("Requested ID:", req.params.id);
@@ -237,68 +277,6 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-const editUser = async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
-  try {
-    const user = await User.findById(id);
-
-    if (!user || user.isdeleted) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (updates.username) user.username = updates.username;
-    if (updates.email) user.email = updates.email;
-    if (updates.password) {
-      user.password = await bcrypt.hash(updates.password, 10);
-    }
-    if (updates.profilePicture) user.profilePicture = updates.profilePicture;
-    if (updates.role) user.role = updates.role;
-    if (updates.isdeleted !== undefined) user.isdeleted = updates.isdeleted;
-    if (updates.isActivated !== undefined) user.isActivated = updates.isActivated;
-
-    await user.save();
-
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    delete userResponse.otp;
-    delete userResponse.otpExpiry;
-
-    res.status(200).json({ message: "User updated successfully", user: userResponse });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const deleteUser = async (req, res) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
-  try {
-    const user = await User.findById(id).select("isdeleted");
-
-    if (!user || user.isdeleted) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    await User.findByIdAndUpdate(id, { isdeleted: true }, { new: true });
-
-    res.status(200).json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 const updateUserData = async (req, res) => {
   const { id } = req.params;
   const { username, email, phone, city, bio } = req.body;
@@ -310,14 +288,17 @@ const updateUserData = async (req, res) => {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
+    // تحديث البيانات إن وُجدت
     user.username = username || user.username;
     user.email = email || user.email;
     user.phone = phone || user.phone;
     user.city = city || user.city;
     user.bio = bio || user.bio;
 
+    // تحديث الصورة فقط إن تم رفع صورة جديدة
     if (req.file) {
-      user.photo = req.file.path;
+      const photoPath = `http://localhost:9527/uploads/${req.file.filename}`;
+      user.photo = photoPath;
     }
 
     await user.save();
@@ -328,44 +309,36 @@ const updateUserData = async (req, res) => {
   }
 };
 
+
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    const userId = req.user.userId;
 
-    console.log('User ID:', userId);
-    console.log('Current Password:', currentPassword);
-
-    const user = await User.findById(userId);
+    // تأكد من وجود المستخدم
+    const user = await User.findById(req.user.userId);
     if (!user) {
-      console.log('User not found');
-      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // التحقق من كلمة المرور الحالية
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      console.log('Current password is incorrect');
-      return res.status(401).json({ success: false, message: 'كلمة المرور الحالية غير صحيحة' });
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    if (currentPassword === newPassword) {
-      console.log('New password must be different from current');
-      return res.status(400).json({ success: false, message: 'كلمة المرور الجديدة يجب أن تكون مختلفة عن الحالية' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    user.password = hashedPassword;
+    // تشفير كلمة المرور الجديدة وحفظها
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    console.log('Password updated successfully');
-    res.json({ success: true, message: 'تم تحديث كلمة المرور بنجاح' });
-  } catch (error) {
-    console.error('Error in changePassword:', error);
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    // الاستجابة بالنجاح
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    console.error('Error in changePassword:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
 
 const authenticateToken = (req, res, next) => {
   // محاولة الحصول على التوكن من الكوكيز أولاً
@@ -392,6 +365,49 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Failed to authenticate token' });
   }
 };
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+
+  try {
+    const user = await User.findById(id).select("isdeleted");
+
+    if (!user || user.isdeleted) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await User.findByIdAndUpdate(id, { isdeleted: true }, { new: true });
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}); // جلب كل المستخدمين من قاعدة البيانات
+    console.log("Fetched users:", users); // تحقق من المستخدمين المسترجعين
+
+    const userCount = users.length; // عدد المستخدمين المسترجعين
+
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+      userCount,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error); // سجل الخطأ في الكونسول
+    res.status(500).json({ message: "Internal server error" }); // رد في حالة الخطأ
+  }
+};
+
+
+
 
 module.exports = {
   register,
@@ -399,11 +415,11 @@ module.exports = {
   logout,
   getAllUsers,
   getUserById,
-  editUser,
   deleteUser,
   getUserProfile,
   updateUserData,
   changePassword,
   authenticateToken,
+    googleLogin,
   isAdmin
 };

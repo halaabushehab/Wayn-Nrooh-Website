@@ -124,73 +124,60 @@ export default function AuthForm() {
   };
   
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const { email, password } = formData;
-    axios.defaults.withCredentials = true;
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      const { email, password } = formData;
+      axios.defaults.withCredentials = true;
+  
+      try {
+          console.log("📤 Sending login data:", { email, password });
+  
+          const response = await axios.post("http://localhost:9527/api/auth/login", 
+              { email, password }, 
+              { withCredentials: true }
+          );
+  
+          const userData = response.data;
+          const token = userData.token;
+  
+          console.log("✅ User data received:", userData);
+  
+          if (token) {
+              // ✅ تخزين كل البيانات في كوكي واحدة باسم user
+              Cookies.set("user", JSON.stringify({
+                  token: token,
+                  username: userData.username,
+                  email: userData.email,
+                  userId: userData.userId, // إذا كانت موجودة
+                  isAdmin: userData.isAdmin || false, // إذا كانت موجودة
+              }), { expires: 7 });
+              setIsOpen(false);
+              // تعيين التوكن للهيدر
+              axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  
+              // إعادة تعيين النموذج
+              setFormData({
+                  username: '',
+                  email: '',
+                  password: '',
+                  showPassword: false,
+              });
+              window.location.reload();
 
-    try {
-        console.log("📤 Sending login data:", { email, password });
-
-        const response = await axios.post("http://localhost:9527/api/auth/login", 
-            { email, password }, 
-            { withCredentials: true }
-        );
-
-        const userData = response.data;
-        const token = userData.token;
-
-        console.log("✅ User data received:", userData);
-
-        if (token) {
-            // تخزين كل البيانات في كوكي واحدة باسم user
-            Cookies.set("user", JSON.stringify({
-                token: token,
-                username: userData.username,
-                email: userData.email,
-                userId: userData.userId,
-                isAdmin: userData.isAdmin || false,
-            }), { expires: 7 });
-
-            setIsOpen(false);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-            setFormData({
-                username: '',
-                email: '',
-                password: '',
-                showPassword: false,
-            });
-
-            // ✅ إظهار رسالة ترحيب مع اسم المستخدم
-            Swal.fire({
-                title: `مرحباً ${userData.username}!`,
-                text: "تم تسجيل الدخول بنجاح.",
-                icon: "success",
-                confirmButtonText: "موافق",
-                background: "#022C43",
-                color: "#FFD700",
-            });
-
-            // إعادة تحميل الصفحة بعد فترة قصيرة
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        }
-
-    } catch (error) {
-        console.error("❌ Error:", error.response ? error.response.data : error.message);
-        Swal.fire({
-            title: "فشل تسجيل الدخول",
-            text: "يرجى التحقق من بيانات الدخول والمحاولة مجددًا.",
-            icon: "error",
-            confirmButtonText: "حسناً",
-            background: "#022C43",
-            color: "#FFD700",
-        });
-    }
-};
-
+          }
+      } catch (error) {
+          console.error("❌ Error:", error.response ? error.response.data : error.message);
+          Swal.fire({
+              title: "فشل تسجيل الدخول",
+              text: "يرجى التحقق من بيانات الدخول والمحاولة مجددًا.",
+              icon: "error",
+              confirmButtonText: "حسناً",
+              background: "#022C43",
+              color: "#FFD700",
+          });
+      }
+  };
+  
   
 
 
@@ -231,79 +218,32 @@ if (!isOpen) return null;
 
 // ================================================================================================================
 
-useEffect(() => {
-  const script = document.createElement("script");
-  script.src = "https://accounts.google.com/gsi/client";
-  script.async = true;
-  script.defer = true;
-  script.onload = () => {
-    window.google.accounts.id.initialize({
-      client_id:
-        "433961052087-ksa4nir2mjgih7oudtn24lkb7l02m609.apps.googleusercontent.com",
-      callback: handleGoogleLogin,
-      ux_mode: "popup",
-      scope: "profile email",  // إضافة الأذونات للحصول على بيانات المستخدم
-    });
-
-    window.google.accounts.id.renderButton(
-      document.getElementById("google-signin-btn"),
-      { theme: "white", size: "large" }  // تغيير الثيم والحجم
+const handleGoogleLogin = () => {
+    const googleAuthUrl = "http://localhost:9527/api/auth/google";
+  
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+  
+    const authWindow = window.open(
+      googleAuthUrl,
+      "googleLogin",
+      `width=${width},height=${height},left=${left},top=${top}`
     );
+  
+    const checkLogin = setInterval(() => {
+      if (authWindow.closed) {
+        clearInterval(checkLogin);
+        const token = localStorage.getItem("google_token");
+        if (token) {
+          // تابع بعد ما المستخدم يسجل الدخول
+          console.log("تم تسجيل الدخول بنجاح");
+        }
+      }
+    }, 1000);
   };
-  document.body.appendChild(script);
-}, [navigate]);
-
-
-const handleGoogleLogin = async (response) => {
-  try {
-    const res = await axios.post(
-      "http://localhost:9527/api/auth/google-login",
-      { credential: response.credential }
-    );
-
-    console.log("🔍 Google login response:", res.data); // ✅ تحقق من استجابة الخادم
-
-    const userData = res.data;
-
-    if (userData.token) {
-      // تأكد من أن `userData.user?.username` يحتوي على القيمة الصحيحة
-      Cookies.set("user", JSON.stringify({
-        token: userData.token,
-        username: userData.username,  // تأكد أن هذا يتم استخدامه بشكل صحيح
-        email: userData.email,
-        userId: userData.userId,
-        isAdmin: userData.isAdmin || false,
-      }), { expires: 7 });
-      const userFromCookies = JSON.parse(Cookies.get('user'));
-      console.log('User from cookies:', userFromCookies); // تحقق من محتويات الكوكيز
-      
-      axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
-    }
-
-    Swal.fire({
-      icon: "success",
-      title: `مرحباً ${userData.user?.username || "مستخدم"}!`,  // استخدم القيمة الافتراضية هنا أيضًا
-      text: "تم تسجيل الدخول باستخدام Google بنجاح!",
-      background: "#FFFFFF",
-    }).then(() => {
-      window.location.reload();
-      navigate("/");
-    });
-
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "تم رفض الوصول",
-      text: error.response?.data?.message || "فشل في التوثيق عبر Google.",
-      background: "#FFFFFF",
-      color: "#115173",
-      confirmButtonColor: "#115173",
-    });
-  }
-};
-;
-
-
+  
 
   
   return (
@@ -487,17 +427,11 @@ const handleGoogleLogin = async (response) => {
                 {isSignUp ? "لديك حساب؟ سجل الدخول" : "ليس لديك حساب؟ سجل الآن"}
               </button>
   
-
-
-
-
-  
               <button
                 type="button"
-         id="google-signin-btn" 
-         className="flex justify-center"
-             
-             >
+                onClick={handleGoogleLogin}
+                className="py-3 px-6 rounded-lg text-black bg-gradient-to-r from-[#ffffff] to-[#fffffff] hover:from-[#D32F2F] hover:to-[#D32F2F] w-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1 relative overflow-hidden group"
+              >
 
                 
 {/* 

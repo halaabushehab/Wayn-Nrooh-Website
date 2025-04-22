@@ -91,7 +91,7 @@ const SeasonalSection = () => {
     try {
       const seasonInArabic = activeSeason;
       setLoading(true);
-      const response = await fetch(`http://localhost:9527/places/season/${activeSeason}`);
+      const response = await fetch(`http://localhost:9527/api/places/season/${activeSeason}`);
       if (!response.ok) {
         const errorDetails = await response.json();
         throw new Error(`Error: ${errorDetails.message || 'Unknown error'}`);

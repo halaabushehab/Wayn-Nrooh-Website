@@ -1,80 +1,19 @@
-// const Payment = require("../models/Payment");
-// // const SubscriptionCard = require("../models/SubscriptionCard");
-// const User = require("../models/user");
-
-// exports.createPayment = async (req, res) => {
-//   try {
-//     const { subscriber_id, subscriptionCard_id, payment_method } = req.body;
-
-//     if (!subscriber_id || !subscriptionCard_id || !payment_method) {
-//       return res.status(400).json({ error: "Missing required fields" });
-//     }
-
-//     const subscriptionCard = await SubscriptionCard.findById(subscriptionCard_id);
-//     if (!subscriptionCard) {
-//       return res.status(404).json({ error: "Subscription card not found" });
-//     }
-
-//     // تحويل السعر إلى رقم (مثلاً 50 دولار)
-//     const amount = parseFloat(subscriptionCard.price.replace("$", ""));
-
-//     const paymentData = {
-//       subscriber: subscriber_id,
-//       subscriptionCard: subscriptionCard_id,
-//       amount,
-//       payment_method,
-//       payment_status: "Completed",
-//     };
-
-//     const payment = await Payment.create(paymentData);
-
-//     // استخراج مدة الاشتراك (مثلاً عدد الأشهر) من subscriptionCard.duration
-//     const durationMatch = subscriptionCard.duration.match(/\d+/);
-//     if (!durationMatch) {
-//       throw new Error("No numeric value found in duration");
-//     }
-    
-//     const durationNumber = parseInt(durationMatch[0], 10);
-//     if (isNaN(durationNumber)) {
-//       throw new Error("Invalid duration value");
-//     }
-    
-//     const subscriptionExpiry = new Date();
-//     subscriptionExpiry.setMonth(subscriptionExpiry.getMonth() + durationNumber);
-
-//     await User.findByIdAndUpdate(subscriber_id, {
-//       subscriptionPlan: subscriptionCard.title,
-//       subscriptionExpiry,
-//     });
-
-//     return res
-//       .status(201)
-//       .json({ message: "Payment recorded successfully", payment });
-//   } catch (error) {
-//     console.error("Error creating payment:", error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-
-// controllers/paymentController.js
-
-
 
 const Payment = require("../models/Payment");
 const Place = require("../models/places");
 const User = require("../models/User");
 const nodemailer = require("nodemailer");
 const exchangeRate = 0.71; // سعر الصرف من الدينار الأردني إلى الدولار
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 exports.createPayment = async (req, res) => {
   try {
-    const { userId, placeId, paymentMethod, ticketCount } = req.body;
+    const { userId, placeId, paymentMethod, ticketCount, stripeToken } = req.body;
     console.log("📩 البيانات المستلمة:", req.body);
 
-    // Validate required fields  
-    if (!userId || !placeId || !paymentMethod || !ticketCount) {
+    // Validate required fields
+    if (!userId || !placeId || !paymentMethod || !ticketCount || !stripeToken) {
       console.log("🚨 خطأ: بعض الحقول مفقودة");
       return res.status(400).json({ error: "جميع الحقول مطلوبة" });
     }
@@ -115,6 +54,18 @@ exports.createPayment = async (req, res) => {
     const totalAmount = ticketPrice * ticketCount;
     console.log("💰 المبلغ الإجمالي:", totalAmount);
 
+    // Use Stripe to create a payment
+    const charge = await stripe.charges.create({
+      amount: totalAmount * 100, // Stripe يقبل المبالغ بالسنتات
+      currency: "usd", // أو العملة المطلوبة
+      description: `Payment for tickets to ${place.name}`,
+      source: stripeToken, // Token من Stripe
+    });
+
+    if (charge.status !== "succeeded") {
+      return res.status(400).json({ error: "فشل في الدفع عبر Stripe" });
+    }
+
     // Create payment record with additional data (user and place name)
     const payment = new Payment({
       subscriber: userId,
@@ -125,7 +76,9 @@ exports.createPayment = async (req, res) => {
       payment_status: "completed",
       userName: user.name,    // إضافة اسم المستخدم
       placeName: place.name,  // إضافة اسم المكان
+      stripeChargeId: charge.id, // حفظ معرف الدفع من Stripe
     });
+
     await payment.save();
     console.log("✅ تم إنشاء الدفع:", payment);
 
@@ -135,6 +88,7 @@ exports.createPayment = async (req, res) => {
     res.status(500).json({ error: "حدث خطأ أثناء معالجة الدفع" });
   }
 };
+
 // Get booking and payment details
 exports.getBookingWithPayment = async (req, res) => {
   try {

@@ -1,44 +1,203 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, Filter, MoreVertical, User, Mail, Phone } from 'lucide-react'
+import axios from 'axios'
+import Cookies from 'js-cookie'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 export default function UsersTab() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const usersPerPage = 5
+
+  // جلب التوكن من الكوكيز
+  const userCookie = Cookies.get('user')
+  const parsedUser = userCookie ? JSON.parse(userCookie) : null
+  const token = parsedUser?.token
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true)
+        const response = await axios.get('http://localhost:9527/api/auth/all', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        console.log('Users data:', response.data) // للتأكد من البيانات المستلمة
+        setUsers(response.data.users || []) // استخدام القيمة الافتراضية [] في حالة عدم وجود users
+      } catch (error) {
+        console.error('Error fetching users:', error)
+        toast.error('حدث خطأ أثناء جلب بيانات المستخدمين')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (token) {
+      fetchUsers()
+    }
+  }, [token])
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(`http://localhost:9527/api/auth/delete/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, status: 'blocked' } : user
+      ))
+      toast.success('تم حظر المستخدم بنجاح')
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      toast.error('حدث خطأ أثناء حظر المستخدم')
+    }
+  }
+
+  const handleActivateUser = async (userId) => {
+    try {
+      await axios.put(`http://localhost:9527/api/auth/activate/${userId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, status: 'active' } : user
+      ))
+      toast.success('تم تفعيل المستخدم بنجاح')
+    } catch (error) {
+      console.error('Error activating user:', error)
+      toast.error('حدث خطأ أثناء تفعيل المستخدم')
+    }
+  }
+
+  // فلترة المستخدمين
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = 
+      (user.username?.toLowerCase()?.includes(searchTerm.toLowerCase())) || 
+      (user.email?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+    
+    const matchesFilter = 
+      filter === 'all' || 
+      (filter === 'admins' && user.isAdmin) ||
+      (filter === 'users' && !user.isAdmin) ||
+      (filter === 'blocked' && user.status === 'blocked')
+    
+    return matchesSearch && matchesFilter
+  })
+
+  // ترقيم الصفحات
+  const indexOfLastUser = currentPage * usersPerPage
+  const indexOfFirstUser = indexOfLastUser - usersPerPage
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser)
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage)
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch('/api/admin/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, email, password })
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert('تم إضافة المستخدم بنجاح!');
+    } else {
+      alert('خطأ في إضافة المستخدم: ' + result.message);
+    }
+  };
+
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+   {/* <div className="container">
+      <h1 className="text-2xl font-bold">إضافة أدمن جديد</h1>
+      <form onSubmit={handleSubmit}>
         <div>
-          <h1 className="text-2xl font-bold">المستخدمين</h1>
-          <p className="text-gray-500">إدارة حسابات المستخدمين والصلاحيات</p>
+          <label>اسم المستخدم</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </div>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md">
-          إضافة مستخدم جديد
+        <div>
+          <label>البريد الإلكتروني</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>كلمة المرور</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">
+          إضافة أدمن جديد
         </button>
-      </div>
+      </form>
+    </div>
+       */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div className="flex space-x-2 space-x-reverse">
-            <button className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">
-              الكل (345)
+            <button 
+              className={`px-4 py-2 rounded-md ${filter === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+              onClick={() => setFilter('all')}
+            >
+              الكل ({users.length})
             </button>
-            <button className="px-4 py-2 rounded-md bg-gray-100">
-              مدراء (12)
+            <button 
+              className={`px-4 py-2 rounded-md ${filter === 'admins' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+              onClick={() => setFilter('admins')}
+            >
+              مدراء ({users.filter(u => u.isAdmin).length})
             </button>
-            <button className="px-4 py-2 rounded-md bg-gray-100">
-              مستخدمين (320)
+            <button 
+              className={`px-4 py-2 rounded-md ${filter === 'users' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+              onClick={() => setFilter('users')}
+            >
+              مستخدمين ({users.filter(u => !u.isAdmin).length})
             </button>
-            <button className="px-4 py-2 rounded-md bg-gray-100">
-              محظورين (13)
+            <button 
+              className={`px-4 py-2 rounded-md ${filter === 'blocked' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+              onClick={() => setFilter('blocked')}
+            >
+              محظورين ({users.filter(u => u.status === 'blocked').length})
             </button>
           </div>
+          
           <div className="flex w-full md:w-auto space-x-2 space-x-reverse">
             <div className="relative flex-1 md:flex-none">
               <input
                 type="text"
                 placeholder="بحث عن مستخدم..."
                 className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 pr-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              />
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
             <button className="border border-gray-300 rounded-md px-3 py-2 bg-white flex items-center">
               <Filter size={16} className="ml-2" />
@@ -46,211 +205,201 @@ export default function UsersTab() {
             </button>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-right">
-            <thead className="bg-gray-50 text-gray-600 text-sm">
-              <tr>
-                <th className="px-4 py-3 rounded-tr-lg">المستخدم</th>
-                <th className="px-4 py-3">البريد الإلكتروني</th>
-                <th className="px-4 py-3">رقم الهاتف</th>
-                <th className="px-4 py-3">تاريخ التسجيل</th>
-                <th className="px-4 py-3">الدور</th>
-                <th className="px-4 py-3">الحالة</th>
-                <th className="px-4 py-3 rounded-tl-lg">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <UserRow
-                user={{
-                  name: 'أحمد محمد',
-                  email: 'ahmed@example.com',
-                  phone: '+971 55 123 4567',
-                  image:
-                    'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWFufGVufDB8fDB8fHww&auto=format&fit=crop&w=150&q=80',
-                }}
-                date="12 يناير 2023"
-                role="مدير"
-                status="active"
-              />
-              <UserRow
-                user={{
-                  name: 'سارة أحمد',
-                  email: 'sara@example.com',
-                  phone: '+971 55 234 5678',
-                  image:
-                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=150&q=80',
-                }}
-                date="15 فبراير 2023"
-                role="مستخدم"
-                status="active"
-              />
-              <UserRow
-                user={{
-                  name: 'محمد علي',
-                  email: 'mohamed@example.com',
-                  phone: '+971 55 345 6789',
-                  image:
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1hbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=150&q=80',
-                }}
-                date="3 مارس 2023"
-                role="مستخدم"
-                status="active"
-              />
-              <UserRow
-                user={{
-                  name: 'فاطمة حسن',
-                  email: 'fatima@example.com',
-                  phone: '+971 55 456 7890',
-                  image:
-                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8d29tYW58ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=150&q=80',
-                }}
-                date="22 أبريل 2023"
-                role="مدير"
-                status="active"
-              />
-              <UserRow
-                user={{
-                  name: 'عمر خالد',
-                  email: 'omar@example.com',
-                  phone: '+971 55 567 8901',
-                  image:
-                    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bWFufGVufDB8fDB8fHww&auto=format&fit=crop&w=150&q=80',
-                }}
-                date="8 مايو 2023"
-                role="مستخدم"
-                status="blocked"
-              />
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-6 flex justify-between items-center">
-          <div className="text-sm text-gray-500">عرض 1-5 من 345 مستخدم</div>
-          <div className="flex space-x-2 space-x-reverse">
-            <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white">
-              <svg
-                className="rotate-90"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-blue-600 text-white">
-              1
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white">
-              2
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white">
-              3
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white">
-              <svg
-                className="rotate-270"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
+        
+        {loading ? (
+          <div className="text-center py-8">جاري تحميل البيانات...</div>
+        ) : (
+          <>
+            <div className="overflow-x-auto border rounded-lg">
+              <table className="w-full text-right min-w-[800px]">
+                <thead className="bg-gray-50 text-gray-600 text-sm">
+                  <tr>
+                    <th className="px-4 py-3 rounded-tr-lg">المستخدم</th>
+                    <th className="px-4 py-3">البريد الإلكتروني</th>
+                    <th className="px-4 py-3">رقم الهاتف</th>
+                    <th className="px-4 py-3">تاريخ التسجيل</th>
+                    <th className="px-4 py-3">الدور</th>
+                    <th className="px-4 py-3">الحالة</th>
+                    <th className="px-4 py-3 rounded-tl-lg">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {currentUsers.length > 0 ? (
+                    currentUsers.map((user) => (
+                      <UserRow
+                        key={user._id}
+                        user={user}
+                        onDelete={handleDeleteUser}
+                        onActivate={handleActivateUser}
+                      />
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center py-8 text-gray-500">
+                        {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد مستخدمين لعرضهم'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {filteredUsers.length > 0 && (
+              <div className="mt-6 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  عرض {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)} من {filteredUsers.length} مستخدم
+                </div>
+                <div className="flex space-x-2 space-x-reverse">
+                  <button 
+                    className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white"
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <svg className="rotate-90" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                    <button
+                      key={number}
+                      className={`w-10 h-10 flex items-center justify-center rounded-md border ${currentPage === number ? 'bg-blue-600 text-white' : 'bg-white'}`}
+                      onClick={() => paginate(number)}
+                    >
+                      {number}
+                    </button>
+                  ))}
+                  
+                  <button 
+                    className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 bg-white"
+                    onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <svg className="rotate-270" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
 }
-function UserRow({ user, date, role, status }) {
+
+function UserRow({ user, onDelete, onActivate }) {
+  const [showActions, setShowActions] = useState(false)
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'غير معروف'
+    const options = { year: 'numeric', month: 'long', day: 'numeric' }
+    return new Date(dateString).toLocaleDateString('ar-EG', options)
+  }
+
   const getStatusClass = (status) => {
     switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800'
-      case 'pending':
-        return 'bg-amber-100 text-amber-800'
-      case 'blocked':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'active': return 'bg-green-100 text-green-800'
+      case 'pending': return 'bg-amber-100 text-amber-800'
+      case 'blocked': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
+
   const getStatusText = (status) => {
     switch (status) {
-      case 'active':
-        return 'نشط'
-      case 'pending':
-        return 'قيد التفعيل'
-      case 'blocked':
-        return 'محظور'
-      default:
-        return 'غير معروف'
+      case 'active': return 'نشط'
+      case 'pending': return 'قيد التفعيل'
+      case 'blocked': return 'محظور'
+      default: return 'غير معروف'
     }
   }
-  const getRoleClass = (role) => {
-    switch (role) {
-      case 'مدير':
-        return 'bg-blue-100 text-blue-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
+
+  const getRoleClass = (isAdmin) => {
+    return isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
   }
+
+  const getRoleText = (isAdmin) => {
+    return isAdmin ? 'مدير' : 'مستخدم'
+  }
+
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-4 py-4">
+      <td className="px-4 py-4 min-w-[200px]">
         <div className="flex items-center">
+          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center ml-3">
           <img
-            src={user.image}
-            alt={user.name}
-            className="w-10 h-10 rounded-full ml-3"
-          />
+  src={user.photo ? `http://localhost:9527/${user.photo}` : '/default-avatar.jpg'}
+  alt="Profile"
+  className="w-10 h-10 rounded-full object-cover"
+/>          </div>
           <div>
-            <p className="font-medium">{user.name}</p>
-            <p className="text-gray-500 text-xs">آخر تسجيل دخول: منذ ساعتين</p>
+            <p className="font-medium">{user.username || 'مستخدم بدون اسم'}</p>
+            <p className="text-gray-500 text-xs">آخر تسجيل دخول: غير معروف</p>
           </div>
         </div>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-4 py-4 min-w-[200px]">
         <div className="flex items-center">
           <Mail size={16} className="ml-2 text-gray-400" />
-          {user.email}
+          {user.email || 'بريد غير معروف'}
         </div>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-4 py-4 min-w-[150px]">
         <div className="flex items-center">
           <Phone size={16} className="ml-2 text-gray-400" />
-          {user.phone}
+          {user.phone || 'غير متوفر'}
         </div>
       </td>
-      <td className="px-4 py-4">{date}</td>
+      <td className="px-4 py-4 min-w-[150px]">
+        {formatDate(user.createdAt)}
+      </td>
       <td className="px-4 py-4">
-        <span
-          className={`px-2 py-1 rounded-md text-xs font-medium ${getRoleClass(role)}`}
-        >
-          {role}
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${getRoleClass(user.isAdmin)}`}>
+          {getRoleText(user.isAdmin)}
         </span>
       </td>
       <td className="px-4 py-4">
-        <span
-          className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusClass(status)}`}
-        >
-          {getStatusText(status)}
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusClass(user.status)}`}>
+          {getStatusText(user.status)}
         </span>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-4 py-4 min-w-[100px]">
         <div className="relative">
-          <button className="text-gray-500 hover:text-gray-700">
+          <button 
+            className="text-gray-500 hover:text-gray-700"
+            onClick={() => setShowActions(!showActions)}
+          >
             <MoreVertical size={18} />
           </button>
+          
+          {showActions && (
+            <div className="absolute left-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
+              {user.status === 'blocked' ? (
+                <button
+                  className="block w-full text-right px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+                  onClick={() => {
+                    onActivate(user._id)
+                    setShowActions(false)
+                  }}
+                >
+                  تفعيل
+                </button>
+              ) : (
+                <button
+                  className="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  onClick={() => {
+                    onDelete(user._id)
+                    setShowActions(false)
+                  }}
+                >
+                  حظر
+                </button>
+              )}
+          
+            </div>
+          )}
         </div>
       </td>
     </tr>

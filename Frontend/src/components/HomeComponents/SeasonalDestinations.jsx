@@ -66,7 +66,7 @@ const SeasonalSection = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:9527/places/season/${activeSeason}?limit=4`
+        `http://localhost:9527/api/places/season/${activeSeason}?limit=4`
       );
 
       if (!response.ok) {

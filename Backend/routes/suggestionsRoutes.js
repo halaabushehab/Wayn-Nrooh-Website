@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../utils/upload');
+const upload = require('../middleware/uploadMiddleware');
 const { 
   verifyTokenAndPermissions,
   createSuggestion

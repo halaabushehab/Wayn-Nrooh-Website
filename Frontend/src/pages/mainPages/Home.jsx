@@ -10,14 +10,14 @@ import CategorySection from "../../components/HomeComponents/CategorySection"
 import AboutSection from "../../components/HomeComponents/AboutSection ";
 import JordanDestinations from "../../components/HomeComponents/JordanDestinations";
 import MapSection from '../../components/HomeComponents/Map'
-
+import SuggestedPlacesSection  from '../../components/HomeComponents/SuggestedPlacesSection '
 const Home = () => {
   
   return (
     <>
      
       {/* ***** HERO Section ***** */}
-      {/* <HeroSection /> */}
+      <HeroSection />
       {/* ***** Categories Section ***** */}
       <CategorySection />
 
@@ -25,19 +25,22 @@ const Home = () => {
       <AboutSection />
       
       {/* ***** Explore Jordan Section ***** */}
-      <div className="my-50">
-      <ExploreJordanSection />
-
-         </div>
+      {/* <div className="my-50">
+  
+         </div> */}
       
       {/* ***** Jordan Destinations Section ***** */}
-      {/* <JordanDestinations /> */}
+      <JordanDestinations />
       
       {/* ***** Seasonal Destinations Section ***** */}
       <SeasonalDestinations />
       
       {/* ***** Map Section ***** */}
       {/* <MapSection /> */}
+
+
+          {/* <ExploreJordanSection /> */}
+          <SuggestedPlacesSection  />
     </>
   );
 };

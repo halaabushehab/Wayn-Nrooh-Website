@@ -1,17 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const placeController = require("../controllers/placeController");
-const upload = require("../utils/upload");
+const upload = require("../middleware/uploadMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
-
+const { createPlace } = require("../controllers/placeController");
 // ✅ جلب جميع الأماكن
 router.get("/", placeController.getAllPlaces);
 
 // ✅ جلب عدد الأماكن
 router.get("/count", placeController.getPlaceCount);
 
-// ✅ إضافة مكان جديد
-router.post("/add", placeController.addPlace);
+
+// POST route to create a place
+router.post("/", createPlace);
 
 // ✅ جلب مكان حسب الـ ID
 router.get("/:id", placeController.getPlaceById);
@@ -27,5 +28,14 @@ router.get("/season/:season", placeController.getPlacesBySeason);
 
 // ✅ فلترة + بحث
 router.get("/filtered/search", placeController.getFilteredPlaces);
+
+
+// Route to edit a place
+router.patch('/places/:id', placeController.updatePlace);
+
+// Route to soft delete a place
+router.delete('/places/:id', placeController.softDeletePlace);
+
+router.get("/status", placeController.getPlaceStatusStats);
 
 module.exports = router;
