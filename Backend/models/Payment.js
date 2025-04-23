@@ -1,4 +1,3 @@
-// models/Payment.js
 const mongoose = require("mongoose");
 
 const PaymentSchema = new mongoose.Schema(
@@ -31,26 +30,28 @@ const PaymentSchema = new mongoose.Schema(
       enum: ["pending", "completed", "failed"],
       default: "pending",
     },
-    transactionId: { // معرّف المعاملة (للدفع عبر الإنترنت)
+    transactionId: {
       type: String,
       required: false,
     },
-    paymentDate: { // تاريخ الدفع
+    paymentDate: {
       type: Date,
       required: false,
     },
-    discount: { // الخصم (إن وجد)
+    discount: {
       type: Number,
       required: false,
       default: 0,
     },
-    currency: { // العملة
+    currency: {
       type: String,
       required: true,
-      default: "JD", // افتراض العملة هي الدينار
+      default: "JD", // الدينار الأردني كافتراضي
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("Payment", PaymentSchema);

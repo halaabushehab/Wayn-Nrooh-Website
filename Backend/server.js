@@ -66,6 +66,7 @@ app.use("/api", messageroutes);
 app.use('/api', commentRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use("/api/payments", paymentRoutes);
+
 app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
 app.use('/api/favorites', favoriteRoutes);
