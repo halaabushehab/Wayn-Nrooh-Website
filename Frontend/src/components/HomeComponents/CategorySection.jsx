@@ -148,8 +148,97 @@ import {
   MountainIcon,
   BookIcon,
   Compass,
+  MapPinIcon,
+  StarIcon
 } from 'lucide-react';
-import { PlaceCard } from '../HomeComponents/PlaceCard';
+
+// Updated PlaceCard component to match the style in CityPage
+const PlaceCard = ({ place }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  const addToFavorites = (e) => {
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+    // Here you would implement the actual favorites functionality
+    // similar to the one in CityPage component
+  };
+  
+  const handleDetails = () => {
+    // Navigate to details page - would need to be connected to router
+    window.location.href = `/place-details/${place._id}`;
+  };
+  
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group">
+      <div className="relative">
+        {/* Image with overlay gradient */}
+        <div className="h-52 overflow-hidden">
+          <img
+            src={place.gallery?.[0] || "/api/placeholder/400/300"}
+            alt={place.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
+        </div>
+        
+        {/* Season tag */}
+        {place.best_season && (
+          <div className="absolute top-4 right-4 bg-[#FFD700] text-[#022C43] px-3 py-1 rounded-full text-sm font-bold shadow-md">
+            {place.best_season}
+          </div>
+        )}
+        
+        {/* Favorite button */}
+        <button
+          className={`absolute top-4 left-4 p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
+            isFavorite 
+              ? 'bg-red-500 text-white animate-heartbeat' 
+              : 'bg-white/20 backdrop-blur-md hover:bg-white/60'
+          }`}
+          onClick={addToFavorites}
+        >
+          <HeartIcon 
+            className={`w-5 h-5 ${isFavorite ? 'fill-white' : 'text-white'}`} 
+          />
+        </button>
+        
+        {/* Place name overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 py-4">
+          <h3 className="font-bold text-xl text-white drop-shadow-lg">
+            {place.name}
+          </h3>
+        </div>
+      </div>
+      
+      <div className="p-5">
+        {/* Location with icon */}
+        <div className="flex items-center text-gray-600 mb-4">
+          <MapPinIcon className="w-5 h-5 ml-2 text-[#115173]" />
+          <span className="text-sm">{place.short_description || place.description?.substring(0, 70) + '...'}</span>
+        </div>
+        
+        {/* City tag */}
+        <div className="mb-4">
+          <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-3 py-1 rounded-full">
+            {place.city}
+          </span>
+        </div>
+        
+        {/* Action button */}
+        <button
+          onClick={handleDetails}
+          className="w-full bg-[#115173] text-white py-3 rounded-xl hover:bg-[#022C43] transition-colors duration-300 flex items-center justify-center group"
+        >
+          <span>عرض التفاصيل</span>
+          <svg className="w-5 h-5 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const CategorySection = () => {
   const [activeCategory, setActiveCategory] = useState('متاحف');
@@ -266,12 +355,12 @@ const CategorySection = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollRight}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 focus:outline-none hidden md:block"
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 focus:outline-none hidden md:block"
             style={{ backgroundColor: '#FFD700' }}
           >
-            {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: '#022C43' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: '#022C43' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg> */}
+            </svg>
           </motion.button>
 
           <div 
@@ -294,7 +383,7 @@ const CategorySection = () => {
                       ? 'text-white shadow-lg'
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                   }`}
-                  style={{ 
+                  style={{
                     backgroundColor: activeCategory === category.id ? '#115173' : '',
                     borderBottom: activeCategory === category.id ? '3px solid #FFD700' : ''
                   }}
@@ -310,12 +399,12 @@ const CategorySection = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollLeft}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 focus:outline-none hidden md:block"
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 focus:outline-none hidden md:block"
             style={{ backgroundColor: '#FFD700' }}
           >
-            {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: '#022C43' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: '#022C43' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg> */}
+            </svg>
           </motion.button>
         </div>
 
@@ -347,7 +436,7 @@ const CategorySection = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {activePlaces.length > 0 ? (
               activePlaces.map((place, index) =>
@@ -356,7 +445,6 @@ const CategorySection = () => {
                     key={place._id} 
                     variants={itemVariants}
                     whileHover={{ y: -10, transition: { duration: 0.2 } }}
-                    className="transition-all duration-300"
                   >
                     <PlaceCard place={place} />
                   </motion.div>
@@ -375,7 +463,7 @@ const CategorySection = () => {
                 />
                 <p className="text-gray-500 text-lg">لا توجد أماكن في هذه الفئة حالياً</p>
                 <button 
-                  className="mt-4 px-6 py-2 rounded-full text-white"
+                  className="mt-4 px-6 py-2 rounded-full text-white transition-all duration-300 hover:bg-[#022C43]"
                   style={{ backgroundColor: '#115173' }}
                 >
                   اكتشف فئات أخرى
@@ -385,12 +473,26 @@ const CategorySection = () => {
           </motion.div>
         )}
       </div>
+      
+      {/* Add heartbeat animation for favorite button */}
+      <style jsx>{`
+        @keyframes heartbeat {
+          0% { transform: scale(1); }
+          25% { transform: scale(1.2); }
+          50% { transform: scale(1); }
+          75% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+        
+        .animate-heartbeat { 
+          animation: heartbeat 1s ease-in-out; 
+        }
+      `}</style>
     </section>
   );
 };
 
 export default CategorySection;
-
 
 
 

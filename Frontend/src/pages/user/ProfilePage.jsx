@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 import { useParams } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -29,13 +30,23 @@ const ProfilePage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  const token = localStorage.getItem('token');
+  const userCookie = Cookies.get("user");
+  const parsedUser = userCookie ? JSON.parse(userCookie) : null;
+  const token = parsedUser?.token || null;
   const decodedToken = token ? jwt_decode(token) : null;
+  
+// 🔐 Check token validity
+if (!token || !decodedToken || decodedToken.exp * 1000 < Date.now()) {
+  Cookies.remove('user');
+  window.location.href = '/login';
+}
+
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         if (!token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           throw new Error('No token found');
         }
 

@@ -1,18 +1,18 @@
+// routes/paymentRoutes.js
 const express = require("express");
 const router = express.Router();
 const paymentController = require("../controllers/paymentController");
 
-// إنشاء عملية دفع
-router.post("/pay", paymentController.createPayment);
+// إنشاء جلسة الدفع
+router.post("/create-checkout-session", paymentController.createCheckoutSession);
 
-// الحصول على تفاصيل الحجز والدفع
-router.get("/booking/:bookingId", paymentController.getBookingWithPayment);
+// التعامل مع Webhook من Stripe
+router.post("/stripe-webhook", paymentController.handleStripeWebhook);
 
-// 🔴 احرص على أن هذا المسار موجود
+// جلب جميع المدفوعات
 router.get("/payments", paymentController.getAllPayments);
 
-
-
-
+// جلب دفع معين حسب ID
+router.get("/payment/:paymentId", paymentController.getPaymentById);
 
 module.exports = router;

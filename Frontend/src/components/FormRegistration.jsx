@@ -74,55 +74,86 @@ export default function AuthForm() {
         return true;
     };
 
-    const handleRegister = async (e) => {
-      e.preventDefault();
-      if (!validateForm()) return;
-  
-      try {
-          const response = await axios.post("http://localhost:9527/api/auth/register", formData);
-          const userData = response.data;
-  
-          // ✅ تخزين جميع البيانات في كوكي واحدة مثل login
-          Cookies.set("user", JSON.stringify({
-              token: userData.token,
-              username: userData.username,
-              email: userData.email,
-              userId: userData.userId,
-              isAdmin: userData.isAdmin || false,
-          }), { expires: 7 });
-  
-          // ✅ تعيين التوكن للهيدر
-          axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
-  
-          Swal.fire({
-              title: `مرحبًا ${userData.username}! 👋`,
-              text: "تم إنشاء الحساب بنجاح! تم تسجيل الدخول تلقائيًا.",
-              icon: "success",
-              confirmButtonText: "استكشاف الموقع",
-          }).then(() => {
-              setIsOpen(false); // إغلاق الفورم بعد التسجيل
-              window.location.reload();
-              navigate("/");
-          });
-  
-          // إعادة تعيين النموذج
-          setFormData({
-              username: '',
-              email: '',
-              password: '',
-              showPassword: false,
-          });
-  
-      } catch (err) {
-          console.error("Error:", err.response?.data || err.message);
-          Swal.fire({
-              title: "فشل التسجيل",
-              text: "حدث خطأ أثناء التسجيل. حاول مجددًا.",
-              icon: "error",
-          });
-      }
-  };
-  
+
+ const handleRegister = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  const { username, email, password } = formData;
+  axios.defaults.withCredentials = true; // إضافة هذا السطر
+
+  // تأكد أن البيانات اللي راح ترسلها صحيحة
+  console.log("📤 بيانات التسجيل:", { username, email, password });
+
+  try {
+    const response = await axios.post(
+      "http://localhost:9527/api/auth/register",
+      { username, email, password },
+      { withCredentials: true } // إضافة هذا الخيار
+    );
+
+    // تأكد من أن الرد يحتوي على البيانات اللازمة
+    console.log("✅ رد السيرفر:", response.data);
+
+    const userData = response.data;
+    const token = userData.token; // استخراج التوكن بشكل منفصل مثل handleLogin
+
+    if (!token) {
+      throw new Error("الرد لا يحتوي على توكن. تحقق من الباكيند.");
+    }
+
+    // تخزين بيانات المستخدم في الكوكيز بنفس طريقة handleLogin
+    Cookies.set("user", JSON.stringify({
+      token: token,
+      username: userData.username,
+      email: userData.email,
+      userId: userData.userId,
+      isAdmin: userData.isAdmin || false,
+    }), { expires: 7 });
+
+    // إعداد التوكن في الهيدر للطلبات الجاية
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    setIsOpen(false); // نقل إغلاق الفورم هنا مثل handleLogin
+
+    // عرض رسالة نجاح بنفس أسلوب handleLogin
+    Swal.fire({
+      title: `مرحبًا ${userData.username}! 👋`,
+      text: "تم إنشاء الحساب بنجاح! تم تسجيل الدخول تلقائيًا.",
+      icon: "success",
+      confirmButtonText: "استكشاف الموقع",
+      background: "#022C43", // إضافة إعدادات الألوان
+      color: "#FFD700",
+    }).then(() => {
+      // إعادة تحميل الصفحة بعد تأخير مثل handleLogin
+      setTimeout(() => {
+        window.location.reload();
+        navigate("/");
+      }, 2000);
+    });
+
+    // إعادة تعيين الفورم
+    setFormData({
+      username: '',
+      email: '',
+      password: '',
+      showPassword: false,
+    });
+
+  } catch (err) {
+    console.error("❌ خطأ في التسجيل:", err.response?.data || err.message);
+
+    Swal.fire({
+      title: "فشل التسجيل",
+      text: err.response?.data?.message || "حدث خطأ أثناء التسجيل. حاول مجددًا.",
+      icon: "error",
+      background: "#022C43", // إضافة إعدادات الألوان
+      color: "#FFD700",
+    });
+  }
+};
+    
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -537,17 +568,6 @@ const handleGoogleLogin = async (response) => {
                 </div>
               </button>
             </div>
-  
-            {!isSignUp && (
-              <div className="text-center mt-4">
-                <a
-                  href="#"
-                  className="text-[#115173] hover:text-[#022C43] transition-colors underline text-sm font-medium"
-                >
-                  نسيت كلمة المرور؟
-                </a>
-              </div>
-            )}
           </form>
           
           <div className="mt-4 text-center">
