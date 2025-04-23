@@ -2,17 +2,18 @@
 const express = require("express");
 const router = express.Router();
 const paymentController = require("../controllers/paymentController");
+const bodyParser = require("body-parser");
 
-// إنشاء جلسة الدفع
-router.post("/create-checkout-session", paymentController.createCheckoutSession);
+// Webhook endpoint
+router.post(
+  "/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  paymentController.handleStripeWebhook
+);
 
-// التعامل مع Webhook من Stripe
-router.post("/stripe-webhook", paymentController.handleStripeWebhook);
-
-// جلب جميع المدفوعات
+// Payment endpoints
+router.post("/pay", paymentController.createCheckoutSession);
 router.get("/payments", paymentController.getAllPayments);
-
-// جلب دفع معين حسب ID
-router.get("/payment/:paymentId", paymentController.getPaymentById);
+router.get("/payments/:paymentId", paymentController.getPaymentById);
 
 module.exports = router;
