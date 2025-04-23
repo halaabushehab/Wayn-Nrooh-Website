@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { HeartIcon, MapPinIcon, StarIcon } from "lucide-react";
+import { HeartIcon, MapPinIcon, StarIcon, Compass } from "lucide-react";
 import favoriteImage from "../../components/img/bookmark.png";
 import bgVideo from "../../components/img/amman-vedio.mp4";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 const CityPage = () => {
   const [user, setUser] = useState(null);
   const [places, setPlaces] = useState([]);
@@ -52,9 +53,18 @@ const CityPage = () => {
   // 🧠 Get favorites for current user
   useEffect(() => {
     if (user?.userId) {
-      const storedFavorites =
-        JSON.parse(localStorage.getItem(`favorites_${user.userId}`)) || [];
-      setFavorites(storedFavorites);
+      const fetchFavorites = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:9527/api/favorites/${user.userId}`
+          );
+          setFavorites(response.data);
+        } catch (error) {
+          console.error("❌ Error fetching favorites:", error);
+        }
+      };
+  
+      fetchFavorites();
     }
   }, [user]);
 
@@ -84,42 +94,54 @@ const CityPage = () => {
   };
 
   // ➕ Add to favorites
-  const addToFavorites = (place) => {
+  const addToFavorites = async (place) => {
     if (!user?.userId) {
       alert("يرجى تسجيل الدخول لحفظ الأماكن في المفضلة.");
       return;
     }
 
-    let userFavorites =
-      JSON.parse(localStorage.getItem(`favorites_${user.userId}`)) || [];
-
-    if (!userFavorites.some((fav) => fav._id === place._id)) {
-      userFavorites.push(place);
-      localStorage.setItem(
-        `favorites_${user.userId}`,
-        JSON.stringify(userFavorites)
+    try {
+      const response = await axios.post(
+        `http://localhost:9527/api/favorites/add`,
+        {
+          userId: user.userId,
+          placeId: place._id,
+        }
       );
-      setFavorites(userFavorites);
-      alert(`${place.name} تم إضافته للمفضلة!`);
-    } else {
-      alert(`${place.name} موجود بالفعل في المفضلة.`);
+
+      if (response.status === 200) {
+        setFavorites((prevFavorites) => [...prevFavorites, place]);
+        toast.success(`${place.name} تم إضافته للمفضلة!`);
+      }
+    } catch (error) {
+      console.error("❌ Error adding to favorites:", error);
+      toast.error("حدث خطأ أثناء إضافة الموقع للمفضلة.");
     }
   };
 
   // ❌ Remove from favorites
-  const removeFromFavorites = (place) => {
+  const removeFromFavorites = async (place) => {
     if (!user?.userId) return;
 
-    let userFavorites =
-      JSON.parse(localStorage.getItem(`favorites_${user.userId}`)) || [];
-    userFavorites = userFavorites.filter((fav) => fav._id !== place._id);
-    localStorage.setItem(
-      `favorites_${user.userId}`,
-      JSON.stringify(userFavorites)
-    );
-    setFavorites(userFavorites);
-    toast.success(`${place.name} تم إضافته للمفضلة!`);
+    try {
+      const response = await axios.post(
+        `http://localhost:9527/api/favorites/remove`,
+        {
+          userId: user.userId,
+          placeId: place._id,
+        }
+      );
 
+      if (response.status === 200) {
+        setFavorites((prevFavorites) =>
+          prevFavorites.filter((fav) => fav._id !== place._id)
+        );
+        toast.success(`${place.name} تم إزالته من المفضلة!`);
+      }
+    } catch (error) {
+      console.error("❌ Error removing from favorites:", error);
+      toast.error("حدث خطأ أثناء إزالة الموقع من المفضلة.");
+    }
   };
 
   const getDisplayedPlaces = () => (showFavorites ? favorites : places);
@@ -137,6 +159,10 @@ const CityPage = () => {
     return filtered.slice(startIndex, endIndex);
   };
 
+  // Check if place is in favorites
+  const isInFavorites = (placeId) => {
+    return favorites.some(fav => fav._id === placeId);
+  };
 
   return (
     <>
@@ -196,33 +222,44 @@ const CityPage = () => {
         </div>
       </section>
       {/*Hero section end */}
-      <h1 className="text-center text-3xl font-bold text-[#022C43] mb-50">
-  <span className="border-b-4 border-[#FFD700] pb-2">الأماكن في {city}</span>
-</h1>
-
+      
+      {/* Section Title */}
+      <h1 className="text-center text-3xl font-bold text-[#022C43] mb-12 mt-16">
+        <span className="relative">
+          الأماكن في {city}
+          <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-[#FFD700]"></span>
+        </span>
+      </h1>
   
-      <div className="container mx-auto px-4" style={{ marginTop: "80px" }}>
-        <div className="flex justify-between items-center mb-10">
-          <div className="flex items-center space-x-4">
-            {/* <a
-              href="#"
-              onClick={() => {
-                const userToken = localStorage.getItem("token");
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-end mb-12">
+          {/* Favorites Toggle Button with Animation */}
+          <button
+            onClick={() => {
+              const userToken = localStorage.getItem("token");
               
-                if (!userToken || !user?.userId) {
-                  alert("يرجى تسجيل الدخول لحفظ الأماكن في المفضلة.");
-                  return;
-                }
+              if (!userToken || !user?.userId) {
+                alert("يرجى تسجيل الدخول لحفظ الأماكن في المفضلة.");
+                return;
+              }
               
-                setShowFavorites(!showFavorites);
-              }}
-              className="cursor-pointer relative group"
-            >
-              <div className="absolute inset-0 bg-[#FFD700]/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-              <img src={favoriteImage} alt="المفضلة" className="w-12 h-12 relative z-10" />
-            </a> */}
-          </div>
-
+              setShowFavorites(!showFavorites);
+            }}
+            className={`cursor-pointer relative group mr-4 transition-all duration-300 ${showFavorites ? 'scale-110' : ''}`}
+          >
+            <div className="absolute inset-0 bg-[#FFD700]/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+            <HeartIcon 
+              size={48} 
+              className={`relative z-10 transition-all duration-300 ${showFavorites ? 'text-red-500 fill-red-500 animate-pulse' : 'text-[#FFD700]'}`} 
+            />
+            {showFavorites && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {favorites.length}
+              </span>
+            )}
+          </button>
+          
+          {/* Search Input with Animation */}
           <div className="w-64 relative">
             <input
               type="text"
@@ -244,72 +281,87 @@ const CityPage = () => {
         <div className="py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {getFilteredPlaces().length > 0 ? (
-              getFilteredPlaces().map((place) => (
-                <div
-                  key={place._id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
-                >
-                  <div className="relative">
-                    {/* Image with overlay gradient */}
-                    <div className="h-52 overflow-hidden">
-                      <img
-                        src={place.gallery[0]}
-                        alt={place.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
+              getFilteredPlaces().map((place) => {
+                // Check if this place is in favorites
+                const isFavorite = isInFavorites(place._id);
+                
+                return (
+                  <div
+                    key={place._id}
+                    className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
+                  >
+                    <div className="relative">
+                      {/* Image with overlay gradient */}
+                      <div className="h-52 overflow-hidden">
+                        <img
+                          src={place.gallery[0]}
+                          alt={place.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
+                      </div>
+                      
+                      {/* Season tag */}
+                      <div className="absolute top-4 right-4 bg-[#FFD700] text-[#022C43] px-3 py-1 rounded-full text-sm font-bold shadow-md">
+                        {place.best_season}
+                      </div>
+                      
+                      {/* Enhanced Favorite button with state indication */}
+                      <button
+                        className={`absolute top-4 left-4 p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
+                          isFavorite 
+                            ? 'bg-red-500 text-white animate-heartbeat' 
+                            : 'bg-white/20 backdrop-blur-md hover:bg-white/60'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          isFavorite
+                            ? removeFromFavorites(place)
+                            : addToFavorites(place);
+                        }}
+                      >
+                        <HeartIcon 
+                          className={`w-5 h-5 ${isFavorite ? 'fill-white' : 'text-white'}`} 
+                        />
+                      </button>
+                      
+                      {/* Place name overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 px-5 py-4">
+                        <h3 className="font-bold text-xl text-white drop-shadow-lg">
+                          {place.name}
+                        </h3>
+                      </div>
                     </div>
                     
-                    {/* Season tag */}
-                    <div className="absolute top-4 right-4 bg-[#FFD700] text-[#022C43] px-3 py-1 rounded-full text-sm font-bold shadow-md">
-                      {place.best_season}
-                    </div>
-                    
-                    {/* Favorite button */}
-                    <button
-                      className="absolute top-4 left-4 bg-white/20 backdrop-blur-md p-2 rounded-full hover:bg-white/60 transition-all duration-300 transform hover:scale-110"
-                      onClick={() =>
-                        showFavorites
-                          ? removeFromFavorites(place)
-                          : addToFavorites(place)
-                      }
-                    >
-                      <HeartIcon className="w-5 h-5 text-white" />
-                    </button>
-                    
-                    {/* Place name overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 px-5 py-4">
-                      <h3 className="font-bold text-xl text-white drop-shadow-lg">
-                        {place.name}
-                      </h3>
+                    <div className="p-5">
+                      {/* Location with icon */}
+                      <div className="flex items-center text-gray-600 mb-4">
+                        <MapPinIcon className="w-5 h-5 ml-2 text-[#115173]" />
+                        <span className="text-sm">{place.short_description}</span>
+                      </div>
+                      
+                      {/* City tag */}
+                      <div className="mb-4">
+                        <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-3 py-1 rounded-full">
+                          {place.city}
+                        </span>
+                      </div>
+                      
+                      {/* Action button */}
+                      <button
+                        onClick={() => handleDetails(place)}
+                        className="w-full bg-[#115173] text-white py-3 rounded-xl hover:bg-[#022C43] transition-colors duration-300 flex items-center justify-center group"
+                      >
+                        <span>عرض التفاصيل</span>
+                        <svg className="w-5 h-5 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                  
-                  <div className="p-5">
-                    {/* Location with icon */}
-                    <div className="flex items-center text-gray-600 mb-4">
-                      <MapPinIcon className="w-5 h-5 ml-2 text-[#115173]" />
-                      <span className="text-sm">{place.short_description}</span>
-                    </div>
-                    
-                    {/* City tag */}
-                    <div className="mb-4">
-                      <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-3 py-1 rounded-full">
-                        {place.city}
-                      </span>
-                    </div>
-                    
-                    {/* Action button */}
-                    <button
-                      onClick={() => handleDetails(place)}
-                      className="w-full bg-[#115173] text-white py-3 rounded-xl hover:bg-[#022C43] transition-colors duration-300 flex items-center justify-center group"
-                    >
-                      <span>عرض التفاصيل</span>
-    
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="col-span-3 flex flex-col items-center justify-center py-16">
                 <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,3 +380,5 @@ const CityPage = () => {
 };
 
 export default CityPage;
+
+

@@ -3,7 +3,7 @@ const Rating = require('../models/Rating');
 // 📌 إضافة تقييم جديد
 exports.addRating = async (req, res) => {
   try {
-    const { userId, placeId, rating, comment } = req.body;
+    const { userId, placeId, rating, comment  } = req.body;
 
     // ✅ التحقق من صحة البيانات
     if (!userId || !placeId || !rating) {
@@ -41,7 +41,8 @@ exports.getRatingsForPlace = async (req, res) => {
       return res.status(400).json({ error: "❌ placeId غير صالح" });
     }
 
-    const ratings = await Rating.find({ placeId });
+    // جلب التقييمات مع بيانات المستخدم
+    const ratings = await Rating.find({ placeId }).populate('userId', 'username profilePicture'); // تأكد من أن لديك علاقة بين التقييمات والمستخدمين
 
     console.log("✅ التقييمات:", ratings);
 
@@ -52,7 +53,18 @@ exports.getRatingsForPlace = async (req, res) => {
     const total = ratings.reduce((sum, r) => sum + r.rating, 0);
     const average = (total / ratings.length).toFixed(1);
 
-    res.json({ average, ratings });
+    // تحويل التقييمات لتشمل بيانات المستخدم
+    const ratingsWithUser  = ratings.map(rating => ({
+      rating: rating.rating,
+      comment: rating.comment,
+      createdAt: rating.createdAt,
+      user: {
+        username: rating.userId.username,
+        profilePicture: rating.userId.profilePicture
+      }
+    }));
+
+    res.json({ average, ratings: ratingsWithUser  });
   } catch (error) {
     console.error("❌ خطأ أثناء جلب التقييمات:", error);
     res.status(500).json({ error: "❌ حدث خطأ أثناء جلب التقييمات" });

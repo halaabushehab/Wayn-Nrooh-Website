@@ -9,6 +9,7 @@ const articleRoutes = require('./routes/ArticleRoutes');
 const paymentRoutes = require("./routes/paymentRoutes");
 const suggestionsRoutes = require('./routes/suggestionsRoutes');
 // const subscribeRoutes   = require('./routes/subscribe');
+const favoriteRoutes = require('./routes/favoritesRoutes');
 
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -64,9 +65,11 @@ app.use("/api/places", placeRoutes);
 app.use("/api", messageroutes);
 app.use('/api', commentRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use("/api", paymentRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
+app.use('/api/favorites', favoriteRoutes);
+
 // app.use("/api/subscribe", subscribeRoutes);
 
 // ✅ مسار تجريبي للتسجيل
@@ -79,6 +82,11 @@ app.post('/api/auth/register', (req, res) => {
 app.use((req, res, next) => {
   console.log(`🔹 Received request: ${req.method} ${req.url}`);
   next();
+});
+
+
+app.get('/', (req, res) => {
+  res.send('Hello World');
 });
 
 // ✅ تشغيل السيرفر
