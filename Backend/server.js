@@ -1,3 +1,4 @@
+
 const express = require("express");
 const connectDB = require("./config/db");
 const authRoutes = require('./routes/auth');
@@ -27,6 +28,8 @@ require("./config/passport");
 
 const app = express();
 const PORT = process.env.PORT || 9527;
+const fs = require('fs');
+const https = require('https');
 
 // ✅ CORS
 app.use(cors({
@@ -37,11 +40,10 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-app.use(express.json()); // لتحليل الطلبات التي تحتوي على JSON
-// تقديم الملفات من مجلد uploads
+app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
+ 
 
 // ✅ Nodemailer transporter
 const transporter = nodemailer.createTransport({

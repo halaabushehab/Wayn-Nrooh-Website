@@ -1,5 +1,5 @@
 const Place = require("../models/places");
-const User = require("../models/user"); // تأكد من وجود هذا الموديل
+const User = require("../models/User"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
 
 // ✅ جلب جميع الأماكن
@@ -127,7 +127,47 @@ exports.getFilteredPlaces = async (req, res) => {
 
 exports.createPlace = async (req, res) => {
   try {
-    const newPlace = new Place(req.body);
+    const {
+      name,
+      short_description,
+      detailed_description,
+      city,
+      working_hours,
+      rating,
+      ticket_price,
+      best_season,
+      is_free,
+      map_link,
+      categories,
+      suitable_for,
+      phone,
+      website,
+    } = req.body;
+
+    console.log(req.body);
+
+
+    // Handle uploaded files
+    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : null;
+    const newPlace = new Place({
+      name,
+      short_description,
+      detailed_description,
+      city,
+      working_hours,
+      rating,
+      ticket_price,
+      best_season,
+      is_free: is_free === "true" || is_free === true,
+      map_link,
+      categories,
+      suitable_for,
+      phone,
+      website,
+      images,
+    });
+    
+
     const savedPlace = await newPlace.save();
     res.status(201).json(savedPlace);
   } catch (error) {
