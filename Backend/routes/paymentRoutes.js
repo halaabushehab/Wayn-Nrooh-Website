@@ -1,19 +1,32 @@
-// routes/paymentRoutes.js
 const express = require("express");
-const router = express.Router();
-const paymentController = require("../controllers/paymentController");
 const bodyParser = require("body-parser");
+const {
+  createCheckoutSession,
+  handleStripeWebhook,
+  getAllPayments,
+  getPaymentById,
+  verifyPayment
+} = require("../controllers/paymentController");
 
-// Webhook endpoint
+const router = express.Router();
+
+// 1) Webhook route — لازم يستخدم الجسم الخام (raw body) وليس JSON parser
 router.post(
   "/webhook",
   bodyParser.raw({ type: "application/json" }),
-  paymentController.handleStripeWebhook
+  handleStripeWebhook
 );
 
-// Payment endpoints
-router.post("/pay", paymentController.createCheckoutSession);
-router.get("/payments", paymentController.getAllPayments);
-router.get("/payments/:paymentId", paymentController.getPaymentById);
+// 2) إنشاء جلسة الدفع
+router.post("/pay", createCheckoutSession);
+
+// 3) جلب كل المدفوعات
+router.get("/payments", getAllPayments);
+
+// 4) جلب دفعة واحدة
+router.get("/payments/:paymentId", getPaymentById);
+
+// 5) التحقق من الدفع بناءً على session_id
+router.get("/verify-payment", verifyPayment);
 
 module.exports = router;

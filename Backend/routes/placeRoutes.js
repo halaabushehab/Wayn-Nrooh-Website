@@ -4,6 +4,9 @@ const placeController = require("../controllers/placeController");
 const upload = require("../middleware/uploadMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
 const { createPlace } = require("../controllers/placeController");
+const { cloudinary } = require('../config/cloudinaryConfig');
+
+
 // ✅ جلب جميع الأماكن
 router.get("/", placeController.getAllPlaces);
 
@@ -12,7 +15,9 @@ router.get("/count", placeController.getPlaceCount);
 
 
 // POST route to create a place
-router.post("/", createPlace);
+router.post('/', upload.array('images'), placeController.createPlace);
+
+
 
 // ✅ جلب مكان حسب الـ ID
 router.get("/:id", placeController.getPlaceById);
