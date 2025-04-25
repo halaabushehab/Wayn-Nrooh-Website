@@ -3,6 +3,7 @@ const router = express.Router();
 const placeController = require("../controllers/placeController");
 const upload = require("../middleware/uploadMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
+
 const { createPlace } = require("../controllers/placeController");
 const { cloudinary } = require('../config/cloudinaryConfig');
 
@@ -35,12 +36,21 @@ router.get("/season/:season", placeController.getPlacesBySeason);
 router.get("/filtered/search", placeController.getFilteredPlaces);
 
 
-// Route to edit a place
-router.patch('/places/:id', placeController.updatePlace);
-
-// Route to soft delete a place
-router.delete('/places/:id', placeController.softDeletePlace);
-
+// تحديث مكان
+router.patch('/:id', 
+    authMiddleware.protect, 
+    authMiddleware.authorize('admin'),
+    upload.array('images'), 
+    placeController.updatePlace
+  );
+  
+  // حذف ناعم
+  router.delete('/:id', 
+    authMiddleware.protect,
+    authMiddleware.authorize('admin'),
+    placeController.softDeletePlace
+  );
+  
 router.get("/status", placeController.getPlaceStatusStats);
 
 module.exports = router;

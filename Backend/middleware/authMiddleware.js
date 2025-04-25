@@ -74,7 +74,58 @@ const checkAuth = (req, res) => {
 };
 
 
-module.exports = { authMiddleware, authenticateToken,checkAuth };
+const protect = (req, res, next) => {
+  // محاولة الحصول على التوكن من الكوكيز أولاً
+  let token = req.cookies.token;
+  
+  // إذا لم يوجد في الكوكيز، جرب الهيدر
+  if (!token) {
+      const authHeader = req.header('Authorization');
+      token = authHeader?.replace('Bearer ', '');
+  }
+
+  if (!token) {
+      console.log("No token provided");
+      return res.status(403).json({ message: 'No token provided' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+          console.error("JWT Verify Error:", err);
+          return res.status(401).json({ message: 'Unauthorized' });
+      }
+      
+      // تعيين معلومات المستخدم في req.user
+      req.user = {
+          id: decoded.userId || decoded.id,
+          userId: decoded.userId || decoded.id,
+          isAdmin: decoded.isAdmin,
+          username: decoded.username,
+          email: decoded.email,
+          role: decoded.role // تأكد من وجود هذا الحقل
+      };
+      
+      next();
+  });
+};
+
+// دالة للتحقق من الصلاحيات
+const authorize = (...roles) => {
+  return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+          return res.status(403).json({
+              success: false,
+              message: `User role ${req.user.role} is not authorized to access this route`
+          });
+      }
+      next();
+  };
+};
+
+
+
+
+module.exports = { authMiddleware, authenticateToken,checkAuth ,protect ,authorize};
 
 
 

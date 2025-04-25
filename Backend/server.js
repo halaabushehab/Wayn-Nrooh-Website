@@ -68,7 +68,12 @@ app.use("/api", messageroutes);
 app.use('/api', commentRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use("/api/payments", paymentRoutes);
+app.post('/api/payments', (req, res) => {
+  console.log(req.body); // شوف شو واصل من الفرونت
+  res.status(200).send("Received");
+  console.log("✅ Payments routes are loaded at /api/payments");
 
+});
 app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
 app.use('/api/favorites', favoriteRoutes);
