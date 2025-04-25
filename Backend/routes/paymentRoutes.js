@@ -5,8 +5,10 @@ const {
   handleStripeWebhook,
   getAllPayments,
   getPaymentById,
-  verifyPayment
+  verifyPayment,
+  createPayment
 } = require("../controllers/paymentController");
+const paymentController = require('../controllers/paymentController');  // تأكد من أن هذا المسار صحيح
 
 const router = express.Router();
 
@@ -27,6 +29,10 @@ router.get("/payments", getAllPayments);
 router.get("/payments/:paymentId", getPaymentById);
 
 // 5) التحقق من الدفع بناءً على session_id
-router.get("/verify-payment", verifyPayment);
+router.get("/verify", verifyPayment);
+
+
+// رابط POST لإضافة عملية الدفع الجديدة
+router.post('/create-payment', paymentController.createPayment);  // تأكد من أن الدالة تم استيرادها بشكل صحيح
 
 module.exports = router;

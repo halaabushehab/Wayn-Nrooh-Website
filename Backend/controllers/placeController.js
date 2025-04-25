@@ -2,20 +2,7 @@ const Place = require("../models/places");
 const User = require("../models/User"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
 
-// ✅ جلب جميع الأماكن
-exports.getAllPlaces = async (req, res) => {
-  try {
-    const places = await Place.find({
-      $or: [
-        { status: "approved" },
-        { status: { $exists: false } }
-      ]
-    });
-    res.status(200).json(places);
-  } catch (error) {
-    res.status(500).json({ message: "خطأ في جلب الأماكن", error });
-  }
-};
+
 
 
 // ✅ جلب عدد الأماكن
@@ -176,28 +163,106 @@ exports.createPlace = async (req, res) => {
   }
 };
 
+
+// ✅ جلب جميع الأماكن
+exports.getAllPlaces = async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+
+    // طباعة القيم للتحقق من الاستعلام
+    // console.log("Query params: ", { status, page, limit });
+
+    const query = {};
+    if (status && ['approved', 'pending', 'rejected'].includes(status)) {
+      query.status = status;
+    }
+
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sort: { createdAt: -1 },
+      populate: {
+        path: 'createdBy',
+        strictPopulate: false // إذا كانت هناك مشكلة في الـ populate بسبب عدم وجود الحقل
+      }
+    };
+
+    // طباعة الخيارات للتحقق من استعلام الصفحة
+    console.log("Query options: ", options);
+
+    const places = await Place.paginate(query, options);
+
+    // طباعة النتيجة قبل إرسالها
+    console.log("Fetched places: ", places);
+
+    res.status(200).json({
+      success: true,
+      data: places
+    });
+  } catch (error) {
+    console.error("Error fetching places:", error);
+    res.status(500).json({
+      success: false,
+      message: 'فشل في جلب الأماكن',
+      error: error.message
+    });
+  }
+};
+
+
+
 // ✅ تعديل المكان (Edit)
 exports.updatePlace = async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "❌ المعرف غير صالح." });
+    const { body, files, user } = req;
+    
+    // البحث عن المكان
+    const place = await Place.findById(id);
+    if (!place) {
+      return res.status(404).json({
+        success: false,
+        message: 'المكان غير موجود'
+      });
     }
 
-    const updatedPlace = await Place.findByIdAndUpdate(
-      id,
-      { $set: req.body }, // Set the fields from the request body
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedPlace) {
-      return res.status(404).json({ message: "❌ المكان غير موجود." });
+    // التحقق من الصلاحيات
+    if (place.createdBy.toString() !== user._id.toString() && user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'غير مصرح لك بتعديل هذا المكان'
+      });
     }
 
-    res.status(200).json(updatedPlace);
+    // معالجة الصور الجديدة
+    let images = place.images;
+    if (files && files.images) {
+      for (const file of files.images) {
+        const result = await uploadToCloudinary(file.path);
+        images.push({
+          path: result.secure_url,
+          publicId: result.public_id
+        });
+      }
+    }
+
+    // تحديث البيانات
+    const updatedPlace = await Place.findByIdAndUpdate(id, {
+      ...body,
+      images,
+      status: user.role === 'admin' ? body.status || place.status : 'pending'
+    }, { new: true });
+
+    res.status(200).json({
+      success: true,
+      data: updatedPlace
+    });
   } catch (error) {
-    res.status(500).json({ message: "❌ حدث خطأ أثناء تحديث المكان.", error: error.message });
+    res.status(400).json({
+      success: false,
+      message: 'فشل في تحديث المكان',
+      error: error.message
+    });
   }
 };
 
@@ -229,13 +294,46 @@ exports.softDeletePlace = async (req, res) => {
 // ✅ جلب إحصائيات الحالات
 exports.getPlaceStatusStats = async (req, res) => {
   try {
-    const approved = await Place.countDocuments({ status: "approved" });
-    const rejected = await Place.countDocuments({ status: "rejected" });
-    const pending = await Place.countDocuments({ status: "pending" });
+    // 1. الأماكن الأكثر زيارة (Top Places)
+    const topPlaces = await Place.aggregate([
+      { $match: { status: 'approved' } },
+      { $sort: { visits: -1 } },
+      { $limit: 5 },
+      { $project: { 
+        name: 1, 
+        visits: 1, 
+        category: 1,
+        trend: { $cond: [{ $gte: ['$visitsChange', 0] }, `+${'$visitsChange'}%`, `-${'$visitsChange'}%`] }
+      }}
+    ]);
 
-    res.status(200).json({ approved, rejected, pending });
+    // 2. الأماكن حسب الفئة (Places by Category)
+    const byCategory = await Place.aggregate([
+      { $match: { status: 'approved' } },
+      { $group: { 
+        _id: '$category', 
+        count: { $sum: 1 },
+        totalVisits: { $sum: '$visits' }
+      }},
+      { $project: {
+        category: '$_id',
+        count: 1,
+        _id: 0
+      }},
+      { $sort: { count: -1 } }
+    ]);
+
+    res.json({
+      success: true,
+      topPlaces,
+      byCategory
+    });
+
   } catch (error) {
-    console.error("Error in getPlaceStatusStats:", error);
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error('Error fetching stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch statistics'
+    });
   }
 };

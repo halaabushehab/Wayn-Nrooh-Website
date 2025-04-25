@@ -391,7 +391,7 @@ const deleteUser = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}); // جلب كل المستخدمين من قاعدة البيانات
-    console.log("Fetched users:", users); // تحقق من المستخدمين المسترجعين
+    // console.log("Fetched users:", users); // تحقق من المستخدمين المسترجعين
 
     const userCount = users.length; // عدد المستخدمين المسترجعين
 
