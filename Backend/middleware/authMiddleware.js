@@ -122,10 +122,19 @@ const authorize = (...roles) => {
   };
 };
 
+// Middleware to check if the user is an admin
+const isAdmin = (req, res, next) => {
+  const user = req.user;  // User attached after JWT verification
+  if (user && user.isAdmin) {
+    return next();  // Proceed to the next handler if the user is admin
+  }
+  res.status(403).json({ message: "Forbidden, Admin access only" });
+};
 
 
 
-module.exports = { authMiddleware, authenticateToken,checkAuth ,protect ,authorize};
+
+module.exports = { authMiddleware,isAdmin, authenticateToken,checkAuth ,protect ,authorize};
 
 
 

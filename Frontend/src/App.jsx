@@ -15,12 +15,12 @@ import SeasonalDestinations from "./components/HomeComponents/SeasonalDestinatio
 import SeasonPage from "./pages/places/seasonPage.jsx";
 import Payments from "./pages/mainPages/Payments.jsx";
 import PaymentSuccess from './pages/mainPages/payment-success.jsx';
-import ExploreJordanSection from "././components/HomeComponents/ExploreJordanSection.jsx";
 
 // Pages - Places
 import CityPage from "./pages/places/palces.jsx";
 import PlaceDetails from "./pages/places/PlaceDetails.jsx";
-
+import ExploreJordanSection from "././components/HomeComponents/ExploreJordanSection.jsx";
+import UpdatePlace from './components/AdminDash/UpdatePlace.jsx';
 // Pages - User
 import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
@@ -53,6 +53,7 @@ const AppContent = () => {
           <Route path="/places" element={<CityPage />} />
           <Route path="/place-details/:id" element={<PlaceDetails />} />
           <Route path="/suggest" element={<ExploreJordanSection />} />
+          <Route path="/dashboard/places/update/:id" element={<UpdatePlace />} />
 
           {/* User Routes */}
           <Route path="/ProfilePage/:id" element={<ProfilePage />} />

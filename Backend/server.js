@@ -1,4 +1,4 @@
-
+const mongoose = require('mongoose');
 const express = require("express");
 const connectDB = require("./config/db");
 const authRoutes = require('./routes/auth');
@@ -11,6 +11,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const suggestionsRoutes = require('./routes/suggestionsRoutes');
 // const subscribeRoutes   = require('./routes/subscribe');
 const favoriteRoutes = require('./routes/favoritesRoutes');
+const adminDashboardRoutes = require('./routes/AdminDashboardRoutes');
 
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -77,6 +78,7 @@ app.post('/api/payments', (req, res) => {
 app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/dashboard', adminDashboardRoutes);
 
 // app.use("/api/subscribe", subscribeRoutes);
 
@@ -96,6 +98,15 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
+
+
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
+    console.error('MongoDB connection error:', error);
+  });
 
 // ✅ تشغيل السيرفر
 app.listen(PORT, () => {

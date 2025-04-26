@@ -17,7 +17,7 @@ const CityPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const placesPerPage = 6;
+  const placesPerPage = 8; // تغيير عدد الأماكن لكل صفحة إلى 8
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -88,6 +88,7 @@ const CityPage = () => {
         (place) => place.status !== "معلق" && place.status !== "محذوف"
       );
       setPlaces(filteredPlaces);
+      setCurrentPage(1); // إعادة تعيين الصفحة الحالية إلى 1 عند تغيير المدينة
     } catch (error) {
       console.error("❌ Error fetching places:", error);
     }
@@ -151,13 +152,21 @@ const CityPage = () => {
   };
 
   const getFilteredPlaces = () => {
-    const filtered = getDisplayedPlaces().filter((place) =>
+    return getDisplayedPlaces().filter((place) =>
       place.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+  };
+
+  // الحصول على الأماكن للصفحة الحالية
+  const getPaginatedPlaces = () => {
+    const filtered = getFilteredPlaces();
     const startIndex = (currentPage - 1) * placesPerPage;
     const endIndex = startIndex + placesPerPage;
     return filtered.slice(startIndex, endIndex);
   };
+
+  // تغيير الصفحة
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Check if place is in favorites
   const isInFavorites = (placeId) => {
@@ -244,6 +253,7 @@ const CityPage = () => {
               }
               
               setShowFavorites(!showFavorites);
+              setCurrentPage(1); // إعادة تعيين الصفحة عند التبديل بين القوائم
             }}
             className={`cursor-pointer relative group mr-4 transition-all duration-300 ${showFavorites ? 'scale-110' : ''}`}
           >
@@ -264,7 +274,10 @@ const CityPage = () => {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1); // إعادة تعيين الصفحة عند البحث
+              }}
               className="w-full px-4 py-3 pl-10 rounded-full border-2 border-gray-200 focus:border-[#115173] focus:outline-none transition-all duration-300"
               placeholder=" ابحث عن الموقع"
               id="searchInput"
@@ -279,9 +292,9 @@ const CityPage = () => {
         </div>
   
         <div className="py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {getFilteredPlaces().length > 0 ? (
-              getFilteredPlaces().map((place) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {getPaginatedPlaces().length > 0 ? (
+              getPaginatedPlaces().map((place) => {
                 // Check if this place is in favorites
                 const isFavorite = isInFavorites(place._id);
                 
@@ -363,16 +376,52 @@ const CityPage = () => {
                 );
               })
             ) : (
-              <div className="col-span-3 flex flex-col items-center justify-center py-16">
+              <div className="col-span-4 flex flex-col items-center justify-center py-16">
                 <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <p className="text-center text-xl text-gray-500">
-                  لا توجد أماكن متاحة حالياً
+                  {showFavorites ? "لا توجد أماكن في المفضلة" : "لا توجد أماكن متاحة حالياً"}
                 </p>
               </div>
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {getFilteredPlaces().length > placesPerPage && (
+            <div className="flex justify-center mt-12">
+              <nav className="flex items-center space-x-2" aria-label="Pagination">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  السابق
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: Math.ceil(getFilteredPlaces().length / placesPerPage) }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => paginate(index + 1)}
+                    className={`px-4 py-2 border rounded-md text-sm font-medium ${currentPage === index + 1 ? 'bg-[#115173] text-white border-[#115173]' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(getFilteredPlaces().length / placesPerPage)))}
+                  disabled={currentPage === Math.ceil(getFilteredPlaces().length / placesPerPage)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  التالي
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -380,5 +429,3 @@ const CityPage = () => {
 };
 
 export default CityPage;
-
-
