@@ -83,14 +83,7 @@ export default function Dashboard() {
             hovered={hoveredItem === "bookings"}
             onHover={() => setHoveredItem("bookings")}
           />
-          <SidebarItem
-            icon={<CreditCard className="transition-transform duration-300 group-hover:scale-110" />}
-            text="المدفوعات"
-            active={activeTab === "payments"}
-            onClick={() => setActiveTab("payments")}
-            hovered={hoveredItem === "payments"}
-            onHover={() => setHoveredItem("payments")}
-          />
+    
           <SidebarItem
             icon={<Users className="transition-transform duration-300 group-hover:scale-110" />}
             text="المستخدمين"
@@ -133,7 +126,6 @@ export default function Dashboard() {
             {activeTab === "places" && <PlacesTabComponent />}
             {activeTab === "messages" && <MessagesTabComponent />}
             {activeTab === "bookings" && <BookingsTabComponent />}
-            {activeTab === "payments" && <PaymentsTabComponent />}
             {activeTab === "users" && <UsersTab />}
             {activeTab === "settings" && <SettingsTab />}
           </div>

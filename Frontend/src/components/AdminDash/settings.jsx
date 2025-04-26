@@ -10,6 +10,7 @@ export default function SettingsTab() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
+ 
   const [activeTab, setActiveTab] = useState('profile');
   const [notificationSettings, setNotificationSettings] = useState({
     newBookings: true,
@@ -128,10 +129,9 @@ export default function SettingsTab() {
     }));
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);
       setTempProfileImage(URL.createObjectURL(file));
     }
   };
@@ -274,11 +274,11 @@ export default function SettingsTab() {
               <h2 className="text-xl font-bold mb-6">إعدادات الملف الشخصي</h2>
               <div className="flex items-center mb-8">
                 <div className="relative">
-                  <img
-                    src={tempProfileImage}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
+                   <img
+        src={tempProfileImage}
+        alt={userData.username}
+        className="w-full h-full object-cover"
+      />
                   {isEditing && (
                     <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer">
                       <input

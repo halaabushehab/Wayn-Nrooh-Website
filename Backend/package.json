@@ -17,6 +17,7 @@
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
+    "chart.js": "^4.4.9",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -37,6 +38,7 @@
     "nodemon": "^3.1.9",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.5.1",
     "stripe": "^18.0.0"
