@@ -365,6 +365,25 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Failed to authenticate token' });
   }
 };
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find(); // بدون شرط isDeleted
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+      userCount: users.length,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+// controllers/authController.js
+
 const deleteUser = async (req, res) => {
   const { id } = req.params;
 
@@ -373,41 +392,39 @@ const deleteUser = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(id).select("isdeleted");
-
-    if (!user || user.isdeleted) {
-      return res.status(404).json({ message: "User not found" });
+    const user = await User.findById(id).select('isDeleted');
+    if (!user || user.isDeleted) {
+      return res.status(404).json({ message: "User not found or already deleted" });
     }
 
-    await User.findByIdAndUpdate(id, { isdeleted: true }, { new: true });
-
-    res.status(200).json({ message: "User deleted successfully" });
+    await User.findByIdAndUpdate(id, { isDeleted: true });
+    res.status(200).json({ message: "User soft-deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
-
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find({}); // جلب كل المستخدمين من قاعدة البيانات
-    // console.log("Fetched users:", users); // تحقق من المستخدمين المسترجعين
-
-    const userCount = users.length; // عدد المستخدمين المسترجعين
-
-    res.status(200).json({
-      message: "Users fetched successfully",
-      users,
-      userCount,
-    });
-  } catch (error) {
-    console.error("Error fetching users:", error); // سجل الخطأ في الكونسول
-    res.status(500).json({ message: "Internal server error" }); // رد في حالة الخطأ
-  }
 };
 
+const restoreUser = async (req, res) => {
+  const { id } = req.params;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
 
+  try {
+    const user = await User.findById(id).select('isDeleted');
+    if (!user || !user.isDeleted) {
+      return res.status(404).json({ message: "User not found or not deleted" });
+    }
+
+    await User.findByIdAndUpdate(id, { isDeleted: false });
+    res.status(200).json({ message: "User restored successfully" });
+  } catch (error) {
+    console.error("Error restoring user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports = {
   register,
@@ -421,5 +438,6 @@ module.exports = {
   changePassword,
   authenticateToken,
     googleLogin,
+    restoreUser,
   isAdmin
 };
