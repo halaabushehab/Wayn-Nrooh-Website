@@ -135,7 +135,9 @@ exports.createPlace = async (req, res) => {
 
 
     // Handle uploaded files
-    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : null;
+    const images = req.files && req.files.length > 0 
+    ? req.files.map(file => `http://localhost:9527/uploads/${file.filename}`) 
+    : [];
     const newPlace = new Place({
       name,
       short_description,
@@ -164,18 +166,13 @@ exports.createPlace = async (req, res) => {
 };
 
 
-// ✅ جلب جميع الأماكن
+// ✅ جلب جميع الأماكن بحالة approved فقط
 exports.getAllPlaces = async (req, res) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10 } = req.query;
 
-    // طباعة القيم للتحقق من الاستعلام
-    // console.log("Query params: ", { status, page, limit });
-
-    const query = {};
-    if (status && ['approved', 'pending', 'rejected'].includes(status)) {
-      query.status = status;
-    }
+    // query يتم ضبطه ليشمل فقط الأماكن ذات الحالة "approved"
+    const query = { status: 'approved' };
 
     const options = {
       page: parseInt(page),
@@ -210,130 +207,3 @@ exports.getAllPlaces = async (req, res) => {
 };
 
 
-
-// ✅ تعديل المكان (Edit)
-exports.updatePlace = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { body, files, user } = req;
-    
-    // البحث عن المكان
-    const place = await Place.findById(id);
-    if (!place) {
-      return res.status(404).json({
-        success: false,
-        message: 'المكان غير موجود'
-      });
-    }
-
-    // التحقق من الصلاحيات
-    if (place.createdBy.toString() !== user._id.toString() && user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'غير مصرح لك بتعديل هذا المكان'
-      });
-    }
-
-    // معالجة الصور الجديدة
-    let images = place.images;
-    if (files && files.images) {
-      for (const file of files.images) {
-        const result = await uploadToCloudinary(file.path);
-        images.push({
-          path: result.secure_url,
-          publicId: result.public_id
-        });
-      }
-    }
-
-    // تحديث البيانات
-    const updatedPlace = await Place.findByIdAndUpdate(id, {
-      ...body,
-      images,
-      status: user.role === 'admin' ? body.status || place.status : 'pending'
-    }, { new: true });
-
-    res.status(200).json({
-      success: true,
-      data: updatedPlace
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'فشل في تحديث المكان',
-      error: error.message
-    });
-  }
-};
-
-// ✅ حذف المكان (Soft delete)
-exports.softDeletePlace = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "❌ المعرف غير صالح." });
-    }
-
-    const place = await Place.findById(id);
-    if (!place) {
-      return res.status(404).json({ message: "❌ المكان غير موجود." });
-    }
-
-    // Mark the place as deleted (soft delete)
-    place.status = "deleted";
-    await place.save();
-
-    res.status(200).json({ message: "✔️ تم حذف المكان بنجاح." });
-  } catch (error) {
-    res.status(500).json({ message: "❌ حدث خطأ أثناء حذف المكان.", error: error.message });
-  }
-};
-
- 
-// ✅ جلب إحصائيات الحالات
-exports.getPlaceStatusStats = async (req, res) => {
-  try {
-    // 1. الأماكن الأكثر زيارة (Top Places)
-    const topPlaces = await Place.aggregate([
-      { $match: { status: 'approved' } },
-      { $sort: { visits: -1 } },
-      { $limit: 5 },
-      { $project: { 
-        name: 1, 
-        visits: 1, 
-        category: 1,
-        trend: { $cond: [{ $gte: ['$visitsChange', 0] }, `+${'$visitsChange'}%`, `-${'$visitsChange'}%`] }
-      }}
-    ]);
-
-    // 2. الأماكن حسب الفئة (Places by Category)
-    const byCategory = await Place.aggregate([
-      { $match: { status: 'approved' } },
-      { $group: { 
-        _id: '$category', 
-        count: { $sum: 1 },
-        totalVisits: { $sum: '$visits' }
-      }},
-      { $project: {
-        category: '$_id',
-        count: 1,
-        _id: 0
-      }},
-      { $sort: { count: -1 } }
-    ]);
-
-    res.json({
-      success: true,
-      topPlaces,
-      byCategory
-    });
-
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch statistics'
-    });
-  }
-};

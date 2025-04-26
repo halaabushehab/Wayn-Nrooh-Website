@@ -4,10 +4,15 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import Modal from '../AdminDash/AddAdmin'; // استيراد المودال
 
 export default function UsersTab() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -96,69 +101,33 @@ export default function UsersTab() {
   const indexOfFirstUser = indexOfLastUser - usersPerPage
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser)
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage)
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    const response = await fetch('/api/admin/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password })
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-      alert('تم إضافة المستخدم بنجاح!');
-    } else {
-      alert('خطأ في إضافة المستخدم: ' + result.message);
-    }
+  
+  const handleAddAdmin = (username, email, password) => {
+    // الكود لإضافة الأدمن الجديد
+    console.log('Adding admin', username, email, password);
   };
-
 
   return (
     <div className="space-y-6">
-   {/* <div className="container">
-      <h1 className="text-2xl font-bold">إضافة أدمن جديد</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>اسم المستخدم</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>البريد الإلكتروني</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>كلمة المرور</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">
-          إضافة أدمن جديد
-        </button>
-      </form>
+    <div>
+      <button
+        onClick={() => setShowModal(true)} 
+        className="bg-blue-600 text-white px-4 py-2 rounded-md"
+      >
+        إضافة أدمن جديد
+      </button>
+
+      {/* المودال */}
+      <Modal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)}
+        onSubmit={handleAddAdmin}
+      />
     </div>
-       */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div className="flex space-x-2 space-x-reverse">
@@ -330,10 +299,10 @@ function UserRow({ user, onDelete, onActivate }) {
         <div className="flex items-center">
           <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center ml-3">
           <img
-  src={user.photo ? `http://localhost:9527/${user.photo}` : '/default-avatar.jpg'}
+  src={user.photo || '/default-avatar.jpg'}
   alt="Profile"
   className="w-10 h-10 rounded-full object-cover"
-/>          </div>
+/>         </div>
           <div>
             <p className="font-medium">{user.username || 'مستخدم بدون اسم'}</p>
             <p className="text-gray-500 text-xs">آخر تسجيل دخول: غير معروف</p>
