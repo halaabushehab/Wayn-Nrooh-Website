@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const upload = require('../middleware/uploadMiddleware');
 const passport = require("passport");
+const Payment = require("../models/Payment");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const axios = require("axios");
 
 
 // جلب جميع الأماكن
@@ -56,7 +59,6 @@ const getAllPlaces = async (req, res) => {
   }
 };
 
-
 const getPlaceById = async (req, res) => {
   const { id } = req.params;  // جلب الـ ID من المسار
   try {
@@ -70,7 +72,6 @@ const getPlaceById = async (req, res) => {
     res.status(500).json({ message: "خطأ في جلب البيانات", error: error.message });
   }
 };
-
 
 // تعديل المكان
 const updatePlace = async (req, res) => {
@@ -99,7 +100,6 @@ const updatePlace = async (req, res) => {
     res.status(500).json({ message: "خطأ في التعديل", error: error.message });
   }
 };
-
 
 
 const deletePlace = async (req, res) => {
@@ -170,10 +170,6 @@ const updatePlaceStatus = async (req, res) => {
   }
 };
 
-
-
-
-
 // User ==========================
 
 const addAdmin = async (req, res) => {
@@ -215,4 +211,57 @@ const addAdmin = async (req, res) => {
   
 
 
-module.exports = { getAllPlaces,getPlaceById,updatePlaceStatus, updatePlace, deletePlace,addAdmin };
+  // Payment ==========================
+
+
+  // الحصول على جميع المدفوعات
+  const getAllPayments = async (req, res) => {
+    try {
+      const payments = await Payment.find();
+      res.status(200).json({ payments });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "حدث خطأ أثناء جلب المدفوعات" });
+    }
+  };
+  
+const getPaymentsByPlaceId = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+    const payments = await Payment.find({ placeId });  // نجلب المدفوعات بناءً على المكان
+    res.status(200).json({ payments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "حدث خطأ أثناء جلب مدفوعات المكان" });
+  }
+};
+
+
+//view =================================
+const getDashboardOverview = async (req, res) => {
+  try {
+    const allData = await axios.get("http://localhost:9527/dashboard/all");
+    const places = await axios.get("http://localhost:9527/api/places/");
+    const messages = await axios.get("http://localhost:9527/api/message");
+    const users = await axios.get("http://localhost:9527/api/auth/all");
+
+    // حساب إجمالي الإيرادات
+    const totalRevenue = allData.data.payments.reduce((acc, payment) => acc + (payment.amount || 0), 0);
+
+    // دمج البيانات
+    const dashboardData = {
+      allData: { ...allData.data, totalRevenue },
+      places: places.data,
+      messages: messages.data,
+      users: users.data,
+    };
+
+    res.json(dashboardData);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+
+module.exports = { getAllPlaces,getDashboardOverview ,getPlaceById,updatePlaceStatus, updatePlace, deletePlace,addAdmin ,getPaymentsByPlaceId ,getAllPayments };

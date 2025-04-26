@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllPlaces, updatePlace, deletePlace,updatePlaceStatus ,getPlaceById,addAdmin  } = require('../controllers/AdminDashboardController');
+const { getAllPlaces, updatePlace,getAllPayments, getDashboardOverview  , deletePlace,updatePlaceStatus ,getPlaceById,addAdmin ,getPaymentsByPlaceId  } = require('../controllers/AdminDashboardController');
 const  { isAdmin ,authenticateToken} = require('../middleware/authMiddleware'); // Correct path
 const upload = require("../middleware/uploadMiddleware");
 
@@ -13,8 +13,19 @@ router.get('/places/:id', authenticateToken, isAdmin, getPlaceById);
 router.put('/places/update/:id', authenticateToken, isAdmin, upload.array('images'), updatePlace);
 
 router.delete('/places/:id', authenticateToken, isAdmin, deletePlace);
+
+
 // ADMIN Add 
 router.post('/add-admin', authenticateToken, addAdmin);  // تأكد أن المسار مضبوط هنا
+
+
+// Payment 
+router.get("/place/:placeId",getPaymentsByPlaceId);
+router.get("/all",getAllPayments);
+
+// overview
+router.get("/overview", getDashboardOverview);
+
 
 module.exports = router;
 
