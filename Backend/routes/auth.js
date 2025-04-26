@@ -11,6 +11,7 @@ const {
     changePassword,
     isAdmin,
     logout,
+    restoreUser,
     googleLogin
 } = require('../controllers/authController');
 
@@ -39,8 +40,6 @@ router.get("/profile/me", authenticateToken, authMiddleware, getUserProfile);
 // ✅ تعديل بيانات المستخدم
 router.put('/profile/me/:id', authenticateToken, authMiddleware, upload.single('image'), updateUserData);
 
-// ✅ حذف المستخدم (Soft Delete)
-router.delete("/delete/:id", authenticateToken, authMiddleware, deleteUser);
 
 // ✅ تغيير كلمة المرور
 router.put('/change-password', authenticateToken, authMiddleware, changePassword);
@@ -50,5 +49,9 @@ router.get("/:id", getUserById);
 
 //  مسارات الأدمن فقط
 router.get("/admin/users", authenticateToken, authMiddleware, isAdmin, getAllUsers);
+
+// ✅ حذف المستخدم (Soft Delete)
+router.delete("/delete/:id", authenticateToken, authMiddleware, deleteUser);
+router.delete('/restore/:id', restoreUser); 
 
 module.exports = router;
