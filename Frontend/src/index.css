@@ -1,4 +1,10 @@
 @import "tailwindcss";
 body {
     direction: rtl;
+    
   }
+
+  a, .no-underline, .link-no-underline {
+    text-decoration: none !important;
+  }
+  
