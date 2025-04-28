@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from 'react-router-dom';
 import Cookies from "js-cookie";
+import { Link } from 'react-router-dom';
 
 
 const callouts = [
@@ -41,6 +41,8 @@ const PlogDetails = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState(""); // To store the new comment text
   const [user, setUser] = useState(null);  // Initialize user state
+  const [content, setContent] = useState('');
+
 
   useEffect(() => {
     const loadUserFromCookies = () => {
@@ -72,73 +74,92 @@ const PlogDetails = () => {
   }, []);
   
 
-
   useEffect(() => {
-    // Fetch article details
-    axios.get(`http://localhost:9527/articles/${id}`)
-      .then((response) => {
-        setArticle(response.data);
+    const fetchData = async () => {
+      try {
+        const [articleRes, commentsRes] = await Promise.all([
+          axios.get(`http://localhost:9527/articles/${id}`),
+        ]);
+        setArticle(articleRes.data);
+           fetchComments();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching article:", error);
-        setLoading(false);
-      });
-      if (!user) {
-        return <p>يرجى تسجيل الدخول لعرض هذه الصفحة.</p>;
       }
-    // Fetch comments for the article
-    axios.get(`http://localhost:9527/api/commit/${id}`)
-      .then((response) => {
-        setComments(response.data);
-        
-      })
-      .catch((error) => {
-        console.error("Error fetching comments:", error);
-      });
-      
+    };
+
+    fetchData();
   }, [id]);
   
- 
-  if (loading) return <p>جاري تحميل المقال...</p>;
-  if (!article) return <p>تعذر تحميل المقال.</p>;
- // تحقق إذا كان المستخدم مسجل الدخول
- if (!user || !user.username) {
-  alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
-  return;
-}
+ // في ملف PlogDetails.jsx
+ const fetchComments = async () => {
+  try {
+    const response = await axios.get(`http://localhost:9527/api/comments/${id}`);
+    console.log("التعليقات:", response.data.comments);
 
-// تحقق من رابط الصورة
-console.log("رابط الصورة:", user.photo);  // أو comment.photo إذا كانت الصورة جزءًا من الـ comment
+    // تعديل البيانات بإضافة الصورة للمستخدم
+    const updatedComments = response.data.comments.map(comment => {
+      // التحقق من وجود userId و username
+      const user = comment.userId ? {
+        username: comment.userId.username || 'مجهول',
+        photo: comment.userId.profilePicture || 'http://localhost:9527/uploads/placeholder.jpg',
+      } : { username: 'مجهول', photo: 'http://localhost:9527/uploads/placeholder.jpg' };
 
-//commit
+      return {
+        ...comment,
+        user,
+        createdAt: new Date(comment.createdAt),
+      };
+    });
+
+    setComments(updatedComments);
+  } catch (error) {
+    console.error('Failed to fetch comments:', error);
+    alert("حدث خطأ أثناء جلب التعليقات");
+  }
+};
+
+//comment
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!user || !user.username) {
+  if (!user || !user.userId) {
     alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
     return;
   }
 
-  const newComment = {
-    userId: user.userId, // استخدام معرف المستخدم
-    articleId: id, // معرف المقال
-    comment: content, // محتوى التعليق
-  };
   try {
-    const response = await axios.post('http://localhost:9527/api/commit', newComment);
-    setComments((prevComments) => [...prevComments, response.data.comment]);
-    setContent(""); // إفراغ حقل التعليق
+    const response = await axios.post('http://localhost:9527/api/comments', {
+      userId: user.userId,
+      articleId: id,
+      content
+    });
+
+    console.log("التعليق المضاف:", response.data);  // عرض بيانات التعليق المضاف
+    const newComment = {
+      _id: response.data._id, // أو id حسب شو بيرجع السيرفر
+      content: response.data.content,
+      user: {
+        username: user.username,
+        photo: user.photo || 'http://localhost:9527/uploads/placeholder.jpg',
+      },
+      createdAt: new Date(response.data.createdAt),
+    };
+    
+    setComments(prev => [newComment, ...prev]);
+    
+    setContent("");
   } catch (error) {
-    console.error("خطأ أثناء إرسال التعليق:", error.response?.data || error.message);
+    console.error("Error submitting comment:", error.response?.data || error.message);
+    alert("حدث خطأ أثناء إرسال التعليق");
   }
-}
+};
 
 
 
-
-
-
+if (loading) return <p>جاري تحميل المقال...</p>;
+if (!article) return <p>تعذر تحميل المقال.</p>;
 
 return (
   <div className="container mx-auto p-5 font-sans" dir="rtl">
@@ -217,53 +238,128 @@ return (
 
         {/* Comments Section */}
         <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          <h4 className="text-xl font-bold mb-6">التعليقات (5)</h4>
-          
-          {/* Individual Comment */}
-          {comments.map((comment) => (
-  <div key={comment._id} className="flex mb-6 border-b pb-6">
-<img
-  className="w-12 h-12 rounded-full"
-  src={comment.photo || 'http://localhost:9527/uploads/placeholder.jpg'} // صورة افتراضية إذا لم تكن موجودة
-  alt={comment.username}
-/>
-    <div className="mr-4 flex-1">
-      <div className="flex justify-between items-center mb-1">
-        <h5 className="font-bold">{comment.username}</h5>
-        <p className="text-sm text-gray-500">
-          {new Date(comment.date).toLocaleDateString()} {/* تنسيق التاريخ */}
-        </p>
-      </div>
-      <p className="text-gray-700 mb-2">{comment.content}</p>
-      <button className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
-        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-        </svg>
-        رد
-      </button>
+      <h4 className="text-xl font-bold mb-6">التعليقات ({comments.length})</h4>
+      
+      {comments.map((comment, index) => (
+        <div key={index} className="flex mb-6 border-b pb-6">
+          <img
+            className="w-12 h-12 rounded-full"
+            src={comment.profilePicture || 'http://localhost:9527/uploads/placeholder.jpg'}
+            alt={comment.user?.username}
+          />
+          <div className="mr-4 flex-1">
+            <div className="flex justify-between items-center mb-1">
+              <h5 className="font-bold">{comment.user?.username}</h5>
+              <p className="text-sm text-gray-500">
+                {new Date(comment.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <p className="text-gray-700 mb-2">{comment.content}</p>
+            <button className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+              </svg>
+              رد
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <h4 className="text-xl font-bold mb-4">اترك تعليقاً</h4>
+      <form onSubmit={handleSubmit} className="mt-4">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 mb-4"
+          placeholder="اكتب تعليقك هنا..."
+          rows="4"
+          required
+        ></textarea>
+        <button 
+          type="submit" 
+          className="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition-colors"
+          disabled={!user}
+        >
+          {user ? 'إرسال التعليق' : 'يجب تسجيل الدخول'}
+        </button>
+      </form>
     </div>
-  </div>
-))}
-
-
-     
-          {/* Comment Form */}
-          <h4 className="text-xl font-bold mb-4">اترك تعليقاً</h4>
-  <form onSubmit={handleSubmit} className="mt-4">
-    <textarea
-      value={newComment}
-      onChange={(e) => setNewComment(e.target.value)}
-      className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 mb-4"
-      placeholder="اكتب تعليقك هنا..."
-      rows="4"
-    ></textarea>
-    <button type="submit" className="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition-colors">
-      إرسال التعليق
-    </button>
-  </form>
-</div>
       </div>
 
+    {/* Sidebar */}
+    <div className="col-lg-4">
+                  <div className="bg-white shadow-sm rounded p-4 mb-4">
+                    <h5 className="font-bold mb-3" style={{ color: '#000', textAlign: 'right' }}>المقالات الأخيرة</h5>
+                    <ul className="list-unstyled">
+                      {callouts.map((post, index) => (
+                        <li className="d-flex align-items-center mb-3" key={index}>
+                          <img
+                            className="img-fluid"
+                            src={post.imageSrc}
+                            alt="مقال حديث"
+                            style={{ width: "30%" }}
+                          />
+                          <div className="ms-3">
+                            <Link to={post.href} style={{ color: '#000', textDecoration: 'none' }}>
+                              {post.discription}
+                            </Link>
+                            <small className="d-block text-muted">{post.date}</small>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+        
+                  <div className="bg-white shadow-sm rounded p-4 mb-4">
+            <h5 className="font-bold mb-4" style={{ color: "#000", textAlign: "right" }}>
+              سحابة الكلمات الدلالية
+            </h5>
+            <div className="d-flex flex-wrap">
+              {["#مشاريع", "#تكنولوجيا", "#سفر", "#مطاعم", "#أسلوب الحياة", "#تصميم", "#رسم"].map(
+                (tag, index) => (
+                  <span key={index} className="badge m-2" style={{ backgroundColor: "#115173", color: "#fff" }}>
+                    {tag}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+            {/* قسم الصور من إنستغرام */}
+            <div className="bg-white shadow-sm rounded p-4 mb-4">
+            <h5 className="font-bold mb-3" style={{ color: "#000", textAlign: "right" }}>
+              صور من إنستغرام
+            </h5>
+            <div className="d-flex flex-wrap">
+              {[
+                "https://i.pinimg.com/736x/13/0e/ce/130eceb043f953af63f10c266ea64f95.jpg",
+                "https://i.pinimg.com/736x/09/6f/8b/096f8b050095e82cc66af6fd813b5795.jpg",
+                "https://i.pinimg.com/736x/d8/b9/79/d8b9792a40fab3340f3fc3a911330f4b.jpg",
+                "https://i.pinimg.com/736x/79/ce/63/79ce6389032fd3971e3b7c852e6b3884.jpg",
+                "https://i.pinimg.com/736x/f9/01/a0/f901a043b3799805e978d6da9f63d9b4.jpg",
+                "https://i.pinimg.com/736x/1d/f8/16/1df8161901846a6e8674ad70c56324f6.jpg",
+              ].map((src, index) => (
+                <img key={index} className="img-fluid m-1" src={src} alt="صورة من إنستغرام" style={{ width: "30%" }} />
+              ))}
+            </div>
+          </div>
+
+
+        
+                   {/* قسم الاشتراك في النشرة الإخبارية */}
+          <div className="bg-white shadow-sm rounded p-4 mb-4">
+            <h5 className="font-bold" style={{ textAlign: "right", color: "#000" }}>
+              اشترك في نشرتنا الإخبارية
+            </h5>
+            <form>
+              <div className="mb-3">
+                <input type="email" className="form-control" placeholder="أدخل بريدك الإلكتروني" required />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ backgroundColor: "#FFD700" }}>
+                اشترك
+              </button>
+            </form>
+          </div>
+                </div>
 
  
       

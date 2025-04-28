@@ -1,424 +1,437 @@
-
-
-
-
-
-import React, { useState, useEffect } from 'react'
-import FeaturedCard from './FeaturedCard'
-import { ChevronLeftIcon, ChevronRightIcon, Star, Heart } from 'lucide-react'
-import { motion } from 'framer-motion';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { Star, Heart, ChevronLeftIcon, ChevronRightIcon, MapPin, Search, Users, Coffee } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const HeroSection = () => {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [animating, setAnimating] = useState(false)
-  
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const containerRef = useRef(null);
+
+  // تحسين بيانات الأماكن مع معلومات أكثر تفصيلاً
   const featuredPlaces = [
-        {
-          id: 1,
-          image: 'https://www.thisisamman.com/wp-content/uploads/2022/11/image1577108857894-1.png',
-          description: 'استمتع بتجربة فريدة في أروع الأسواق المميزة والقديمة على وين نروح، حيث يلتقي عبق التاريخ بجمال التسوق',
-          color: 'from-[#FFD700]/80 to-[#6B3E26]/80',
-          accent: '#FF4500'
-        },
-        {
-          id: 2,
-          image: 'https://s.alicdn.com/@sc04/kf/H76fb512c307b426d874db319a387b2a2m.jpg',
-          description: 'دع طفلك يستمتع بأجمل لحظات اللعب والاكتشاف مع وين نروح، حيث تجد أفضل الأماكن المناسبة للأطفال!',
-          color: 'from-[#6B3E26]/80 to-[#053F5E]/80',
-          accent: '#FFD700'
-        },
-        {
-          id: 3,
-          image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn9WTXSKSdHIlhBIYJVeCdk68FECST92udN-c1NkWJyM79z6DI',
-          description: "استمتع بتجربة فريدة في أروع الأسواق المميزة والقديمة على وين نروح، حيث يلتقي عبق التاريخ بجمال التسوق",
-          color: 'from-[#053F5E]/80 to-[#FFD700]/80',
-          accent: '#FFD700'
-        },
-        
-      ]
+    {
+      id: 1,
+      name: 'سوق الذهب التقليدي',
+      image: 'https://www.thisisamman.com/wp-content/uploads/2022/11/image1577108857894-1.png',
+      description: 'استمتع بتجربة فريدة في أروع الأسواق التقليدية، حيث يلتقي عبق التاريخ بجمال التسوق',
+      color: 'from-amber-600/90 to-amber-900/80',
+      rating: 4.8,
+      location: 'عمّان - وسط البلد',
+      visitors: '٥٠٠٠+',
+      category: 'تسوق'
+    },
+    {
+      id: 2,
+      name: 'منطقة ألعاب الأطفال التفاعلية',
+      image: 'https://s.alicdn.com/@sc04/kf/H76fb512c307b426d874db319a387b2a2m.jpg',
+      description: 'دع طفلك يستمتع بأجمل لحظات اللعب والاكتشاف مع وين نروح، حيث تجد أفضل الأماكن المناسبة للأطفال!',
+      color: 'from-blue-700/80 to-purple-600/70',
+      rating: 4.6,
+      location: 'عمّان - الجبيهة',
+      visitors: '٣٠٠٠+',
+      category: 'ترفيه'
+    },
+    {
+      id: 3,
+      name: 'متحف التراث العربي',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn9WTXSKSdHIlhBIYJVeCdk68FECST92udN-c1NkWJyM79z6DI',
+      description: "اكتشف كنوز الماضي وتعرف على تاريخنا الغني في متحف التراث العربي، تجربة ثقافية لا تُنسى",
+      color: 'from-emerald-700/80 to-emerald-900/70',
+      rating: 4.9,
+      location: 'عمّان - الشميساني',
+      visitors: '٨٠٠٠+',
+      category: 'ثقافة'
+    },
+  ];
   
   const nextSlide = () => {
-    if (animating) return
-    setAnimating(true)
-    setActiveIndex((prev) => (prev + 1) % featuredPlaces.length)
-    setTimeout(() => setAnimating(false), 600)
-  }
+    if (animating) return;
+    setAnimating(true);
+    setActiveIndex((prev) => (prev + 1) % featuredPlaces.length);
+    setTimeout(() => setAnimating(false), 600);
+  };
   
   const prevSlide = () => {
-    if (animating) return
-    setAnimating(true)
-    setActiveIndex((prev) => (prev - 1 + featuredPlaces.length) % featuredPlaces.length)
-    setTimeout(() => setAnimating(false), 600)
-  }
+    if (animating) return;
+    setAnimating(true);
+    setActiveIndex((prev) => (prev - 1 + featuredPlaces.length) % featuredPlaces.length);
+    setTimeout(() => setAnimating(false), 600);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide()
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [animating])
+    const interval = isHovering ? null : setInterval(() => {
+      nextSlide();
+    }, 6000);
+    return () => interval && clearInterval(interval);
+  }, [animating, isHovering]);
+  
+  // إضافة تأثير حركة المؤشر للخلفية
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+      setMousePosition({ x, y });
+    };
+    
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      return () => container.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, []);
   
   // Current slide data
-  const currentPlace = featuredPlaces[activeIndex]
+  const currentPlace = featuredPlaces[activeIndex];
+  const categoryIcons = {
+    'تسوق': <Coffee className="w-5 h-5" />,
+    'ترفيه': <Users className="w-5 h-5" />,
+    'ثقافة': <Star className="w-5 h-5" />
+  };
   
   return (
-    <div className="relative w-full h-screen  overflow-hidden bg-[#022C43]">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 opacity-20 transition-opacity  duration-1000"
+    <div 
+      ref={containerRef}
+      className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-[#022C43] to-[#053F5E] my-23"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* خلفية متحركة */}
+      <motion.div 
+        className="absolute inset-0 opacity-20 transition-opacity duration-1000"
         style={{
           backgroundImage: `url(${currentPlace.image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'blur(4px)'
+          filter: 'blur(4px)',
+          translateX: mousePosition.x,
+          translateY: mousePosition.y
         }}
+        initial={{ scale: 1.2 }}
+        animate={{ 
+          scale: isHovering ? 1.1 : 1.05,
+          x: mousePosition.x,
+          y: mousePosition.y
+        }}
+        transition={{ type: "spring", stiffness: 30 }}
       />
       
-      {/* Main gradient overlay */}
-      <div className="absolute inset-0  " />
+      {/* طبقة التدرج اللوني المتغيرة */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${currentPlace.color} opacity-80`} />
       
-      {/* Decorative vertical timeline on left */}
+      {/* أنماط زخرفية متحركة في الخلفية */}
+      <div className="absolute inset-0 overflow-hidden opacity-10">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: Math.random() * 300 + 50,
+              height: Math.random() * 300 + 50,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              x: [0, Math.random() * 100 - 50],
+              y: [0, Math.random() * 100 - 50],
+            }}
+            transition={{
+              duration: Math.random() * 10 + 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* شريط زمني عمودي مزخرف */}
       <div className="absolute left-12 top-0 bottom-0 flex flex-col items-center z-10">
         <div className="h-full w-px bg-white/20 relative">
-          {featuredPlaces.map((_, idx) => (
-            <div 
+          {featuredPlaces.map((place, idx) => (
+            <motion.div 
               key={idx} 
-              className={`absolute w-4 h-4 rounded-full border-2 border-white/50 -left-1.5 cursor-pointer transition-all duration-300 ${
-                idx === activeIndex ? 'bg-[#FFD700] scale-125 border-[#FFD700]' : 'bg-[#053F5E]'
-              }`}
+              className="absolute -left-12 cursor-pointer"
               style={{ top: `${25 + idx * 25}%` }}
               onClick={() => {
-                if (idx === activeIndex || animating) return
-                setAnimating(true)
-                setActiveIndex(idx)
-                setTimeout(() => setAnimating(false), 600)
+                if (idx === activeIndex || animating) return;
+                setAnimating(true);
+                setActiveIndex(idx);
+                setTimeout(() => setAnimating(false), 600);
               }}
-            />
+            >
+              <motion.div 
+                className={`w-24 h-24 flex items-center justify-center rounded-full ${
+                  idx === activeIndex 
+                    ? 'bg-amber-500/90 shadow-lg shadow-amber-500/30' 
+                    : 'bg-[#053F5E]/80'
+                } transition-all duration-300`}
+                whileHover={{ scale: 1.1 }}
+              >
+                <div className="text-white text-sm text-center">
+                  {categoryIcons[place.category]}
+                  <div className="mt-1 font-bold">{place.category}</div>
+                </div>
+              </motion.div>
+              <motion.div 
+                className={`absolute left-24 top-1/2 h-px w-12 -translate-y-1/2 ${
+                  idx === activeIndex ? 'bg-amber-500' : 'bg-white/20'
+                }`}
+              />
+            </motion.div>
           ))}
         </div>
       </div>
       
-      {/* Main content area */}
+      {/* منطقة المحتوى الرئيسية */}
       <div className="relative h-full flex items-center z-10">
-  <div className="container mx-auto px-8 max-w-screen-xll w-full ">
-
-          <div className="flex flex-col lg:flex-row items-start ">
-          <div className="flex justify-center items-center w-full h-screen  p-6   relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <motion.div 
-        className="absolute top-30 left-10 text-white text-opacity-30 text-9xl"
-        animate={{ y: [0, 20, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-        <FaMapMarkerAlt />
-      </motion.div>
-      
-      <motion.div 
-        className="absolute bottom-20 right-10 text-white text-opacity-30 text-8xl"
-        animate={{ y: [0, -20, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-        <FaMapMarkerAlt />
-      </motion.div>
-      
-      {/* Left Text Section */}
-      <motion.div 
-        className="w-full lg:w-5/6 text-right bg-opacity-80 p-8 rounded-lg shadow-xl bg-white/10 backdrop-blur-md"
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 1 }}>
-        <motion.h1 
-          className="text-10xl md:text-8xl font-bold text-white mb-6"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}>
-            
-          وين نروح؟
-        </motion.h1>
-        
-        <p className="text-white/80 text-xl leading-relaxed mb-8 max-w-xl ">
-          اكتشف أماكن ساحرة وخفية، من الجبال الشاهقة إلى الأزقة القديمة، حيث تحمل كل زاوية قصة فريدة وتاريخًا نابضًا بالحياة.
-        </p>
-        
-        <motion.button 
-          className="bg-[#FFD700] hover:bg-[#115173] text-white px-10 py-3 rounded flex items-center gap-3 group transition-all duration-300 shadow-lg"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}>
-          <span className="text-lg">استكشف الآن</span>
-          <span className="opacity-0 w-0 group-hover:opacity-100 group-hover:w-5 transition-all duration-300">→</span>
-        </motion.button>
-      </motion.div>
-    </div>
-            
-            {/* Right Card Gallery */}
-            <div className="w-full lg:w-7/10 relative h-[400px] mt-[100px] lg:mt-[170px] translate-y-10">
-            {/* Main Featured Card */}
-              <div className="absolute top-0 left-0 w-1/2 z-30">
-                <div className="bg-[#053F5E]/80 backdrop-blur-sm p-2 rounded-lg">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
-                    <img 
-                      src={featuredPlaces[activeIndex].image}
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-120"
-                      alt={featuredPlaces[activeIndex].name}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="inline-block w-4 h-4 fill-[#FFD700] text-[#FFD700]" />
-                          ))}
-                        </div>
-                      </div>
-                      <h3 className="text-white text-lg">{featuredPlaces[activeIndex].name}</h3>
-                    </div>
-                    <button className="absolute top-3 right-3 bg-white/20 p-2 rounded-full hover:bg-white/40 transition-colors">
-                      <Heart className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
+        <div className="container mx-auto px-8 w-full">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            {/* القسم الأيسر - النص والبحث */}
+            <motion.div 
+              className="w-full lg:w-1/2 text-right"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1 }}
+            >
+              <motion.div
+                className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-xl border border-white/10"
+                whileHover={{ boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+              >
+                <motion.h1 
+                  className="text-6xl md:text-8xl font-bold text-white mb-6 font-arabic"
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                >
+                  وين نروح؟
+                </motion.h1>
+                
+                <AnimatePresence mode="wait">
+                  <motion.p 
+                    key={activeIndex}
+                    className="text-white/90 text-xl leading-relaxed mb-8 max-w-xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {currentPlace.description}
+                  </motion.p>
+                </AnimatePresence>
+                
+                {/* مربع البحث المزخرف */}
+                <div className="relative mb-8">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="أين تريد أن تذهب اليوم؟"
+                    className="w-full py-4 px-6 pr-12 rounded-full bg-white/20 backdrop-blur-md text-white placeholder-white/60 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 text-right"
+                  />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
                 </div>
-              </div>
-              
-              {/* Secondary cards - only show if we have more than one place */}
-              {featuredPlaces.length > 1 && (
-                <>
-                  {/* Second Card */}
-                  <div className="absolute top-40 bottom-100 right-8 w-2/3 z-20">
-                    <div className="bg-[#053F5E]/80 backdrop-blur-sm p-2 rounded-lg">
-                      <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
-                        <img 
-                          src={featuredPlaces[(activeIndex + 1) % featuredPlaces.length].image}
-                          className="w-full h-full object-cover"
-                          alt={featuredPlaces[(activeIndex + 1) % featuredPlaces.length].name}
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="inline-block w-3 h-3 fill-[#FFD700] text-[#FFD700]" />
-                              ))}
-                            </div>
-                          </div>
-                          <h3 className="text-white text-base">{featuredPlaces[(activeIndex + 1) % featuredPlaces.length].name}</h3>
-                        </div>
-                        <button className="absolute top-2 right-2 bg-white/20 p-1.5 rounded-full hover:bg-white/40 transition-colors">
-                          <Heart className="w-4 h-4 text-white" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                
+                {/* أزرار استكشاف وإضافة للمفضلة */}
+                <div className="flex flex-wrap gap-4 justify-center md:justify-between">
+                  {/* <motion.button 
+                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-3 rounded-full flex items-center gap-3 transition-all duration-300 shadow-lg font-bold"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-lg">استكشف الآن</span>
+                    <span className="transform rotate-180">←</span>
+                  </motion.button> */}
                   
-                  {/* Third Card */}
-                  <div className="absolute bottom-50 right-10 w-1/2 z-10">
-                    <div className="bg-[#053F5E]/80 backdrop-blur-sm p-2 rounded-lg">
-                      <div className="relative aspect-[1/1] overflow-hidden rounded-lg">
-                        <img 
-                          src={featuredPlaces[(activeIndex + 2) % featuredPlaces.length].image}
-                          className="w-full h-full object-cover"
-                          alt={featuredPlaces[(activeIndex + 2) % featuredPlaces.length].name}
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <motion.button 
+                    className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-full flex items-center gap-2 transition-all duration-300 border border-white/30"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span>استكشف الآن </span>
+                    <Heart className="w-5 h-5" />
+                  </motion.button>
+                </div>
+              </motion.div>
+              
+              {/* معلومات إضافية عن المكان الحالي */}
+              {/* <motion.div 
+                className="mt-6 flex items-center justify-end gap-8 text-white/90 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="text-amber-300">{currentPlace.visitors}</div>
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div>{currentPlace.location}</div>
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.floor(currentPlace.rating) ? 'fill-amber-400 text-amber-400' : 'text-white/30'}`} 
+                      />
+                    ))}
+                  </div>
+                  <div>{currentPlace.rating}</div>
+                </div>
+              </motion.div> */}
+            </motion.div>
+            
+            {/* القسم الأيمن - معرض البطاقات */}
+            <div className="w-full lg:w-1/2 relative h-[500px]">
+              <AnimatePresence>
+                {/* البطاقة الرئيسية */}
+                <motion.div 
+                  key={`main-${activeIndex}`}
+                  className="absolute top-0 left-0 w-3/5 z-30"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <motion.div 
+                    className="bg-gradient-to-br from-[#053F5E]/90 to-[#022C43]/90 backdrop-blur-sm p-3 rounded-lg shadow-xl border border-white/10"
+                    whileHover={{ 
+                      scale: 1.03, 
+                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" 
+                    }}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+                      <img 
+                        src={featuredPlaces[activeIndex].image}
+                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                        alt={featuredPlaces[activeIndex].name}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                        <div className="flex justify-between items-center mb-2">
                           <div>
                             {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="inline-block w-2 h-2 fill-[#FFD700] text-[#FFD700]" />
+                              <Star 
+                                key={i} 
+                                className={`inline-block w-4 h-4 ${
+                                  i < Math.floor(currentPlace.rating) 
+                                    ? 'fill-amber-400 text-amber-400' 
+                                    : 'text-white/50'
+                                }`} 
+                              />
                             ))}
                           </div>
-                          <h3 className="text-white text-sm">{featuredPlaces[(activeIndex + 2) % featuredPlaces.length].name}</h3>
+                        </div>
+                        <h3 className="text-white text-xl font-bold">{featuredPlaces[activeIndex].name}</h3>
+                        <div className="flex items-center gap-2 mt-2 text-white/80">
+                          <MapPin className="w-4 h-4" />
+                          <span className="text-sm">{currentPlace.location}</span>
                         </div>
                       </div>
+                      <motion.button 
+                        className="absolute top-4 right-4 bg-white/20 p-2 rounded-full hover:bg-white/40 transition-colors"
+                        whileHover={{ scale: 1.2, backgroundColor: "rgba(255, 255, 255, 0.4)" }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Heart className="w-5 h-5 text-white" />
+                      </motion.button>
                     </div>
-                  </div>
-                </>
-              )}
+                  </motion.div>
+                </motion.div>
+                
+                {/* البطاقات الثانوية */}
+                {featuredPlaces.length > 1 && (
+                  <>
+                    {/* البطاقة الثانية */}
+                    <motion.div 
+                      key={`second-${activeIndex}`}
+                      className="absolute top-20 right-0 w-2/5 z-20"
+                      initial={{ opacity: 0, y: -30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 30 }}
+                      transition={{ duration: 0.6, delay: 0.1 }}
+                    >
+                      <motion.div 
+                        className="bg-gradient-to-br from-[#053F5E]/80 to-[#022C43]/80 backdrop-blur-sm p-2 rounded-lg shadow-lg border border-white/10"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+                          <img 
+                            src={featuredPlaces[(activeIndex + 1) % featuredPlaces.length].image}
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                            alt={featuredPlaces[(activeIndex + 1) % featuredPlaces.length].name}
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                            <h3 className="text-white text-base font-bold">
+                              {featuredPlaces[(activeIndex + 1) % featuredPlaces.length].name}
+                            </h3>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                    
+                    {/* البطاقة الثالثة */}
+                    <motion.div 
+                      key={`third-${activeIndex}`}
+                      className="absolute bottom-0 right-10 w-1/3 z-10"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                      <motion.div 
+                        className="bg-gradient-to-br from-[#053F5E]/70 to-[#022C43]/70 backdrop-blur-sm p-2 rounded-lg shadow-md border border-white/10"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <div className="relative aspect-[1/1] overflow-hidden rounded-lg">
+                          <img 
+                            src={featuredPlaces[(activeIndex + 2) % featuredPlaces.length].image}
+                            className="w-full h-full object-cover"
+                            alt={featuredPlaces[(activeIndex + 2) % featuredPlaces.length].name}
+                          />
+                          <div className="absolute inset-0 bg-black/30 hover:bg-black/10 transition-colors"></div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
       </div>
       
-      {/* Bottom navigation controls */}
-      <div className="absolute bottom-6 right-8 flex items-center space-x-4 z-20">
+      {/* أزرار التنقل في الأسفل */}
+      {/* <div className="absolute bottom-6 right-8 flex items-center space-x-4 z-20">
         <div className="text-white/60 text-sm">
           {String(activeIndex + 1).padStart(2, '0')} / {String(featuredPlaces.length).padStart(2, '0')}
         </div>
-        <button 
+        <motion.button 
           onClick={prevSlide}
-          className="bg-[#053F5E] hover:bg-[#115173] p-2 rounded-full transition-colors"
+          className="bg-[#053F5E] hover:bg-[#115173] p-3 rounded-full transition-colors"
+          whileHover={{ scale: 1.1, backgroundColor: "#115173" }}
+          whileTap={{ scale: 0.9 }}
         >
           <ChevronLeftIcon className="w-5 h-5 text-white" />
-        </button>
-        <button 
+        </motion.button>
+        <motion.button 
           onClick={nextSlide}
-          className="bg-[#053F5E] hover:bg-[#115173] p-2 rounded-full transition-colors"
+          className="bg-[#053F5E] hover:bg-[#115173] p-3 rounded-full transition-colors"
+          whileHover={{ scale: 1.1, backgroundColor: "#115173" }}
+          whileTap={{ scale: 0.9 }}
         >
           <ChevronRightIcon className="w-5 h-5 text-white" />
-        </button>
-      </div>
+        </motion.button>
+      </div> */}
+
     </div>
-  )
-}
+  );
+};
 
-export default HeroSection
-
-
-
-
-
-
-// import { ChevronRight, MapPin, Search, Globe } from "lucide-react"
-// import { useState } from "react"
-
-// const JordanHero = () => {
-//   const [sliderPosition, setSliderPosition] = useState(50)
-//   const [isDragging, setIsDragging] = useState(false)
-
-//   const handleMouseDown = () => setIsDragging(true)
-//   const handleMouseUp = () => setIsDragging(false)
-
-//   const handleMouseMove = (e) => {
-//     if (isDragging) {
-//       const container = e.currentTarget.getBoundingClientRect()
-//       const position = ((e.clientX - container.left) / container.width) * 100
-//       setSliderPosition(Math.min(Math.max(position, 10), 90))
-//     }
-//   }
-
-//   const handleTouchMove = (e) => {
-//     if (isDragging) {
-//       const container = e.currentTarget.getBoundingClientRect()
-//       const touch = e.touches[0]
-//       const position = ((touch.clientX - container.left) / container.width) * 100
-//       setSliderPosition(Math.min(Math.max(position, 10), 90))
-//     }
-//   }
-
-//   return (
-//     <div className="relative min-h-screen" dir="rtl">
-//       {/* الشريط العلوي */}
-//       <nav className="absolute top-0 left-0 right-0 z-50 p-4 flex justify-between items-center">
-//         <div className="flex items-center">
-//           <h1 className="text-2xl font-bold text-white">
-//             <span className="text-[#FFD700]">وين</span> نروح
-//           </h1>
-//         </div>
-//         <div className="hidden md:flex items-center space-x-8 space-x-reverse">
-//           <a href="#videos" className="text-white hover:text-[#FFD700] transition-colors">فيديوهات</a>
-//           <a href="#destinations" className="text-white hover:text-[#FFD700] transition-colors">وجهات</a>
-//           <a href="#bookings" className="text-white hover:text-[#FFD700] transition-colors">حجوزات</a>
-//           <a href="#shop" className="text-white hover:text-[#FFD700] transition-colors">تسوق</a>
-//           <button aria-label="بحث">
-//             <Search className="text-white hover:text-[#FFD700]" />
-//           </button>
-//           <button aria-label="اللغة">
-//             <Globe className="text-white hover:text-[#FFD700]" />
-//           </button>
-//         </div>
-//         <button className="md:hidden text-white">
-//           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-//             <line x1="3" y1="12" x2="21" y2="12" />
-//             <line x1="3" y1="6" x2="21" y2="6" />
-//             <line x1="3" y1="18" x2="21" y2="18" />
-//           </svg>
-//         </button>
-//       </nav>
-
-//       {/* شاشة الانقسام */}
-//       <div
-//         className="relative h-screen overflow-hidden"
-//         onMouseMove={handleMouseMove}
-//         onMouseUp={handleMouseUp}
-//         onMouseLeave={handleMouseUp}
-//         onTouchMove={handleTouchMove}
-//         onTouchEnd={handleMouseUp}
-//       >
-//         {/* الجانب الأيسر - البتراء */}
-//         <div
-//           className="absolute inset-0 bg-[#053F5E]"
-//           style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
-//         >
-//           <div className="absolute inset-0 bg-black bg-opacity-30">
-//             <div
-//               className="h-full w-full bg-cover bg-center"
-//               style={{ backgroundImage: `url('/petra.jpg')`, filter: "brightness(0.8)" }}
-//             ></div>
-//           </div>
-//           <div className="absolute bottom-20 right-10 md:right-20 text-white max-w-md text-right z-10">
-//             <h2 className="text-4xl md:text-5xl font-bold mb-2">البتراء،</h2>
-//             <h3 className="text-3xl md:text-4xl font-bold mb-4">المدينة الوردية</h3>
-//             <p className="text-lg opacity-90 mb-6">
-//               أعجوبة أثرية منحوتة بالصخر، وموقع تراث عالمي لليونسكو منذ القرن الرابع قبل الميلاد.
-//             </p>
-//             <button className="px-6 py-3 bg-[#FFD700] text-[#053F5E] rounded-lg font-semibold flex items-center gap-2 hover:bg-opacity-90 transition-all">
-//               استكشف البتراء <ChevronRight size={18} />
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* الجانب الأيمن - البحر الميت */}
-//         <div
-//           className="absolute inset-0 bg-[#115173]"
-//           style={{ clipPath: `polygon(${sliderPosition}% 0, 100% 0, 100% 100%, ${sliderPosition}% 100%)` }}
-//         >
-//           <div className="absolute inset-0 bg-black bg-opacity-20">
-//             <div
-//               className="h-full w-full bg-cover bg-center"
-//               style={{ backgroundImage: `url('/deadsea.jpg')`, filter: "brightness(0.9)" }}
-//             ></div>
-//           </div>
-//           <div className="absolute bottom-20 left-10 md:left-20 text-white max-w-md z-10">
-//             <h2 className="text-4xl md:text-5xl font-bold mb-2">البحر الميت،</h2>
-//             <h3 className="text-3xl md:text-4xl font-bold mb-4">أخفض نقطة على وجه الأرض</h3>
-//             <p className="text-lg opacity-90 mb-6">
-//               تجربة فريدة بالطفو في مياه غنية بالمعادن بعمق 430 متر تحت مستوى سطح البحر.
-//             </p>
-//             <button className="px-6 py-3 bg-[#FFD700] text-[#053F5E] rounded-lg font-semibold flex items-center gap-2 hover:bg-opacity-90 transition-all">
-//               اكتشف البحر الميت <ChevronRight size={18} />
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* شريط التحكم */}
-//         <div
-//           className="absolute top-0 bottom-0 z-20 w-1 bg-white bg-opacity-70"
-//           style={{ left: `${sliderPosition}%` }}
-//         ></div>
-//         <div
-//           className="absolute top-1/2 transform -translate-y-1/2 z-30 w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer shadow-lg"
-//           style={{ left: `calc(${sliderPosition}% - 24px)` }}
-//           onMouseDown={handleMouseDown}
-//           onTouchStart={handleMouseDown}
-//         >
-//           <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center">
-//             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#053F5E" strokeWidth="2">
-//               <polyline points="15 18 9 12 15 6"></polyline>
-//             </svg>
-//           </div>
-//         </div>
-
-//         {/* مؤشرات الوجهات */}
-//         <div className="absolute top-1/4 right-1/4 transform translate-x-1/2 bg-white p-3 rounded-lg shadow-lg z-20 rotate-3 hover:rotate-0 transition-transform cursor-pointer">
-//           <div className="flex items-center gap-3">
-//             <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-[#053F5E]">
-//               <MapPin size={16} />
-//             </div>
-//             <div className="text-right">
-//               <p className="text-[#053F5E] font-medium text-sm">وادي رم</p>
-//               <p className="text-xs text-[#115173]">صحراء ساحرة</p>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="absolute top-1/3 left-1/4 transform -translate-x-1/2 bg-white p-3 rounded-lg shadow-lg z-20 -rotate-2 hover:rotate-0 transition-transform cursor-pointer">
-//           <div className="flex items-center gap-3">
-//             <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-[#053F5E]">
-//               <MapPin size={16} />
-//             </div>
-//             <div className="text-right">
-//               <p className="text-[#053F5E] font-medium text-sm">جرش</p>
-//               <p className="text-xs text-[#115173]">آثار رومانية</p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default JordanHero
+export default HeroSection;

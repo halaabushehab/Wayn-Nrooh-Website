@@ -66,7 +66,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/places", placeRoutes);
 app.use("/api", messageroutes);
-app.use('/api/commit', commentRoutes);
+app.use('/api/comments', commentRoutes)
 app.use('/api/ratings', ratingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.post('/api/payments', (req, res) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Calendar, DollarSign, Users, MapPin, Filter, Download, RefreshCw } from "lucide-react";
+import { Calendar, HandCoins , Users, MapPin, Filter, Download, RefreshCw } from "lucide-react";
 
 const PaymentsDashboard = () => {
   const [payments, setPayments] = useState([]);
@@ -473,9 +473,10 @@ const PaymentsDashboard = () => {
               transition={{ delay: 0.3, duration: 1, staggerChildren: 0.1 }}
             >
               {renderStatCard(
-                <DollarSign size={20} />, 
+                <HandCoins 
+ size={20} />, 
                 "إجمالي المبلغ", 
-                `${totalAmount.toFixed(2)} $`, 
+`${(totalAmount * 0.7).toFixed(2)} دينار أردني`, 
                 "bg-[#115173]"
               )}
               {renderStatCard(

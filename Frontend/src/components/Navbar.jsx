@@ -5,7 +5,7 @@ import logo from "./img/Screenshot 2025-01-24 235121.png";
 import FormRegistration from "../components/FormRegistration";
 import Swal from "sweetalert2";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 const Navbar = () => {
   const [isFormOpen, setFormOpen] = useState(false);
@@ -33,7 +33,9 @@ const Navbar = () => {
               isAdmin: parsedUser.isAdmin || false,
             });
 
-            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
+            axios.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${parsedUser.token}`;
           }
         } catch (error) {
           console.error("Error parsing user cookie:", error);
@@ -52,14 +54,14 @@ const Navbar = () => {
       username: userData.username,
       userId: userData.userId,
       email: userData.email,
-      isAdmin: userData.isAdmin || false
+      isAdmin: userData.isAdmin || false,
     };
-    
+
     Cookies.set("user", JSON.stringify(userToStore), { expires: 7 });
     setUser({
       username: userData.username,
       userId: userData.userId,
-      isAdmin: userData.isAdmin
+      isAdmin: userData.isAdmin,
     });
 
     setFormOpen(false);
@@ -76,10 +78,16 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (citiesDropdownRef.current && !citiesDropdownRef.current.contains(event.target)) {
+      if (
+        citiesDropdownRef.current &&
+        !citiesDropdownRef.current.contains(event.target)
+      ) {
         setIsCitiesOpen(false);
       }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
@@ -112,7 +120,7 @@ const Navbar = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         Cookies.remove("user");
-        delete axios.defaults.headers.common['Authorization'];
+        delete axios.defaults.headers.common["Authorization"];
         setUser(null);
         setIsUserMenuOpen(false);
         navigate("/");
@@ -135,7 +143,7 @@ const Navbar = () => {
           </Link>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="lg:hidden text-white p-2"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
@@ -145,120 +153,129 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <nav
-  className={`lg:flex items-center gap-6 text-white text-lg ${
-    menuOpen
-      ? "fixed top-16 right-0 w-full bg-[#022C43] p-6 shadow-lg flex flex-col"
-      : "hidden"
-  }`}
->
-  <Link 
-    className="hover:text-[#FFD700] transition py-2 no-underline text-white text-base  visited:no-underline" 
-    to="/"
-    onClick={() => setMenuOpen(false)}
-  >
-    الرئيسية
-  </Link>
-  
-  <div className="relative" ref={citiesDropdownRef}>
-    <button 
-      onClick={() => setIsCitiesOpen(!isCitiesOpen)} 
-      className="hover:text-[#FFD700] flex items-center py-2 no-underline text-white text-base"
-    >
-      المدن <ChevronDown className={`ml-1 transition-transform ${isCitiesOpen ? "rotate-180" : ""}`} />
-    </button>
-    <div 
-      className={`absolute right-0 mt-2 w-48 bg-[#115173] rounded-md shadow-lg overflow-hidden ${
-        isCitiesOpen ? "block" : "hidden"
-      }`}
-    >
-      <Link 
-        className="block px-4 py-2 text-white hover:bg-[#0d3a5a] no-underline text-base" 
-        to="/places?city=عمان"
-        onClick={() => {
-          setIsCitiesOpen(false);
-          setMenuOpen(false);
-        }}
-      >
-        عمان
-      </Link>
-      <Link 
-        className="block px-4 py-2 text-white hover:bg-[#0d3a5a] no-underline text-base" 
-        to="/places?city=الزرقاء"
-        onClick={() => {
-          setIsCitiesOpen(false);
-          setMenuOpen(false);
-        }}
-      >
-        الزرقاء
-      </Link>
-      <Link 
-        className="block px-4 py-2 text-white hover:bg-[#0d3a5a] no-underline text-base" 
-        to="/places?city=إربد"
-        onClick={() => {
-          setIsCitiesOpen(false);
-          setMenuOpen(false);
-        }}
-      >
-        إربد
-      </Link>
-    </div>
-  </div>
+            className={`lg:flex items-center gap-6 text-white text-lg ${
+              menuOpen
+                ? "fixed top-16 right-0 w-full bg-[#022C43] p-6 shadow-lg flex flex-col"
+                : "hidden"
+            }`}
+          >
+            <Link
+              className="hover:text-[#FFD700] transition py-2  text-white text-base  "
+              to="/"
+              onClick={() => setMenuOpen(false)}
+            >
+              الرئيسية
+            </Link>
 
-  <Link 
-    className="hover:text-[#FFD700] transition py-2 no-underline text-white text-base" 
-    to="/article"
-    onClick={() => setMenuOpen(false)}
-  >
-    المدونات
-  </Link>
-  <Link 
-    className="hover:text-[#FFD700] transition py-2 no-underline text-white text-base" 
-    to="/About"
-    onClick={() => setMenuOpen(false)}
-  >
-    من نحن
-  </Link>
-  <Link 
-    className="hover:text-[#FFD700] transition py-2 no-underline text-white text-base" 
-    to="/contact"
-    onClick={() => setMenuOpen(false)}
-  >
-    تواصل معنا
-  </Link>
+            <div className="relative" ref={citiesDropdownRef}>
+              <button
+                onClick={() => setIsCitiesOpen(!isCitiesOpen)}
+                className="hover:text-[#FFD700] flex items-center py-2 text-white text-base"
+              >
+                المدن{" "}
+                <ChevronDown
+                  className={`ml-1 transition-transform ${
+                    isCitiesOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              <div
+                className={`absolute right-0 mt-2 w-48 bg-[#115173] rounded-md shadow-lg overflow-hidden ${
+                  isCitiesOpen ? "block" : "hidden"
+                }`}
+              >
+                <Link
+                  className="block px-4 py-2 text-white hover:bg-[#0d3a5a] text-base"
+                  to="/places?city=عمان"
+                  onClick={() => {
+                    setIsCitiesOpen(false);
+                    setMenuOpen(false);
+                  }}
+                >
+                  عمان
+                </Link>
+                <Link
+                  className="block px-4 py-2 text-white hover:bg-[#0d3a5a] text-base"
+                  to="/places?city=الزرقاء"
+                  onClick={() => {
+                    setIsCitiesOpen(false);
+                    setMenuOpen(false);
+                  }}
+                >
+                  الزرقاء
+                </Link>
+                <Link
+                  className="block px-4 py-2 text-white hover:bg-[#0d3a5a] text-base"
+                  to="/places?city=إربد"
+                  onClick={() => {
+                    setIsCitiesOpen(false);
+                    setMenuOpen(false);
+                  }}
+                >
+                  إربد
+                </Link>
+              </div>
+            </div>
 
-  {/* Mobile User Actions */}
-  <div className="lg:hidden mt-4">
-    {user ? (
-      <div className="flex flex-col gap-2">
-        <Link
-          to={user.isAdmin ? "/AdminDash" : `/ProfilePage/${user.userId}`}
-          className="flex items-center px-4 py-2 text-white hover:bg-[#0d3a5a] transition-colors rounded-lg no-underline text-base"
-          onClick={() => setMenuOpen(false)}
-        >
-          <FaUser className="ml-2" />
-          {user.isAdmin ? "لوحة التحكم" : "الملف الشخصي"}
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="flex items-center px-4 py-2 text-red-400 hover:bg-[#0d3a5a] transition-colors rounded-lg text-right no-underline text-base"
-        >
-          <FaSignOutAlt className="ml-2" />
-          تسجيل الخروج
-        </button>
-      </div>
-    ) : (
-      <button
-        onClick={() => {
-          setFormOpen(true);
-          setMenuOpen(false);
-        }}
-        className="w-full px-4 py-2 bg-transparent border border-[#FFD700] text-[#FFD700] rounded-lg hover:bg-[#FFD700]/10 transition-colors no-underline text-base"
-      >
-        تسجيل الدخول
-      </button>
-    )}
-  </div>
-</nav>
+            <Link
+              className="hover:text-[#FFD700] transition py-2 text-white text-base"
+              to="/article"
+              onClick={() => setMenuOpen(false)}
+            >
+              المدونات
+            </Link>
+            <Link
+              className="hover:text-[#FFD700] transition py-2 text-white text-base"
+              to="/About"
+              onClick={() => setMenuOpen(false)}
+            >
+              من نحن
+            </Link>
+            <Link
+              className="hover:text-[#FFD700] transition py-2 text-white text-base"
+              to="/contact"
+              onClick={() => setMenuOpen(false)}
+            >
+              تواصل معنا
+            </Link>
+
+            {/* Mobile User Actions */}
+            <div className="lg:hidden mt-4">
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to={
+                      user.isAdmin
+                        ? "/AdminDash"
+                        : `/ProfilePage/${user.userId}`
+                    }
+                    className="flex items-center px-4 py-2 text-white hover:bg-[#0d3a5a] transition-colors rounded-lg text-base"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <FaUser className="ml-2" />
+                    {user.isAdmin ? "لوحة التحكم" : "الملف الشخصي"}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center px-4 py-2 text-red-400 hover:bg-[#0d3a5a] transition-colors rounded-lg text-right text-base"
+                  >
+                    <FaSignOutAlt className="ml-2" />
+                    تسجيل الخروج
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setFormOpen(true);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-2 bg-transparent border border-[#FFD700] text-[#FFD700] rounded-lg hover:bg-[#FFD700]/10 transition-colors text-base"
+                >
+                  تسجيل الدخول
+                </button>
+              )}
+            </div>
+          </nav>
 
           {/* Desktop User Actions */}
           <div className="hidden lg:flex items-center gap-4">
@@ -271,14 +288,21 @@ const Navbar = () => {
                 >
                   <FaUser className="text-[#FFD700]" />
                   <span>{user.username}</span>
-                  <ChevronDown className={`transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`transition-transform ${
+                      isUserMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-[#115173] rounded-md shadow-lg z-50 overflow-hidden">
-                    
                     <Link
-                      to={user.isAdmin ? "/AdminDash" : `/ProfilePage/${user.userId}`}
+                      to={
+                        user.isAdmin
+                          ? "/AdminDash"
+                          : `/ProfilePage/${user.userId}`
+                      }
                       className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a] transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -310,15 +334,15 @@ const Navbar = () => {
       {/* Login Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50">
-          <div 
+          <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setFormOpen(false)}
           />
-          
+
           <div className="relative flex items-center justify-center min-h-screen p-4">
             <div className="bg-white rounded-lg w-full max-w-md z-50">
-              <FormRegistration 
-                onClose={() => setFormOpen(false)} 
+              <FormRegistration
+                onClose={() => setFormOpen(false)}
                 onLogin={handleLoginSuccess}
               />
             </div>
@@ -346,31 +370,6 @@ const ChevronDown = ({ className, ...props }) => (
 );
 
 export default Navbar;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { useState, useEffect, useRef } from "react";
 // import { Link, useNavigate ,NavLink } from "react-router-dom";
@@ -429,7 +428,7 @@ export default Navbar;
 //       email: userData.email,
 //       isAdmin: userData.isAdmin || false
 //     };
-    
+
 //     Cookies.set("user", JSON.stringify(userToStore), { expires: 7 });
 //     setUser({
 //       username: userData.username,
@@ -505,20 +504,20 @@ export default Navbar;
 //     >
 //       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between py-3">
 //         {/* Logo with subtle animation */}
-//         <Link 
-//           to="/" 
+//         <Link
+//           to="/"
 //           className="flex items-center transition-transform hover:scale-105"
 //         >
-//           <img 
-//             className="h-14 md:h-16 w-auto" 
-//             src={logo} 
-//             alt="Logo" 
+//           <img
+//             className="h-14 md:h-16 w-auto"
+//             src={logo}
+//             alt="Logo"
 //           />
 //           <span className="mr-2 text-xl font-bold text-[#FFD700] hidden md:block">دليل السياحة</span>
 //         </Link>
 
 //         {/* Mobile Menu Button with better styling */}
-//         <button 
+//         <button
 //           className="lg:hidden text-white p-2 rounded-md hover:bg-[#115173]/50 transition-colors"
 //           onClick={() => setMenuOpen(!menuOpen)}
 //           aria-label="Toggle menu"
@@ -538,9 +537,9 @@ export default Navbar;
 //               : "hidden"
 //           }`}
 //         >
-//           <NavLink 
+//           <NavLink
 //             to="/"
-//             className={({isActive}) => 
+//             className={({isActive}) =>
 //               `flex items-center px-4 py-3 rounded-lg transition-all no-underline text-white text-base font-medium
 //               ${isActive ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'hover:bg-[#115173]/50 hover:text-[#FFD700]'}`
 //             }
@@ -549,10 +548,10 @@ export default Navbar;
 //             <FaHome className="ml-2" />
 //             الرئيسية
 //           </NavLink>
-          
+
 //           <div className="relative w-full" ref={citiesDropdownRef}>
-//             <button 
-//               onClick={() => setIsCitiesOpen(!isCitiesOpen)} 
+//             <button
+//               onClick={() => setIsCitiesOpen(!isCitiesOpen)}
 //               className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all no-underline text-white text-base font-medium
 //                 ${isCitiesOpen ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'hover:bg-[#115173]/50 hover:text-[#FFD700]'}`}
 //             >
@@ -562,12 +561,12 @@ export default Navbar;
 //               </div>
 //               <FaChevronDown  className={`transition-transform ${isCitiesOpen ? "rotate-180" : ""}`} />
 //             </button>
-//             <div 
+//             <div
 //               className={`mt-1 w-full bg-[#115173]/90 rounded-lg shadow-lg overflow-hidden backdrop-blur-sm ${
 //                 isCitiesOpen ? "block" : "hidden"
 //               }`}
 //             >
-//               <Link 
+//               <Link
 //                 className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a]/80 transition-colors no-underline text-base"
 //                 to="/places?city=عمان"
 //                 onClick={() => {
@@ -578,7 +577,7 @@ export default Navbar;
 //                 <FaMapMarkerAlt className="ml-2 text-[#FFD700]" />
 //                 عمان
 //               </Link>
-//               <Link 
+//               <Link
 //                 className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a]/80 transition-colors no-underline text-base"
 //                 to="/places?city=الزرقاء"
 //                 onClick={() => {
@@ -589,7 +588,7 @@ export default Navbar;
 //                 <FaMapMarkerAlt className="ml-2 text-[#FFD700]" />
 //                 الزرقاء
 //               </Link>
-//               <Link 
+//               <Link
 //                 className="flex items-center px-4 py-3 text-white hover:bg-[#0d3a5a]/80 transition-colors no-underline text-base"
 //                 to="/places?city=إربد"
 //                 onClick={() => {
@@ -603,9 +602,9 @@ export default Navbar;
 //             </div>
 //           </div>
 
-//           <NavLink 
+//           <NavLink
 //             to="/article"
-//             className={({isActive}) => 
+//             className={({isActive}) =>
 //               `flex items-center px-4 py-3 rounded-lg transition-all no-underline text-white text-base font-medium
 //               ${isActive ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'hover:bg-[#115173]/50 hover:text-[#FFD700]'}`
 //             }
@@ -614,10 +613,10 @@ export default Navbar;
 //             <FaNewspaper className="ml-2" />
 //             المدونات
 //           </NavLink>
-          
-//           <NavLink 
+
+//           <NavLink
 //             to="/About"
-//             className={({isActive}) => 
+//             className={({isActive}) =>
 //               `flex items-center px-4 py-3 rounded-lg transition-all no-underline text-white text-base font-medium
 //               ${isActive ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'hover:bg-[#115173]/50 hover:text-[#FFD700]'}`
 //             }
@@ -626,10 +625,10 @@ export default Navbar;
 //             <FaInfoCircle className="ml-2" />
 //             من نحن
 //           </NavLink>
-          
-//           <NavLink 
+
+//           <NavLink
 //             to="/contact"
-//             className={({isActive}) => 
+//             className={({isActive}) =>
 //               `flex items-center px-4 py-3 rounded-lg transition-all no-underline text-white text-base font-medium
 //               ${isActive ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'hover:bg-[#115173]/50 hover:text-[#FFD700]'}`
 //             }
@@ -724,15 +723,15 @@ export default Navbar;
 //     {/* Enhanced Login Form Modal */}
 //     {isFormOpen && (
 //       <div className="fixed inset-0 z-50 flex items-center justify-center">
-//         <div 
+//         <div
 //           className="absolute inset-0 bg-black/70 backdrop-blur-md"
 //           onClick={() => setFormOpen(false)}
 //         />
-        
+
 //         <div className="relative w-full max-w-md mx-4 z-50 animate-fade-in-up">
 //           <div className="bg-gradient-to-br from-[#022C43] to-[#115173] rounded-xl overflow-hidden shadow-2xl border border-[#FFD700]/20">
 //             <div className="absolute top-0 right-0 p-3">
-//               <button 
+//               <button
 //                 onClick={() => setFormOpen(false)}
 //                 className="text-white hover:text-[#FFD700] transition-colors"
 //               >
@@ -741,14 +740,14 @@ export default Navbar;
 //             </div>
 //             <div className="p-6">
 //               <div className="flex justify-center mb-6">
-//                 <img 
-//                   className="h-16 w-auto" 
-//                   src={logo} 
-//                   alt="Logo" 
+//                 <img
+//                   className="h-16 w-auto"
+//                   src={logo}
+//                   alt="Logo"
 //                 />
 //               </div>
-//               <FormRegistration 
-//                 onClose={() => setFormOpen(false)} 
+//               <FormRegistration
+//                 onClose={() => setFormOpen(false)}
 //                 onLogin={handleLoginSuccess}
 //               />
 //             </div>
