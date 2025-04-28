@@ -1,12 +1,29 @@
-const mongoose = require("mongoose");
+// commentSchema.js
+const mongoose = require('mongoose');
 
-const CommentSchema = new mongoose.Schema({
-  articleId: { type: mongoose.Schema.Types.ObjectId, ref: "Article", required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  username: { type: String, required: true },
-  userAvatar: { type: String, default: "" },
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-});
+// في نموذج Comment
+const commentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // تأكد من أن هذا يشير إلى نموذج "User"
+    required: true
+  },
+  articleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Article',
+    required: true
+  },
+  comment: {
+    type: String,
+    required: true
+  },
+}, { timestamps: true });
 
-module.exports = mongoose.model("Comment", CommentSchema);
+const Comment = mongoose.model('Comment', commentSchema);
+module.exports = Comment;
+
+
+// profilePicture: {
+//   type: String, // URL للصورة
+//   default: 'default-avatar-url', // يمكنك تحديد صورة افتراضية هنا
+// },
