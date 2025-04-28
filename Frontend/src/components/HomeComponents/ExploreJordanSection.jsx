@@ -1,223 +1,7 @@
-
-// import React, { useState } from "react";
-
-// const AddPlaceForm = () => {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     short_description: "",
-//     detailed_description: "",
-//     city: "",
-//     working_hours: "",
-//     rating: "",
-//     ticket_price: "",
-//     best_season: "",
-//     is_free: false,
-//     map_link: "",
-//     categories: "",
-//     suitable_for: "",
-//     phone: "",
-//     website: "",
-//   });
-
-//   const [images, setImages] = useState([]);
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [submitStatus, setSubmitStatus] = useState(null);
-
-//   const handleInputChange = (e) => {
-//     const { name, value, type, checked } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: type === "checkbox" ? checked : value,
-//     }));
-//   };
-
-//   const handleFileChange = (e, setFileState) => {
-//     setFileState([...e.target.files]);
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setIsSubmitting(true);
-//     setSubmitStatus(null);
-  
-//     const data = new FormData();
-    
-//     // إضافة البيانات الأخرى من formData
-//     for (const key in formData) {
-//       data.append(key, formData[key]);
-//     }
-  
-//     // تحويل arrays من النصوص المنفصلة بفواصل إلى مصفوفات
-//     data.append("categories", JSON.stringify(formData.categories.split(",").map((c) => c.trim())));
-//     data.append("suitable_for", JSON.stringify(formData.suitable_for.split(",").map((s) => s.trim())));
-  
-//     data.append("contact", JSON.stringify({
-//       phone: formData.phone,
-//       website: formData.website,
-//     }));
-  
-//     if (images && images.length > 0) {
-//       images.forEach((image) => {
-//         data.append('images', image); // تأكد من استخدام 'images' (جمع) إذا كان multer يستخدم .array()
-//       });
-//     }
-
-  
-//     try {
-//       const response = await fetch("http://localhost:9527/api/places/", {
-//         method: "POST",
-//         body: data,
-//       });
-  
-//       if (!response.ok) {
-//         throw new Error("فشل في إرسال البيانات");
-//       }
-  
-//       const result = await response.json();
-//       console.log("تم الإرسال بنجاح:", result);
-//       setSubmitStatus("success");
-//       setFormData({
-//         name: "",
-//         short_description: "",
-//         detailed_description: "",
-//         city: "",
-//         working_hours: "",
-//         rating: "",
-//         ticket_price: "",
-//         best_season: "",
-//         is_free: false,
-//         map_link: "",
-//         categories: "",
-//         suitable_for: "",
-//         phone: "",
-//         website: "",
-//       });
-//       setImages(null);  // إعادة تعيين الصور بعد الإرسال
-//     } catch (error) {
-//       console.error("خطأ أثناء الإرسال:", error);
-//       setSubmitStatus("error");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-  
-//   return (
-//     <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg my-40">
-//       <h2 className="text-3xl font-bold text-center text-[#115173] mb-6">إضافة مكان جديد</h2>
-//       <div className="w-24 h-1 mx-auto bg-[#FFD700] mb-6 rounded"></div>
-
-//       {submitStatus === "success" && (
-//         <div className="mb-6 p-4 bg-green-100 text-green-800 border-l-4 border-green-500 rounded">
-//           تم إرسال معلومات المكان بنجاح!
-//         </div>
-//       )}
-//       {submitStatus === "error" && (
-//         <div className="mb-6 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded">
-//           حدث خطأ أثناء الإرسال. حاول مرة أخرى.
-//         </div>
-//       )}
-
-//       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-//         {/* Text inputs */}
-//         {[
-//           { name: "name", label: "اسم المكان" },
-//           { name: "short_description", label: "وصف قصير" },
-//           { name: "detailed_description", label: "وصف تفصيلي", type: "textarea" },
-//           { name: "city", label: "المدينة" },
-//           { name: "working_hours", label: "ساعات العمل" },
-//           { name: "rating", label: "التقييم", type: "number" },
-//           { name: "ticket_price", label: "سعر التذكرة", type: "number" },
-//           { name: "map_link", label: "رابط الخريطة" },
-//           { name: "categories", label: "التصنيفات (مفصولة بفواصل)" },
-//           { name: "suitable_for", label: "مناسب لـ (مفصول بفواصل)" },
-//           { name: "phone", label: "رقم الهاتف" },
-//           { name: "website", label: "الموقع الإلكتروني" },
-//         ].map(({ name, label, type = "text" }) => (
-//           <div key={name} className={`input-group ${name === "detailed_description" ? "col-span-2" : ""}`}>
-//             <label className="block mb-1 font-medium text-[#022C43]">{label}</label>
-//             {type === "textarea" ? (
-//               <textarea
-//                 name={name}
-//                 value={formData[name]}
-//                 onChange={handleInputChange}
-//                 className="w-full p-3 border rounded-lg"
-//                 rows={4}
-//               />
-//             ) : (
-//               <input
-//                 type={type}
-//                 name={name}
-//                 value={formData[name]}
-//                 onChange={handleInputChange}
-//                 className="w-full p-3 border rounded-lg"
-//               />
-//             )}
-//           </div>
-//         ))}
-
-//         {/* Best season */}
-//         <div className="input-group">
-//           <label className="block mb-1 font-medium text-[#022C43]">أفضل موسم</label>
-//           <select
-//             name="best_season"
-//             value={formData.best_season}
-//             onChange={handleInputChange}
-//             className="w-full p-3 border rounded-lg"
-//           >
-//             <option value="">اختر الموسم</option>
-//             <option value="الربيع">الربيع</option>
-//             <option value="الصيف">الصيف</option>
-//             <option value="الخريف">الخريف</option>
-//             <option value="الشتاء">الشتاء</option>
-//             <option value="جميع المواسم">جميع المواسم</option>
-//           </select>
-//         </div>
-
-//         {/* is_free checkbox */}
-//         <div className="input-group flex items-center gap-2 mt-6">
-//           <input
-//             type="checkbox"
-//             name="is_free"
-//             checked={formData.is_free}
-//             onChange={handleInputChange}
-//           />
-//           <label className="font-medium text-[#022C43]">هل الدخول مجاني؟</label>
-//         </div>
-
-//         {/* Images upload */}
-//         <input
-//   type="file"
-//   name="image"   // ✨✨✨
-//   multiple
-//   accept="image/*"
-//   onChange={(e) => handleFileChange(e, setImages)}
-//   className="w-full p-3 border rounded-lg"
-// />
-
-
-
-//         {/* Submit */}
-//         <div className="col-span-2 mt-6">
-//           <button
-//             type="submit"
-//             disabled={isSubmitting}
-//             className="w-full py-3 bg-[#115173] text-white font-bold rounded-lg hover:bg-[#0d3c57] transition"
-//           >
-//             {isSubmitting ? "جاري الإرسال..." : "إرسال"}
-//           </button>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default AddPlaceForm;
-
-
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaCamera, FaMapMarkerAlt, FaClock, FaStar, FaTicketAlt, FaCalendarAlt, FaPhone, FaGlobe } from "react-icons/fa";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const AddPlaceForm = () => {
   const [formData, setFormData] = useState({
@@ -241,6 +25,34 @@ const AddPlaceForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadUserFromCookies = () => {
+      const userCookie = Cookies.get("user");
+      if (userCookie) {
+        try {
+          const parsedUser = JSON.parse(userCookie);
+          console.log("🧖 Loading user from cookies:", parsedUser);
+  
+          if (parsedUser.token) {
+            setUser({
+              username: parsedUser.username,
+              userId: parsedUser.userId,
+              isAdmin: parsedUser.isAdmin || false,
+            });
+  
+            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
+          }
+        } catch (error) {
+          console.error("Error parsing user cookie:", error);
+          Cookies.remove("user");
+        }
+      }
+    };
+  
+    loadUserFromCookies();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -253,8 +65,7 @@ const AddPlaceForm = () => {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setImages(files);
-    
-    // إنشاء معاينات للصور
+
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(previews);
   };
@@ -271,79 +82,72 @@ const AddPlaceForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus(null);
+    console.log('🚀 handleSubmit triggered');
   
-    // التحقق من الصحة
-    if (!formData.name || !formData.city || !formData.short_description) {
-      setSubmitStatus("error");
-      setIsSubmitting(false);
+    const allCookies = Cookies.get();
+    console.log('All cookies:', allCookies);  // طباعة جميع الكوكيز للتأكد من التوكن
+  
+    const userCookie = Cookies.get('user');  // احصل على الكوكيز 'user'
+    console.log('Extracted user cookie:', userCookie);
+  
+    if (!userCookie) {
+      console.error('❗ No user found in cookies');
       return;
     }
-
-    const data = new FormData();
-    
-    for (const key in formData) {
-      data.append(key, formData[key]);
+  
+    const parsedUser = JSON.parse(userCookie);
+    const token = parsedUser.token;  // استخراج التوكن
+    console.log('🔑 Extracted token from user cookie:', token);
+  
+    if (!token) {
+      console.error('❗ No token found in user cookie');
+      return;
     }
   
-    data.append("categories", JSON.stringify(formData.categories.split(",").map((c) => c.trim())));
-    data.append("suitable_for", JSON.stringify(formData.suitable_for.split(",").map((s) => s.trim())));
-  
-    data.append("contact", JSON.stringify({
-      phone: formData.phone,
-      website: formData.website,
-    }));
-  
-    if (images.length > 0) {
-      images.forEach((image) => {
-        data.append('images', image);
-      });
+    if (!formData) {
+      console.error('❗ formData is undefined');
+      return;
     }
+  
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+      withCredentials: true,
+    };
+  
+  // بدلاً من إرسال النصوص، أرسل المصفوفات
+const formDataToSend = new FormData();
+for (const key in formData) {
+  if (key === "categories" || key === "suitable_for") {
+    // تأكد من أن هذه الحقول يتم تحويلها بشكل صحيح
+    formDataToSend.append(key, JSON.stringify(formData[key]));
+  } else {
+    formDataToSend.append(key, formData[key]);
+  }
+}
 
+images.forEach(image => {
+  formDataToSend.append('images', image);
+});
+
+  
     try {
-      const response = await fetch("http://localhost:9527/api/places/", {
-        method: "POST",
-        body: data,
-      });
-  
-      if (!response.ok) {
-        throw new Error("فشل في إرسال البيانات");
-      }
-  
-      const result = await response.json();
-      console.log("تم الإرسال بنجاح:", result);
-      setSubmitStatus("success");
-      
-      // إعادة تعيين النموذج
-      setFormData({
-        name: "",
-        short_description: "",
-        detailed_description: "",
-        city: "",
-        working_hours: "",
-        rating: "",
-        ticket_price: "",
-        best_season: "",
-        is_free: false,
-        map_link: "",
-        categories: "",
-        suitable_for: "",
-        phone: "",
-        website: "",
-      });
-      setImages([]);
-      setImagePreviews([]);
+      const response = await axios.post('http://localhost:9527/api/places/', formDataToSend, config);
+      console.log('✅ Place created successfully:', response.data);
     } catch (error) {
-      console.error("خطأ أثناء الإرسال:", error);
-      setSubmitStatus("error");
-    } finally {
-      setIsSubmitting(false);
+      console.error('❌ Error creating place:', error.response?.data || error.message);
     }
   };
   
+  
+  
+  
+  
+  
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-gradient-to-b from-white to-[#f5f9fa] rounded-2xl shadow-xl my-10 border border-[#e1e8eb]">
+    <div className="max-w-4xl mx-auto p-8 bg-gradient-to-b from-white to-[#f5f9fa] rounded-2xl shadow-xl my-50 border border-[#e1e8eb]">
       <div className="text-center mb-8">
         <h2 className="text-4xl font-bold text-[#115173] mb-3 relative inline-block">
           إضافة مكان جديد
@@ -686,3 +490,238 @@ const AddPlaceForm = () => {
 };
 
 export default AddPlaceForm;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState } from "react";
+
+// const AddPlaceForm = () => {
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     short_description: "",
+//     detailed_description: "",
+//     city: "",
+//     working_hours: "",
+//     rating: "",
+//     ticket_price: "",
+//     best_season: "",
+//     is_free: false,
+//     map_link: "",
+//     categories: "",
+//     suitable_for: "",
+//     phone: "",
+//     website: "",
+//   });
+
+//   const [images, setImages] = useState([]);
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [submitStatus, setSubmitStatus] = useState(null);
+
+//   const handleInputChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setFormData((prev) => ({
+//       ...prev,
+//       [name]: type === "checkbox" ? checked : value,
+//     }));
+//   };
+
+//   const handleFileChange = (e, setFileState) => {
+//     setFileState([...e.target.files]);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setIsSubmitting(true);
+//     setSubmitStatus(null);
+  
+//     const data = new FormData();
+    
+//     // إضافة البيانات الأخرى من formData
+//     for (const key in formData) {
+//       data.append(key, formData[key]);
+//     }
+  
+//     // تحويل arrays من النصوص المنفصلة بفواصل إلى مصفوفات
+//     data.append("categories", JSON.stringify(formData.categories.split(",").map((c) => c.trim())));
+//     data.append("suitable_for", JSON.stringify(formData.suitable_for.split(",").map((s) => s.trim())));
+  
+//     data.append("contact", JSON.stringify({
+//       phone: formData.phone,
+//       website: formData.website,
+//     }));
+  
+//     if (images && images.length > 0) {
+//       images.forEach((image) => {
+//         data.append('images', image); // تأكد من استخدام 'images' (جمع) إذا كان multer يستخدم .array()
+//       });
+//     }
+
+  
+//     try {
+//       const response = await fetch("http://localhost:9527/api/places/", {
+//         method: "POST",
+//         body: data,
+//       });
+  
+//       if (!response.ok) {
+//         throw new Error("فشل في إرسال البيانات");
+//       }
+  
+//       const result = await response.json();
+//       console.log("تم الإرسال بنجاح:", result);
+//       setSubmitStatus("success");
+//       setFormData({
+//         name: "",
+//         short_description: "",
+//         detailed_description: "",
+//         city: "",
+//         working_hours: "",
+//         rating: "",
+//         ticket_price: "",
+//         best_season: "",
+//         is_free: false,
+//         map_link: "",
+//         categories: "",
+//         suitable_for: "",
+//         phone: "",
+//         website: "",
+//       });
+//       setImages(null);  // إعادة تعيين الصور بعد الإرسال
+//     } catch (error) {
+//       console.error("خطأ أثناء الإرسال:", error);
+//       setSubmitStatus("error");
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+  
+//   return (
+//     <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg my-40">
+//       <h2 className="text-3xl font-bold text-center text-[#115173] mb-6">إضافة مكان جديد</h2>
+//       <div className="w-24 h-1 mx-auto bg-[#FFD700] mb-6 rounded"></div>
+
+//       {submitStatus === "success" && (
+//         <div className="mb-6 p-4 bg-green-100 text-green-800 border-l-4 border-green-500 rounded">
+//           تم إرسال معلومات المكان بنجاح!
+//         </div>
+//       )}
+//       {submitStatus === "error" && (
+//         <div className="mb-6 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded">
+//           حدث خطأ أثناء الإرسال. حاول مرة أخرى.
+//         </div>
+//       )}
+
+//       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+//         {/* Text inputs */}
+//         {[
+//           { name: "name", label: "اسم المكان" },
+//           { name: "short_description", label: "وصف قصير" },
+//           { name: "detailed_description", label: "وصف تفصيلي", type: "textarea" },
+//           { name: "city", label: "المدينة" },
+//           { name: "working_hours", label: "ساعات العمل" },
+//           { name: "rating", label: "التقييم", type: "number" },
+//           { name: "ticket_price", label: "سعر التذكرة", type: "number" },
+//           { name: "map_link", label: "رابط الخريطة" },
+//           { name: "categories", label: "التصنيفات (مفصولة بفواصل)" },
+//           { name: "suitable_for", label: "مناسب لـ (مفصول بفواصل)" },
+//           { name: "phone", label: "رقم الهاتف" },
+//           { name: "website", label: "الموقع الإلكتروني" },
+//         ].map(({ name, label, type = "text" }) => (
+//           <div key={name} className={`input-group ${name === "detailed_description" ? "col-span-2" : ""}`}>
+//             <label className="block mb-1 font-medium text-[#022C43]">{label}</label>
+//             {type === "textarea" ? (
+//               <textarea
+//                 name={name}
+//                 value={formData[name]}
+//                 onChange={handleInputChange}
+//                 className="w-full p-3 border rounded-lg"
+//                 rows={4}
+//               />
+//             ) : (
+//               <input
+//                 type={type}
+//                 name={name}
+//                 value={formData[name]}
+//                 onChange={handleInputChange}
+//                 className="w-full p-3 border rounded-lg"
+//               />
+//             )}
+//           </div>
+//         ))}
+
+//         {/* Best season */}
+//         <div className="input-group">
+//           <label className="block mb-1 font-medium text-[#022C43]">أفضل موسم</label>
+//           <select
+//             name="best_season"
+//             value={formData.best_season}
+//             onChange={handleInputChange}
+//             className="w-full p-3 border rounded-lg"
+//           >
+//             <option value="">اختر الموسم</option>
+//             <option value="الربيع">الربيع</option>
+//             <option value="الصيف">الصيف</option>
+//             <option value="الخريف">الخريف</option>
+//             <option value="الشتاء">الشتاء</option>
+//             <option value="جميع المواسم">جميع المواسم</option>
+//           </select>
+//         </div>
+
+//         {/* is_free checkbox */}
+//         <div className="input-group flex items-center gap-2 mt-6">
+//           <input
+//             type="checkbox"
+//             name="is_free"
+//             checked={formData.is_free}
+//             onChange={handleInputChange}
+//           />
+//           <label className="font-medium text-[#022C43]">هل الدخول مجاني؟</label>
+//         </div>
+
+//         {/* Images upload */}
+//         <input
+//   type="file"
+//   name="image"   // ✨✨✨
+//   multiple
+//   accept="image/*"
+//   onChange={(e) => handleFileChange(e, setImages)}
+//   className="w-full p-3 border rounded-lg"
+// />
+
+
+
+//         {/* Submit */}
+//         <div className="col-span-2 mt-6">
+//           <button
+//             type="submit"
+//             disabled={isSubmitting}
+//             className="w-full py-3 bg-[#115173] text-white font-bold rounded-lg hover:bg-[#0d3c57] transition"
+//           >
+//             {isSubmitting ? "جاري الإرسال..." : "إرسال"}
+//           </button>
+//         </div>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default AddPlaceForm;
+
+
+

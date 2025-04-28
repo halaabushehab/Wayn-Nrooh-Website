@@ -72,8 +72,9 @@ const Blog = () => {
                     <Link to={`/articles/${article.id}`} style={{ color: "#000", textDecoration: "none" }}>
                       <h6>{article.title}</h6>
                     </Link>
-                    <small className="d-block text-muted">{article.date}</small>
-                    <p>{article.description}</p> {/* وصف المقال */}
+<small className="d-block text-muted">
+  {new Date(article.date).toLocaleDateString('ar-JO', { year: 'numeric', month: 'long', day: 'numeric' })}
+</small>                    <p>{article.description}</p> {/* وصف المقال */}
                   </div>
                 </li>
               ))}

@@ -1,6 +1,7 @@
 const Place = require("../models/places");
 const User = require("../models/User"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
+const jwt = require('jsonwebtoken');
 
 
 
@@ -112,8 +113,17 @@ exports.getFilteredPlaces = async (req, res) => {
 
 
 
+
 exports.createPlace = async (req, res) => {
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;  // Get the userId from the token
+
     const {
       name,
       short_description,
@@ -131,14 +141,15 @@ exports.createPlace = async (req, res) => {
       website,
     } = req.body;
 
-    console.log(req.body);
+    // Parse categories and suitable_for if they are strings
+    const parsedCategories = typeof categories === 'string' ? JSON.parse(categories) : categories;
+    const parsedSuitableFor = typeof suitable_for === 'string' ? JSON.parse(suitable_for) : suitable_for;
 
+    // Handle images
+    const images = req.files ? req.files.map(file => `http://localhost:9527/uploads/${file.filename}`) : [];
 
-    // Handle uploaded files
-    const images = req.files && req.files.length > 0 
-    ? req.files.map(file => `http://localhost:9527/uploads/${file.filename}`) 
-    : [];
     const newPlace = new Place({
+      createdBy: userId,  // Set the createdBy field to the current user's ID
       name,
       short_description,
       detailed_description,
@@ -149,13 +160,12 @@ exports.createPlace = async (req, res) => {
       best_season,
       is_free: is_free === "true" || is_free === true,
       map_link,
-      categories,
-      suitable_for,
+      categories: parsedCategories,
+      suitable_for: parsedSuitableFor,
       phone,
       website,
       images,
     });
-    
 
     const savedPlace = await newPlace.save();
     res.status(201).json(savedPlace);
@@ -164,6 +174,8 @@ exports.createPlace = async (req, res) => {
     res.status(400).json({ message: "Failed to create place", error: error.message });
   }
 };
+
+
 
 
 // ✅ جلب جميع الأماكن بحالة approved فقط

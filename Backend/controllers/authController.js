@@ -18,7 +18,7 @@ const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Google token is required" });
     }
 
-    // التحقق من صحة token
+    // التحقق من صحة التوكن
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,  // التأكد من أن الـ client ID يتطابق مع الـ Google Client ID في البيئة
@@ -27,11 +27,11 @@ const googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
     const { email, name, sub, picture } = payload; // "sub" هو معرف المستخدم في Google
 
-    // التحقق من وجود المستخدم في قاعدة البيانات باستخدام الـ email
-    let user = await User.findOne({ email });
+    // التحقق من وجود المستخدم في قاعدة البيانات باستخدام الـ googleId
+    let user = await User.findOne({ googleId: sub });
 
     if (!user) {
-      // إذا لم يكن المستخدم موجودًا، قم بإنشاء حساب جديد
+      // إذا لم يكن المستخدم موجودًا، قم بإنشاء حساب جديد باستخدام بيانات جوجل
       user = new User({
         username: name,
         email: email,

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from 'react-router-dom';
-
+import Cookies from "js-cookie";
 
 
 const callouts = [
@@ -32,12 +32,49 @@ const callouts = [
   },
   
 ]; 
+
+
 const PlogDetails = () => {
   const { id } = useParams(); // جلب معرف المقال من الرابط
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState(""); // To store the new comment text
+  const [user, setUser] = useState(null);  // Initialize user state
 
   useEffect(() => {
+    const loadUserFromCookies = () => {
+      const userCookie = Cookies.get("user");
+      if (userCookie) {
+        try {
+          const parsedUser = JSON.parse(userCookie);
+          console.log("🧖 Loading user from cookies:", parsedUser);
+  
+          if (parsedUser.token) {
+            setUser({
+              username: parsedUser.username,
+              userId: parsedUser.userId,
+              isAdmin: parsedUser.isAdmin || false,
+              email: parsedUser.email, // Ensure the email is also saved in the user state
+              photo: parsedUser.photo || 'http://localhost:9527/uploads/placeholder.jpg', // تأكد من أن الـ photo موجودة
+            });
+  
+            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
+          }
+        } catch (error) {
+          console.error("Error parsing user cookie:", error);
+          Cookies.remove("user");
+        }
+      }
+    };
+  
+    loadUserFromCookies();
+  }, []);
+  
+
+
+  useEffect(() => {
+    // Fetch article details
     axios.get(`http://localhost:9527/articles/${id}`)
       .then((response) => {
         setArticle(response.data);
@@ -47,198 +84,192 @@ const PlogDetails = () => {
         console.error("Error fetching article:", error);
         setLoading(false);
       });
+      if (!user) {
+        return <p>يرجى تسجيل الدخول لعرض هذه الصفحة.</p>;
+      }
+    // Fetch comments for the article
+    axios.get(`http://localhost:9527/api/commit/${id}`)
+      .then((response) => {
+        setComments(response.data);
+        
+      })
+      .catch((error) => {
+        console.error("Error fetching comments:", error);
+      });
+      
   }, [id]);
-
+  
+ 
   if (loading) return <p>جاري تحميل المقال...</p>;
   if (!article) return <p>تعذر تحميل المقال.</p>;
+ // تحقق إذا كان المستخدم مسجل الدخول
+ if (!user || !user.username) {
+  alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
+  return;
+}
 
+// تحقق من رابط الصورة
+console.log("رابط الصورة:", user.photo);  // أو comment.photo إذا كانت الصورة جزءًا من الـ comment
 
 //commit
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // تحقق من تسجيل الدخول
-  if (!user) {
+  if (!user || !user.username) {
     alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
     return;
   }
 
-  const comment = {
-    articleId: articleId, // معرف المقال
-    username: user.username, // اسم المستخدم المسجل
-    content: content, // محتوى التعليق
-    email: user.email, // بريد المستخدم
+  const newComment = {
+    userId: user.userId, // استخدام معرف المستخدم
+    articleId: id, // معرف المقال
+    comment: content, // محتوى التعليق
   };
-
   try {
-    await axios.post('/api/comments', comment); // مسار API لإضافة تعليق
-    setContent(''); // إعادة تعيين حقل التعليق بعد الإرسال
+    const response = await axios.post('http://localhost:9527/api/commit', newComment);
+    setComments((prevComments) => [...prevComments, response.data.comment]);
+    setContent(""); // إفراغ حقل التعليق
   } catch (error) {
-    console.error("خطأ في إرسال التعليق", error);
+    console.error("خطأ أثناء إرسال التعليق:", error.response?.data || error.message);
   }
-};
+}
 
 
 
 
 
-  return (
-    <div className="container mx-auto p-5" style={{ direction: 'rtl' }}>
-      {/* Bradcam Area */}
+
+
+return (
+  <div className="container mx-auto p-5 font-sans" dir="rtl">
     {/* Hero Section */}
-    <div
-  className="relative h-[400px] flex items-center justify-center bg-cover bg-center rounded-lg shadow-lg"
-  style={{ backgroundImage: "url('https://i.pinimg.com/736x/7a/39/c9/7a39c98897363a0625c40c57d8522bc7.jpg')" }}
->
-  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg"></div>
-  <div className="relative z-10 text-center text-white px-6 max-w-2xl">
-  <h3 className="text-4xl font-extrabold mb-4 drop-shadow-lg">مدونتنا</h3>
-  <p className="text-lg text-gray-200 leading-relaxed">
-    اكتشف مقالات شيقة وملهمة حول أفضل الوجهات، التجارب الفريدة، والنصائح المفيدة لكل محب للسفر والاستكشاف.
-    نقدم لكم محتوى ثري يجمع بين المعرفة والتجربة، لتكونوا على اطلاع دائم بأجمل الأماكن وأحدث الاتجاهات.
-  </p>
-</div>
-
-</div>
-      {/* Blog Area */}
-      <div className="flex flex-col lg:flex-row">
-        {/* Sidebar */}
-         {/* الشريط الجانبي (Sidebar) */}
-                <div className="col-lg-4">
-                  <div className="bg-white shadow-sm rounded p-4 mb-4">
-                    <h5 className="font-bold mb-3" style={{ color: '#000', textAlign: 'right' }}>المقالات الأخيرة</h5>
-                    <ul className="list-unstyled">
-                      {callouts.map((post, index) => (
-                        <li className="d-flex align-items-center mb-3" key={index}>
-                          <img
-                            className="img-fluid"
-                            src={post.imageSrc}
-                            alt="مقال حديث"
-                            style={{ width: "30%" }}
-                          />
-                          <div className="ms-3">
-                            <Link to={post.href} style={{ color: '#000', textDecoration: 'none' }}>
-                              {post.discription}
-                            </Link>
-                            <small className="d-block text-muted">{post.date}</small>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-        
-                  <div className="bg-white shadow-sm rounded p-4 mb-4">
-            <h5 className="font-bold mb-4" style={{ color: '#000', textAlign: 'right' }}>سحابة الكلمات الدلالية</h5>
-            <div className="d-flex flex-wrap">
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#مشاريع</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#تكنولوجيا</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#سفر</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#مطاعم</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#أسلوب الحياة</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#تصميم</span>
-              <span className="badge m-2" style={{ backgroundColor: '#115173', color: '#fff' }}>#رسم</span>
-            </div>
-          </div>
-        
-          <div className="bg-white shadow-sm rounded p-4 mb-4">
-            <h5 className="font-bold mb-3" style={{ color: '#000', textAlign: 'right' }}>صور من إنستغرام</h5>
-            <div className="d-flex flex-wrap">
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/25/81/2b/25812ba4f53180e9443e76361c9bbef9.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/ab/ac/78/abac785eebadf5e4cd7f07c86907d97c.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/c6/7a/44/c67a44f9c5cd7f070cfab43648215d49.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/1e/77/7d/1e777d63c1a5a2d9c5f943ddb07aef92.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/5f/16/82/5f1682acb6c4d19dcaa142e61e49ca54.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-              <img className="img-fluid m-1" src="https://i.pinimg.com/736x/c4/7e/18/c47e18518150b4cd1b9401bf11d6ab65.jpg" alt="صورة من إنستغرام" style={{ width: "30%" }} />
-            </div>
-          </div>
-
-        
-                  <div className="bg-white shadow-sm rounded p-4 mb-4">
-                    <h5 className="font-bold" style={{ textAlign: 'right', color: '#000' }}>اشترك في نشرتنا الإخبارية</h5>
-                    <form>
-                      <div className="mb-3">
-                        <input type="email" className="form-control" placeholder="أدخل بريدك الإلكتروني" required />
-                      </div>
-                      <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#FFD700' }}>
-                        اشترك
-                      </button>
-                    </form>
-                  </div>
-                </div>
-
-        {/* Main Content */}
-        <div className="lg:w-3/4 p-4">
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-      {/* صورة المقال */}
-      {article.imageSrc && (
-        <img className="w-full rounded-lg mb-4" src={article.imageSrc} alt={article.title} />
-      )}
-
-      {/* عنوان المقال */}
-      <h2 className="text-3xl font-bold text-blue-900">{article.title}</h2>
-
-      {/* بيانات المقال */}
-      <ul className="flex space-x-4 text-gray-600 mt-2">
-        {article.tags && article.tags.length > 0 && (
-          <li>
-            <i className="fa fa-tags"></i> {article.tags.join("، ")}
-          </li>
-        )}
-        <li><i className="fa fa-eye"></i> {article.views} مشاهدة</li>
-        <li><i className="fa fa-thumbs-up"></i> {article.likeCount} إعجاب</li>
-        <li><i className="fa fa-comments"></i> 03 تعليقات</li>
-      </ul>
-
-      {/* تاريخ المقال */}
-      <small className="text-gray-500 block my-2">
-        {new Date(article.date).toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' })}
-      </small>
-
-      {/* المحتوى الرئيسي */}
-      <p className="text-lg text-gray-700 mb-4">{article.content}</p>
-
-      {/* اقتباس داخل صندوق مميز */}
-      {article.content_1 && (
-        <div className="bg-gray-100 border-l-4 border-blue-900 p-4 my-6">
-          <blockquote className="text-gray-700 italic">
-            "{article.content_1}"
-          </blockquote>
-        </div>
-      )}
-
-      {/* فقرة إضافية */}
-      {article.content_1 && <p className="text-gray-700 leading-relaxed">{article.content_1}</p>}
-    </div>
-          {/* Comments Section */}
-          <div className="mt-8">
-            <h4 className="text-xl font-semibold">05 تعليقات</h4>
-            <div className="flex items-start mt-4">
-              <img className="w-12 h-12 rounded-full" src="https://i.pinimg.com/736x/f6/ee/13/f6ee1311d121ea0cef159ff502d21720.jpg" alt="صورة المعلق" />
-              <div className="ml-4">
-                <h5 className="font-bold">إيميلي بلانت</h5>
-                <p className="text-sm text-gray-500">4 ديسمبر 2017</p>
-                <p className="text-gray-700">مقال رائع!</p>
-                <a href="#" className="text-blue-600 hover:underline text-sm">رد</a>
-              </div>
-            </div>
-          </div>
-
-          {/* Comment Form */}
-          <div className="mt-8">
-            <h4 className="text-xl font-semibold">اترك تعليقًا</h4>
-            <form className="mt-4">
-              <textarea className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900" placeholder="اكتب تعليقك"></textarea>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <input className="p-3 border rounded-md" type="text" placeholder="الاسم" />
-                <input className="p-3 border rounded-md" type="email" placeholder="البريد الإلكتروني" />
-              </div>
-              <button className="mt-4 bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-700">إرسال</button>
-            </form>
-          </div>
-        </div>
+    <div className="relative h-64 mb-8 flex items-center justify-center bg-cover bg-center rounded-lg shadow-lg">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg"></div>
+      <div className="relative z-10 text-center text-white px-6 max-w-2xl">
+        <h3 className="text-4xl font-extrabold mb-4 drop-shadow-lg">مدونتنا</h3>
+        <p className="text-lg text-gray-200 leading-relaxed">
+          اكتشف مقالات شيقة وملهمة حول أفضل الوجهات، التجارب الفريدة، والنصائح المفيدة لكل محب للسفر والاستكشاف.
+          نقدم لكم محتوى ثري يجمع بين المعرفة والتجربة، لتكونوا على اطلاع دائم بأجمل الأماكن وأحدث الاتجاهات.
+        </p>
       </div>
     </div>
-  );
+
+    {/* Blog Area */}
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Main Content */}
+      <div className="w-full lg:w-2/3 order-2 lg:order-1">
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
+          {/* Article Image */}
+          <img className="w-full rounded-lg mb-4 h-64 object-cover" src={article.imageSrc} alt={article.title} />
+
+          {/* Article Title */}
+          <h2 className="text-3xl font-bold text-blue-900 mb-3">{article.title}</h2>
+
+          {/* Article Metadata */}
+          <div className="flex flex-wrap gap-4 text-gray-600 mb-3">
+            {article.tags && article.tags.length > 0 && (
+              <span className="flex items-center">
+                <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                {article.tags.join("، ")}
+              </span>
+            )}
+            <span className="flex items-center">
+              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              {article.views} مشاهدة
+            </span>
+            <span className="flex items-center">
+              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+              </svg>
+              {article.likeCount} إعجاب
+            </span>
+            <span className="flex items-center">
+              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
+              </svg>
+              3 تعليقات
+            </span>
+          </div>
+
+          {/* Article Date */}
+          <p className="text-gray-500 text-sm mb-4">
+            {new Date(article.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+
+          {/* Main Content */}
+          <p className="text-lg text-gray-700 mb-6 leading-relaxed">{article.content}</p>
+
+          {/* Quote Box */}
+          <div className="bg-gray-100 border-r-4 border-blue-900 p-4 my-6">
+            <blockquote className="text-gray-700 italic pr-4">
+              "{article.content_1}"
+            </blockquote>
+          </div>
+
+          {/* Additional Content */}
+          <p className="text-gray-700 leading-relaxed">{article.content}</p>
+        </div>
+
+        {/* Comments Section */}
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
+          <h4 className="text-xl font-bold mb-6">التعليقات (5)</h4>
+          
+          {/* Individual Comment */}
+          {comments.map((comment) => (
+  <div key={comment._id} className="flex mb-6 border-b pb-6">
+<img
+  className="w-12 h-12 rounded-full"
+  src={comment.photo || 'http://localhost:9527/uploads/placeholder.jpg'} // صورة افتراضية إذا لم تكن موجودة
+  alt={comment.username}
+/>
+    <div className="mr-4 flex-1">
+      <div className="flex justify-between items-center mb-1">
+        <h5 className="font-bold">{comment.username}</h5>
+        <p className="text-sm text-gray-500">
+          {new Date(comment.date).toLocaleDateString()} {/* تنسيق التاريخ */}
+        </p>
+      </div>
+      <p className="text-gray-700 mb-2">{comment.content}</p>
+      <button className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
+        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+        رد
+      </button>
+    </div>
+  </div>
+))}
+
+
+     
+          {/* Comment Form */}
+          <h4 className="text-xl font-bold mb-4">اترك تعليقاً</h4>
+  <form onSubmit={handleSubmit} className="mt-4">
+    <textarea
+      value={newComment}
+      onChange={(e) => setNewComment(e.target.value)}
+      className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 mb-4"
+      placeholder="اكتب تعليقك هنا..."
+      rows="4"
+    ></textarea>
+    <button type="submit" className="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition-colors">
+      إرسال التعليق
+    </button>
+  </form>
+</div>
+      </div>
+
+
+ 
+      
+    </div>
+  </div>
+);
 };
 
 export default PlogDetails;
