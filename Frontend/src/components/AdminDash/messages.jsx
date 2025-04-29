@@ -188,7 +188,6 @@
 
 
 
-"use client"
 
 import { useEffect, useState } from "react"
 import axios from "axios"
@@ -225,6 +224,7 @@ export default function MessagesTab() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (
+        msg.name.toLowerCase().includes(query) ||
         msg.from.toLowerCase().includes(query) ||
         msg.title.toLowerCase().includes(query) ||
         msg.message.toLowerCase().includes(query)

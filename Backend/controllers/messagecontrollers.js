@@ -1,6 +1,7 @@
 const Contact = require("../models/contact_messages");
 const transporter = require("../mailer");  // استيراد الوحدة
 const { Message } = require('../models/contact_messages'); // تأكد من المسار الصحيح
+const User = require("../models/user"); // ❓ هل هذا موجود؟
 
 
 
@@ -39,7 +40,7 @@ const updateMessageStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updatedMessage = await User.findByIdAndUpdate(
+    const updatedMessage = await Contact.findByIdAndUpdate(
       id,
       { status: "Read" },
       { new: true }
@@ -55,6 +56,7 @@ const updateMessageStatus = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const replyToContact = async (req, res) => {
   try {
