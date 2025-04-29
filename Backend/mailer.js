@@ -1,12 +1,23 @@
-const nodemailer = require('nodemailer');
+// const nodemailer = require("nodemailer");
+// require("dotenv").config();
 
-// إعداد الناقل (transporter) مرة واحدة
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// module.exports = transporter;
+
+
+const nodemailer = require("nodemailer");
+
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // يمكنك استخدام أي خدمة بريد إلكتروني
+  service: "gmail",
   auth: {
-    user: 'your-email@gmail.com', // بريدك الإلكتروني
-    pass: 'your-email-password', // كلمة المرور الخاصة بك
+    user: "hala.abushiihab@gmail.com",
+    pass: "ivefxmmmajainuqo",
   },
 });
-
-module.exports = transporter; // تصدير الناقل

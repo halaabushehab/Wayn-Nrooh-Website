@@ -21,6 +21,7 @@ import CityPage from "./pages/places/palces.jsx";
 import PlaceDetails from "./pages/places/PlaceDetails.jsx";
 import ExploreJordanSection from "././components/HomeComponents/ExploreJordanSection.jsx";
 import UpdatePlace from './components/AdminDash/UpdatePlace.jsx';
+import FavoritesPage from './pages/places/FavoritesPage.jsx'
 // Pages - User
 import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
@@ -54,6 +55,7 @@ const AppContent = () => {
           <Route path="/place-details/:id" element={<PlaceDetails />} />
           <Route path="/suggest" element={<ExploreJordanSection />} />
           <Route path="/dashboard/places/update/:id" element={<UpdatePlace />} />
+          <Route path="/favorite" element={<FavoritesPage />} />
 
           {/* User Routes */}
           <Route path="/ProfilePage/:id" element={<ProfilePage />} />

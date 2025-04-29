@@ -19,7 +19,10 @@ const Home = () => {
       {/* ***** HERO Section ***** */}
       <HeroSection />
       {/* ***** Categories Section ***** */}
+      <div className="my-40">
       <CategorySection />
+      </div>
+    
 
       {/* ***** About Section ***** */}
       <AboutSection />

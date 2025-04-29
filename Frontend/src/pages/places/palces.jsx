@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { HeartIcon, MapPinIcon, StarIcon, Compass } from "lucide-react";
-import favoriteImage from "../../components/img/bookmark.png";
+// import favoriteImage from "../../components/img/bookmark.png";
 import bgVideo from "../../components/img/amman-vedio.mp4";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,7 +22,7 @@ const CityPage = () => {
   const location = useLocation();
   const { id } = useParams();
 
-  // 🧠 Load user from cookies once
+  //  Load user from cookies once
   useEffect(() => {
     const loadUserFromCookies = () => {
       const userCookie = Cookies.get("user");
