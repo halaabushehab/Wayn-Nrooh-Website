@@ -27,7 +27,7 @@ const SeasonalSection = () => {
     {
       id: "صيف",
       name: "الصيف",
-      icon: <SunIcon className="w-5 h-5" />,
+      icon: <SunIcon className="w-8 h-8" />,
       color: "from-amber-400 to-orange-500",
       bgColor: "bg-gradient-to-br from-amber-50 to-orange-50",
       seasonImage:
@@ -36,7 +36,7 @@ const SeasonalSection = () => {
     {
       id: "شتاء",
       name: "الشتاء",
-      icon: <CloudSnowIcon className="w-5 h-5" />,
+      icon: <CloudSnowIcon className="w-8 h-8" />,
       color: "from-blue-400 to-indigo-500",
       bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
       seasonImage:
@@ -45,7 +45,7 @@ const SeasonalSection = () => {
     {
       id: "خريف",
       name: "الخريف",
-      icon: <LeafIcon className="w-5 h-5" />,
+      icon: <LeafIcon className="w-8 h-8" />,
       color: "from-orange-400 to-red-500",
       bgColor: "bg-gradient-to-br from-orange-50 to-red-50",
       seasonImage:
@@ -54,7 +54,7 @@ const SeasonalSection = () => {
     {
       id: "ربيع",
       name: "الربيع",
-      icon: <FlowerIcon className="w-5 h-5" />,
+      icon: <FlowerIcon className="w-8 h-8" />,
       color: "from-green-400 to-emerald-500",
       bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
       seasonImage:
@@ -118,7 +118,7 @@ const SeasonalSection = () => {
 
         {/* Seasons Selector */}
         <div className="flex justify-center mb-16">
-          <div className="inline-flex bg-white p-1 rounded-full shadow-lg border border-gray-100">
+          <div className="inline-flex  p-1 rounded-full shadow-lg border border-gray-100">
             {seasons.map((season) => (
               <button
                 key={season.id}
@@ -129,7 +129,7 @@ const SeasonalSection = () => {
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                <span className="mb-1">{season.icon}</span>
+                <span className="mb-1 ">{season.icon}</span>
                 <span className="font-medium text-sm">{season.name}</span>
               </button>
             ))}

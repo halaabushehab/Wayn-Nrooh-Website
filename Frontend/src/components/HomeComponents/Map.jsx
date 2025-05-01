@@ -58,7 +58,7 @@ function RoadSign({ destination, distance }) {
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 0.8 }}
       transition={{ duration: 0.5 }}
-      className="bg-white p-3 rounded-lg shadow-lg border-2 border-[#FFD700]"
+      className=" p-3 rounded-lg shadow-lg border-2 border-[#FFD700]"
     >
       <div className="text-center">
         <div className="text-lg font-bold text-[#022C43]">{destination}</div>
@@ -276,7 +276,7 @@ function MapSection() {
     <>
       {showAnimation && <TravelAnimation />}
       
-      <section className="py-16 bg-white relative">
+      <section className="py-16  relative">
         <div className="absolute top-10 right-10 rotate-12 opacity-80 hidden lg:block">
           <RoadSign destination="جرش" distance="50 كم" />
         </div>

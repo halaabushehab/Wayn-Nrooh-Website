@@ -1,434 +1,564 @@
-import React, { useState } from 'react';
-import { 
-  ChevronDownIcon, MapIcon, CompassIcon, HeartIcon, StarIcon, MapPinIcon,
-  PlayCircleIcon, CameraIcon, SparklesIcon, CoffeeIcon, UtensilsIcon,
-  TentIcon, MusicIcon, PaletteIcon
-} from 'lucide-react';
+import { useState } from 'react';
+import { Plane, Pin } from 'lucide-react';
 
-const About = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handlePlayClick = () => {
-    setIsPlaying(true);
-  };
-
-  // Destinations data
-  const destinations = [
-    {
-      title: 'وادي رم',
-      image: 'https://images.unsplash.com/photo-1486848538113-ce1a4923fbc5?w=800&h=600&fit=crop',
-      description: 'صحراء ساحرة بتشكيلات صخرية فريدة ورمال ذهبية',
-      location: 'جنوب الأردن',
-    },
-    {
-      title: 'جرش',
-      image: 'https://images.unsplash.com/photo-1518130160890-3c9a1debf981?w=800&h=600&fit=crop',
-      description: 'مدينة رومانية قديمة بآثار مذهلة',
-      location: 'شمال الأردن',
-    },
-    {
-      title: 'البحر الميت',
-      image: 'https://images.unsplash.com/photo-1544735716-ea9ef790f501?w=800&h=600&fit=crop',
-      description: 'أخفض نقطة على سطح الأرض بمياه علاجية',
-      location: 'غرب الأردن',
-    },
-  ];
-
-  // Experiences data
-  const experiences = [
-    {
-      title: 'جولات ثقافية',
-      description: 'استكشف التراث الأردني الغني مع السكان المحليين',
-      icon: <CompassIcon className="h-8 w-8" />,
-      color: 'from-amber-500 to-orange-600',
-      image: 'https://images.unsplash.com/photo-1552250575-e508473b090f?w=800&auto=format&fit=crop&q=60',
-    },
-    {
-      title: 'تذوق القهوة العربية',
-      description: 'اختبر طقوس القهوة العربية التقليدية',
-      icon: <CoffeeIcon className="h-8 w-8" />,
-      color: 'from-brown-500 to-amber-700',
-      image: 'https://images.unsplash.com/photo-1568465212448-162d3efd4560?w=800&auto=format&fit=crop&q=60',
-    },
-    {
-      title: 'المطبخ الأردني',
-      description: 'تعلم طهي الأطباق الأردنية الشهيرة',
-      icon: <UtensilsIcon className="h-8 w-8" />,
-      color: 'from-red-500 to-red-700',
-      image: 'https://images.unsplash.com/photo-1573225342350-16731dd9bf3d?w=800&auto=format&fit=crop&q=60',
-    },
-    {
-      title: 'مخيم صحراوي',
-      description: 'أمضِ ليلة تحت النجوم في وادي رم',
-      icon: <TentIcon className="h-8 w-8" />,
-      color: 'from-purple-500 to-purple-800',
-      image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?w=800&auto=format&fit=crop&q=60',
-    },
-    {
-      title: 'الموسيقى التقليدية',
-      description: 'استمع إلى الموسيقى الأردنية الأصيلة',
-      icon: <MusicIcon className="h-8 w-8" />,
-      color: 'from-blue-500 to-blue-700',
-      image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&auto=format&fit=crop&q=60',
-    },
-    {
-      title: 'الحرف اليدوية',
-      description: 'تعلم الحرف اليدوية التقليدية',
-      icon: <PaletteIcon className="h-8 w-8" />,
-      color: 'from-green-500 to-green-700',
-      image: 'https://images.unsplash.com/photo-1528732807373-ba48ba455b1f?w=800&auto=format&fit=crop&q=60',
-    },
-  ];
-
-  // Reviews data
-  const reviews = [
-    {
-      name: 'أحمد محمد',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
-      rating: 5,
-      text: 'اكتشفت أماكن مذهلة لم أكن أعرف عنها من قبل. تجربة لا تُنسى!',
-      location: 'البتراء، الأردن',
-      position: 'right',
-    },
-    {
-      name: 'سارة أحمد',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop',
-      rating: 5,
-      text: 'الدليل السياحي كان رائعاً وساعدني في اكتشاف الثقافة المحلية.',
-      location: 'جرش، الأردن',
-      position: 'left',
-    },
-    {
-      name: 'محمد علي',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop',
-      rating: 5,
-      text: 'رحلة مميزة في وادي رم، المناظر الطبيعية كانت خلابة!',
-      location: 'وادي رم، الأردن',
-      position: 'right',
-    },
-  ];
+export default function TravelWebsite() {
+  const [hoveredDestination, setHoveredDestination] = useState(null);
 
   return (
-    <div className="overflow-hidden">
+    <div className="font-sans text-gray-800">
+      {/* "url('https://images.pexels.com/photos/158827/field-corn-air-frisch-158827.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')" */}
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-[#022C43] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-fixed"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1570214476695-19bd467e6f7a?q=80&w=2070&auto=format&fit=crop')",
-            transform: 'translateZ(0)',
-          }}
-        >
-          <div className="absolute inset-0 bg-[#022C43]/70"></div>
-        </div>
-        
-        <div className="relative z-10 container mx-auto px-4 h-screen flex flex-col justify-center items-center text-center text-white">
-          <div className="animate-fadeIn">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#FFD700]">
-              اكتشف جمال الأردن
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed">
-              رحلة استثنائية عبر الكنوز المخفية والوجهات الساحرة في المملكة الأردنية الهاشمية
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-12">
-              <div className="flex flex-col items-center space-y-3 p-6 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all">
-                <MapIcon className="h-8 w-8 text-[#FFD700]" />
-                <h3 className="text-xl font-semibold">أماكن فريدة</h3>
-                <p className="text-sm opacity-90">
-                  اكتشف وجهات سياحية خارج المسار التقليدي
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-3 p-6 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all">
-                <CompassIcon className="h-8 w-8 text-[#FFD700]" />
-                <h3 className="text-xl font-semibold">تجارب محلية</h3>
-                <p className="text-sm opacity-90">
-                  عش التجربة الأردنية الحقيقية مع السكان المحليين
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-3 p-6 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all">
-                <HeartIcon className="h-8 w-8 text-[#FFD700]" />
-                <h3 className="text-xl font-semibold">ذكريات خالدة</h3>
-                <p className="text-sm opacity-90">
-                  اصنع ذكريات لا تُنسى في رحلتك
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <ChevronDownIcon className="h-8 w-8 text-[#FFD700]" />
-          </div>
-        </div>
-      </section>
+      <section
+  className="relative h-[50vh] bg-cover bg-center"
+  style={{
+    backgroundImage:
+      "url('https://images.pexels.com/photos/8354534/pexels-photo-8354534.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+  }}
+>
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-black opacity-10"></div>
 
-      {/* About Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#022C43] mb-4">
-              عن موقعنا
-            </h2>
-            <div className="w-24 h-1 bg-[#FFD700] mx-auto"></div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="md:w-1/2">
-              <div className="rounded-lg overflow-hidden shadow-xl">
-                <img
-                  src="https://images.unsplash.com/photo-1675182571984-06de60fd8306?q=80&w=1000&auto=format&fit=crop"
-                  alt="منظر طبيعي للأردن"
-                  className="w-full h-[400px] object-cover"
-                />
-              </div>
-            </div>
-            
-            <div className="md:w-1/2 text-right">
-              <h3 className="text-2xl font-bold text-[#115173] mb-4">
-                اكتشف جمال الأردن الخفي
-              </h3>
-              <p className="text-[#444444] mb-4 leading-relaxed text-lg">
-                مرحباً بكم في موقعنا المخصص لاكتشاف الأماكن الأقل شهرة في الأردن.
-                نحن نسعى لتسليط الضوء على الكنوز المخفية والوجهات الساحرة التي لا
-                تظهر عادةً في مسارات السياحة التقليدية.
-              </p>
-              <p className="text-[#444444] mb-6 leading-relaxed text-lg">
-                من خلال هذا الموقع، نهدف إلى مشاركة المعلومات القيّمة والتجارب
-                الفريدة التي تتيح للزوار استكشاف جوانب أصيلة من الثقافة الأردنية
-                والمناظر الطبيعية الخلابة والمواقع التاريخية النادرة.
-              </p>
-              <p className="text-[#444444] leading-relaxed text-lg">
-                انضموا إلينا في رحلة اكتشاف جمال الأردن بعيداً عن الطرق المطروقة،
-                واستمتعوا بتجارب سفر أصيلة ستبقى في ذاكرتكم إلى الأبد.
-              </p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-[#FFD700] hover:transform hover:-translate-y-2 transition-transform duration-300">
-              <h3 className="text-xl font-bold text-[#022C43] mb-4 text-center">
-                اكتشاف الأماكن
-              </h3>
-              <p className="text-[#444444] text-center">
-                نقدم معلومات مفصلة عن الأماكن الأقل شهرة في الأردن، مع نصائح
-                للزيارة وأفضل الأوقات للاستمتاع بها.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-[#FFD700] hover:transform hover:-translate-y-2 transition-transform duration-300">
-              <h3 className="text-xl font-bold text-[#022C43] mb-4 text-center">
-                الثقافة المحلية
-              </h3>
-              <p className="text-[#444444] text-center">
-                نستكشف العادات والتقاليد الأردنية الأصيلة، والمأكولات المحلية،
-                والحرف اليدوية التي تعكس تراث المملكة الغني.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-[#FFD700] hover:transform hover:-translate-y-2 transition-transform duration-300">
-              <h3 className="text-xl font-bold text-[#022C43] mb-4 text-center">
-                تجارب فريدة
-              </h3>
-              <p className="text-[#444444] text-center">
-                نشارك قصص وتجارب حقيقية من مسافرين اكتشفوا سحر الأردن الخفي، ونقدم
-                اقتراحات لمغامرات لا تُنسى.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+  {/* Content */}
+  <div
+    dir="rtl"
+    className="absolute inset-0 flex flex-col justify-center items-center px-6 text-white text-center z-10"
+  >
+    {/* Badge and subtitle */}
+    <div className="flex items-center text-sm mb-4 space-x-2 space-x-reverse">
+      <span className="bg-[#FFD700] text-black px-3 py-1 rounded-full text-xs font-bold">
+        وين نروح
+      </span>
+      <span className="tracking-wide">من نحن</span>
+    </div>
 
-      {/* Experiences Section */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#022C43] mb-4">
-              تجارب فريدة في الأردن
-            </h2>
-            <div className="w-24 h-1 bg-[#FFD700] mx-auto mb-6"></div>
-            <p className="text-xl text-[#444444] max-w-2xl mx-auto">
-              اكتشف الثقافة الأردنية من خلال تجارب حية وفريدة
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {experiences.map((experience, index) => (
-              <div
-                key={index}
-                className="group relative transform transition-all duration-500 hover:scale-105"
-              >
-                <div className="relative h-96 rounded-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br bg-opacity-90 backdrop-blur-sm p-6 flex flex-col justify-between">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${experience.color} opacity-90`}></div>
-                    
-                    <div className="relative z-10">
-                      <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                        {React.cloneElement(experience.icon, {
-                          className: 'h-8 w-8 text-white',
-                        })}
-                      </div>
-                      <h3 className="text-2xl font-bold text-white mb-3">
-                        {experience.title}
-                      </h3>
-                      <p className="text-white/90 text-lg">
-                        {experience.description}
-                      </p>
-                    </div>
-                    
-                    <div className="relative z-10">
-                      <button className="bg-white/20 hover:bg-white/30 text-white py-2 px-6 rounded-lg transition-colors">
-                        اكتشف المزيد
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-500"
-                    style={{
-                      backgroundImage: `url(${experience.image})`,
-                    }}
-                  ></div>
-                </div>
-                
-                <div className="absolute -bottom-4 left-4 right-4 h-12 bg-gradient-to-t from-black/10 to-transparent rounded-xl blur-xl transform transition-all duration-500 group-hover:scale-110 group-hover:translate-y-1"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    {/* Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+      اكتشف الأردن من منظور جديد
+    </h1>
 
-      {/* Reviews Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#022C43] mb-4">
-              رحلات ملهمة
-            </h2>
-            <div className="w-24 h-1 bg-[#FFD700] mx-auto"></div>
-          </div>
-          
-          <div className="relative">
-            <div className="absolute top-0 left-1/2 w-1 h-full bg-[#FFD700]/20 transform -translate-x-1/2 rounded-full" />
-            
-            <div className="space-y-24">
-              {reviews.map((review, index) => (
-                <div key={index} className="relative">
-                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-[#FFD700] rounded-full z-10">
-                    <div className="absolute w-8 h-8 bg-[#FFD700]/20 rounded-full -left-2 -top-2 animate-ping" />
-                  </div>
-                  
-                  <div className={`flex items-center ${review.position === 'left' ? 'flex-row-reverse' : 'flex-row'} gap-8`}>
-                    <div className={`w-1/2 ${review.position === 'left' ? 'text-left' : 'text-right'}`}>
-                      <div className="bg-white rounded-lg shadow-xl p-6 transform transition-transform hover:-translate-y-2">
-                        <div className={`flex items-center ${review.position === 'left' ? 'flex-row' : 'flex-row-reverse'} mb-4`}>
-                          <img
-                            src={review.image}
-                            alt={review.name}
-                            className="w-16 h-16 rounded-full object-cover border-4 border-[#FFD700]/20"
-                          />
-                          <div className={review.position === 'left' ? 'ml-4' : 'mr-4'}>
-                            <h3 className="font-bold text-[#022C43] text-lg">
-                              {review.name}
-                            </h3>
-                            <div className="flex items-center text-[#FFD700]">
-                              <MapPinIcon className="h-4 w-4 inline mx-1" />
-                              <span className="text-sm">{review.location}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex mb-3">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <StarIcon
-                              key={i}
-                              className="h-5 w-5 text-[#FFD700] fill-current"
-                            />
-                          ))}
-                        </div>
-                        
-                        <p className="text-[#444444] leading-relaxed">
-                          {review.text}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+    {/* Description */}
+    <p className="mb-6 max-w-2xl text-base md:text-lg leading-relaxed">
+      منصة تساعدك على استكشاف أماكن فريدة وتجارب لا تُنسى في أنحاء الأردن.
+    </p>
 
-      {/* Video Section */}
-      <section className="w-full bg-gradient-to-r from-[#022C43] to-[#115173] py-16">
-        <div className="container mx-auto px-4 mb-12">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center mb-4">
-              <SparklesIcon className="h-8 w-8 text-[#FFD700] animate-pulse mr-2" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white">
-                شاهد روعة الأردن
-              </h2>
-              <SparklesIcon className="h-8 w-8 text-[#FFD700] animate-pulse ml-2" />
-            </div>
-            
-            <div className="w-24 h-1 bg-[#FFD700] mx-auto mb-6"></div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-              <div className="flex items-center justify-center space-x-2 text-white/90">
-                <CameraIcon className="h-5 w-5 text-[#FFD700] ml-2" />
-                <span>مناظر خلابة</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2 text-white/90">
-                <HeartIcon className="h-5 w-5 text-[#FFD700] ml-2" />
-                <span>لحظات لا تنسى</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2 text-white/90">
-                <SparklesIcon className="h-5 w-5 text-[#FFD700] ml-2" />
-                <span>تجارب مميزة</span>
-              </div>
-            </div>
-            
-            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-              استعد لرحلة بصرية مذهلة عبر أجمل المعالم السياحية في الأردن. شاهد
-              الآن واترك نفسك تنبهر بجمال وسحر المملكة!
-            </p>
-          </div>
-        </div>
-        
-        <div className="relative w-full max-w-[1920px] mx-auto overflow-hidden">
-          {!isPlaying && (
-            <div
-              className="absolute inset-0 bg-[#022C43]/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center cursor-pointer group"
-              onClick={handlePlayClick}
-            >
-              <div className="transform transition-all duration-500 group-hover:scale-110">
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-[#FFD700]/20 rounded-full blur-xl group-hover:bg-[#FFD700]/30 transition-all duration-500"></div>
-                  <PlayCircleIcon className="w-24 h-24 text-white relative z-10 group-hover:text-[#FFD700] transition-colors duration-500" />
-                </div>
-              </div>
-              <p className="mt-6 text-xl text-white font-semibold opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                انقر للمشاهدة
-              </p>
-            </div>
-          )}
-          
-          <div className="aspect-video w-full">
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/3zTR4ayDG38${isPlaying ? '?autoplay=1' : ''}`}
-              title="استكشاف الأردن"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
+  </div>
+</section>
+
+
+
+      {/* Emotional Section */}
+      <section dir="rtl" className="py-16 px-4 sm:px-6 md:px-16 lg:px-32 bg-white">
+  <div className="max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
+    {/* Image Section */}
+    <div className="w-full md:w-1/2">
+      <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden shadow-lg">
+        <img 
+          src="https://i.pinimg.com/736x/1a/f0/88/1af08855656916032def657d64930760.jpg" 
+          alt="تجربة ركوب الفيل" 
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+        />
+      </div>
+    </div>
     
-      </section>
+    {/* Content Section */}
+    <div className="w-full md:w-1/2 space-y-6">
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-800">!دع مشاعرك تقودك للمغامرة</h2>
+      
+      <div className="space-y-4 text-gray-600 leading-relaxed">
+        <p><span className="font-semibold text-black">وين نروح</span> هو موقع إلكتروني أُطلق في عام 2025 بهدف مساعدة المستخدمين على استكشاف أماكن جديدة ومميزة في الأردن بطريقة سهلة وتفاعلية.</p>
+        <p>جاءت فكرة الموقع نتيجة الحاجة إلى منصة عربية تُقدم معلومات موثوقة ومفصلة عن الأماكن السياحية والترفيهية، خاصةً للعائلات والشباب الذين يبحثون عن تجارب محلية ممتعة.</p>
+        <p>يُقدم الموقع دليلاً شاملاً يشمل المواقع الطبيعية، الثقافية، والأسواق المحلية، مع إمكانية التصفية حسب الفئة أو الموقع الجغرافي.</p>
+      </div>
+
+      <ul className="space-y-3">
+        <li className="flex items-start">
+          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
+          <span>اقتراحات مخصصة حسب موقعك واهتماماتك</span>
+        </li>
+        <li className="flex items-start">
+          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
+          <span>معلومات دقيقة عن الأماكن: صور، أوقات العمل، التكاليف، الفئات المناسبة</span>
+        </li>
+        <li className="flex items-start">
+          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
+          <span>تقييمات وتعليقات من الزوار لتساعدك في اتخاذ القرار</span>
+        </li>
+        <li className="flex items-start">
+          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
+          <span>سهولة في الاستخدام وتجربة عربية بالكامل</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+
+
+      
+
+
+            {/* Stats Section */}
+            <section className="py-16 px-6 md:px-16 lg:px-32 bg-white relative overflow-hidden" dir="rtl">
+  {/* Decorative elements */}
+  <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#115173] opacity-5"></div>
+    <div className="absolute left-20 bottom-0 w-96 h-96 rounded-full bg-[#FFD700] opacity-3"></div>
+  </div>
+
+  {/* Section title */}
+  <div className="relative mb-16 text-center">
+    <h2 className="text-3xl md:text-4xl font-bold text-[#022C43] mb-4">
+      لماذا تختار "وين نروح"؟
+    </h2>
+    <div className="w-20 h-1 bg-gradient-to-r from-[#FFD700] to-[#115173] mx-auto"></div>
+  </div>
+
+  {/* Statistics grid - quarter layout */}
+  <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
+    {/* Top left - Tourist destinations */}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-[#115173]/10 hover:shadow-md transition duration-300">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-[#115173]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#115173]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-3xl font-bold text-[#022C43] mb-1">
+            <span className="counter" data-target="320">0</span>+
+          </h3>
+          <p className="text-[#115173] font-medium">وجهة سياحية</p>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    {/* Top right - Ratings */}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-[#115173]/10 hover:shadow-md transition duration-300">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-[#FFD700]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-3xl font-bold text-[#022C43] mb-1">
+            <span className="counter" data-target="1200">0</span>+
+          </h3>
+          <p className="text-[#115173] font-medium">تقييم من الزوار</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom left - Cities */}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-[#115173]/10 hover:shadow-md transition duration-300">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-[#115173]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#115173]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-3xl font-bold text-[#022C43] mb-1">
+            <span className="counter" data-target="3">0</span>
+          </h3>
+          <p className="text-[#115173] font-medium">مدن رئيسية</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom right - Bookings */}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-[#115173]/10 hover:shadow-md transition duration-300">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-[#FFD700]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-3xl font-bold text-[#022C43] mb-1">
+            <span className="counter" data-target="850">0</span>+
+          </h3>
+          <p className="text-[#115173] font-medium">حجز تم عبر المنصة</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Counter animation script (add this to your JS) */}
+  <script dangerouslySetInnerHTML={{
+    __html: `
+      document.addEventListener('DOMContentLoaded', () => {
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+        
+        const animateCounters = () => {
+          counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            const increment = target / speed;
+            
+            if (count < target) {
+              counter.innerText = Math.ceil(count + increment);
+              setTimeout(animateCounters, 1);
+            } else {
+              counter.innerText = target;
+            }
+          });
+        };
+        
+        // Start animation when section is in view
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            animateCounters();
+            observer.unobserve(entries[0].target);
+          }
+        }, { threshold: 0.5 });
+        
+        observer.observe(document.querySelector('section'));
+      });
+    `
+  }}></script>
+</section>
+
+
+
+      {/* our vision */}
+
+<section dir="rtl" className="py-20 px-4 sm:px-6 md:px-16 lg:px-32 bg-gradient-to-b from-[#F8F4E9] to-[#FFF9EE] relative overflow-hidden">
+  {/* <!-- عناصر زخرفية --> */}
+  <div className="absolute top-0 left-0 w-40 h-40 bg-[#FFD700]/10 rounded-full filter blur-3xl"></div>
+  <div className="absolute bottom-10 right-20 w-60 h-60 bg-[#FF6B6B]/10 rounded-full filter blur-3xl"></div>
+  
+  <div className="max-w-6xl mx-auto relative z-10">
+    {/* <!-- العنوان الرئيسي مع تأثير مميز --> */}
+    <div className="text-center mb-16">
+      <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+        <span className="relative inline-block">
+          <span className="relative z-10">رؤيتنا</span>
+          <span className="absolute bottom-0 right-0 w-full h-3 bg-[#FFD700]/50 z-0 transform -rotate-1"></span>
+        </span>
+      </h2>
+      <div className="w-24 h-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] mx-auto rounded-full"></div>
+    </div>
+
+    {/* <!-- النص الرئيسي مع تأثيرات مرئية --> */}
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-10 shadow-lg border border-[#FFD700]/20 mb-12 transform transition-all hover:shadow-xl hover:-translate-y-1">
+      <p className="text-gray-700 leading-relaxed text-lg md:text-xl text-center max-w-3xl mx-auto font-medium">
+        نطمح لأن يصبح موقع 
+        <span className="font-bold text-[#FF6B6B] relative px-1">
+          <span className="relative z-10">وين نروح</span>
+          <span className="absolute bottom-0 right-0 w-full h-2 bg-[#FFD700]/30 z-0"></span>
+        </span> 
+        الوجهة الأولى لاكتشاف التجارب المميزة في المملكة والعالم العربي، حيث نبتكر أدوات ذكية تجعل كل رحلة فريدة.
+      </p>
+    </div>
+
+    {/* <!-- النقاط مع أيقونات مميزة --> */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      {/* <!-- النقطة 1 --> */}
+      <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-[#FFD700] hover:border-[#FF6B6B] transition-all">
+        <div className="flex items-start">
+          <div className="bg-[#FFF5E6] p-3 rounded-lg ml-4 flex-shrink-0">
+            <svg className="w-6 h-6 text-[#FFA500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-lg mb-2">ذكاء اصطناعي متطور</h3>
+            <p className="text-gray-600">نظام اقتراحات ذكي يتعلم من تفضيلاتك ليقدم لك تجارب شخصية</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* <!-- النقطة 2 --> */}
+      <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-[#FFD700] hover:border-[#FF6B6B] transition-all">
+        <div className="flex items-start">
+          <div className="bg-[#FFF5E6] p-3 rounded-lg ml-4 flex-shrink-0">
+            <svg className="w-6 h-6 text-[#FFA500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-lg mb-2">مشاركة التجارب</h3>
+            <p className="text-gray-600">شارك رحلاتك عبر معرض صور تفاعلي وتقييمات مفصلة</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* <!-- النقطة 3 --> */}
+      <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-[#FFD700] hover:border-[#FF6B6B] transition-all">
+        <div className="flex items-start">
+          <div className="bg-[#FFF5E6] p-3 rounded-lg ml-4 flex-shrink-0">
+            <svg className="w-6 h-6 text-[#FFA500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-lg mb-2">تطبيق محمول</h3>
+            <p className="text-gray-600">تطبيق سريع ومرن مع ميزات حصرية للاكتشاف أثناء التنقل</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* <!-- النقطة 4 --> */}
+      <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-[#FFD700] hover:border-[#FF6B6B] transition-all">
+        <div className="flex items-start">
+          <div className="bg-[#FFF5E6] p-3 rounded-lg ml-4 flex-shrink-0">
+            <svg className="w-6 h-6 text-[#FFA500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-lg mb-2">شراكات استراتيجية</h3>
+            <p className="text-gray-600">تعاون مع أفضل الجهات السياحية لتقديم محتوى موثوق وحصري</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      {/* Offbeat Stays Section */}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-amber-50 p-8 relative">
+  {/* Decorative border frame */}
+  <div className="absolute inset-0 border-2 border-amber-200 m-6 pointer-events-none rounded-lg"></div>
+
+  {/* Main content container */}
+  <div className="w-full max-w-4xl py-8 px-6 relative z-10">
+    {/* Elegant title */}
+    <div className="bg-white rounded-full shadow-sm py-3 px-10 mb-8 mx-auto w-fit border border-amber-100">
+      <h1 className="text-xl font-serif font-medium text-center text-amber-800 tracking-wide">
+        "لحظات ساحرة من رحلاتكم حول العالم"
+      </h1>
+    </div>
+
+    {/* Descriptive text */}
+    <p className="text-lg text-center text-amber-900 mb-8 leading-relaxed font-serif">
+      هنا نلتقط أنقى الذكريات التي عاشها زوارنا في رحلاتهم — لحظات تفيض بالبهجة، 
+      <br />
+      العجائب، والدفء الإنساني. قصص ترويها عدسة الكاميرا قبل الكلمات.
+    </p>
+
+    {/* Images section - now 3 in one row without scroll */}
+    <div className="flex gap-10 justify-center items-start flex-wrap">
+      {/* Image 1 */}
+      <div className="relative transform -rotate-10 hover:rotate-0 transition-transform duration-500 w-64">
+        <div className="relative group">
+          <img
+            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            alt="العائلة في عمان"
+            className="w-full h-64 object-cover shadow-lg rounded-sm 
+            border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
+            border-white transition-all duration-300 group-hover:shadow-xl"
+          />
+          <div className="absolute -top-3 -left-3 right-30">
+            <Pin size={28} className="text-amber-600" />
+          </div>
+          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+            <p className="text-base font-serif font-semibold text-white">
+              الأردن - عمان
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Image 2 */}
+      <div className="relative transform rotate-2 hover:rotate-0 transition-transform duration-500 w-64">
+        <div className="relative group">
+          <img
+            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            alt="العائلة في الزرقاء"
+            className="w-full h-64 object-cover shadow-lg rounded-sm 
+            border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
+            border-white transition-all duration-300 group-hover:shadow-xl"
+          />
+          <div className="absolute -top-3 -left-3 right-30">
+            <Pin size={28} className="text-amber-600" />
+          </div>
+          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+            <p className="text-base font-serif font-semibold text-white">
+              الأردن - الزرقاء
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Image 3 */}
+      <div className="relative transform -rotate-4 hover:rotate-0 transition-transform duration-500 w-64">
+        <div className="relative group">
+          <img
+            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            alt="العائلة في عمان"
+            className="w-full h-64 object-cover shadow-lg rounded-sm 
+            border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
+            border-white transition-all duration-300 group-hover:shadow-xl"
+          />
+          <div className="absolute -top-3 -left-3  right-30">
+            <Pin size={28} className="text-amber-600" />
+          </div>
+          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+            <p className="text-base font-serif font-semibold text-white">
+              الأردن - عمان
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Decorative quote */}
+    <div className="mt-12 text-center">
+      <p className="font-serif italic text-amber-700 text-lg">
+        "كل صورة تحمل قصة، وكل قصة تصنع ذكرى"
+      </p>
+    </div>
+  </div>
+</div>
+
+
+      {/* our  value */}
+      <section dir="rtl" className="py-16 px-4 sm:px-6 md:px-16 lg:px-32 bg-white">
+  <div className="max-w-6xl mx-auto space-y-6">
+    <h2 className="text-3xl md:text-4xl font-bold text-[#022C43] text-center relative pb-4">
+      قيمنا
+      <span className="absolute bottom-0 right-1/2 transform translate-x-1/2 w-20 h-1 bg-[#FFD700] rounded-full"></span>
+    </h2>
+
+    <p className="text-[#115173] leading-relaxed text-lg text-center max-w-3xl mx-auto">
+      في <span className="font-semibold text-[#022C43]">وين نروح</span>، نؤمن بأن نجاحنا لا يقوم فقط على التكنولوجيا والمحتوى، بل على المبادئ التي نلتزم بها في كل تفصيل نقدمه.
+    </p>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
+      {/* <!-- Card 1 --> */}
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+        <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">الشفافية</h3>
+        <p className="text-[#115173] text-center text-sm leading-relaxed">نحرص على عرض معلومات دقيقة وموثوقة بكل وضوح وحيادية.</p>
+      </div>
+      
+      {/* <!-- Card 2 --> */}
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+        <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">الابتكار</h3>
+        <p className="text-[#115173] text-center text-sm leading-relaxed">نبحث دائمًا عن طرق جديدة لتحسين تجربة المستخدم وتقديم محتوى مميز.</p>
+      </div>
+      
+      {/* <!-- Card 3 --> */}
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+        <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">الجودة</h3>
+        <p className="text-[#115173] text-center text-sm leading-relaxed">نهتم بأدق التفاصيل لنقدم تجربة عالية المستوى للمستخدم.</p>
+      </div>
+      
+      {/* <!-- Card 4 --> */}
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+        <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">تجربة المستخدم</h3>
+        <p className="text-[#115173] text-center text-sm leading-relaxed">نصمّم كل ميزة في المنصة لتكون بسيطة، مريحة، ومناسبة للمستخدم العربي.</p>
+      </div>
+      
+      {/* <!-- Card 5 --> */}
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+        <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">دعم السياحة المحلية</h3>
+        <p className="text-[#115173] text-center text-sm leading-relaxed">نُبرز الأماكن المحلية ونشجع على استكشاف الجمال الموجود حولنا.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+      
+      {/* contact Us */}
+      <section dir="rtl" class="relative py-20 px-4 sm:px-6 md:px-16 lg:px-32 bg-white overflow-hidden">
+  {/* <!-- عناصر زخرفية ديناميكية --> */}
+  <div class="absolute top-0 left-0 w-full h-full opacity-10">
+    <div class="absolute top-20 left-1/4 w-16 h-16 bg-[#FFD700] rounded-full filter blur-xl"></div>
+    <div class="absolute bottom-10 right-1/3 w-24 h-24 bg-[#115173] rounded-full filter blur-xl"></div>
+  </div>
+  
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-[#022C43] mb-4 animate-fadeIn">
+        <span class="text-[#115173]">تواصل</span> مع فريقنا
+      </h2>
+      <div class="w-24 h-1 bg-[#FFD700] mx-auto mb-6"></div>
+      <p class="text-xl text-[#022C43] max-w-2xl mx-auto leading-relaxed">
+        نرحب بأفكارك واستفساراتك! فريقنا موجود دائماً لمساعدتك وتلقي ملاحظاتك.
+      </p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      {/* <!-- بطاقة التواصل الرئيسية --> */}
+      <div class="bg-[#FFFFFF] p-8 rounded-2xl shadow-2xl transform transition hover:scale-105 duration-300 border-t-4 border-[#FFD700]">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-[#FFFFFF] rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#FFD700]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#115173]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-[#022C43] mb-3">راسلنا مباشرة</h3>
+          <p class="text-[#115173] mb-6">للاستفسارات العامة وطلبات الشراكة</p>
+          <a href="mailto:contact@wayn-nrouh.com" class="inline-block bg-[#FFD700] hover:bg-[#FFD700]/80 text-[#022C43] font-bold py-3 px-8 rounded-full transition duration-300 shadow-md">
+            contact@wayn-nrouh.com
+          </a>
+        </div>
+      </div>
+      
+      <div class="bg-[#FFFFFF] p-8 rounded-2xl shadow-2xl transform transition hover:scale-105 duration-300 border-t-4 border-[#115173]">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-[#FFFFFF] rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#115173]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#115173]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-[#022C43] mb-3">اتصل بنا</h3>
+          <p class="text-[#115173] mb-6">متاحون للمساعدة من الأحد إلى الخميس</p>
+          <a href="tel:+123456789" class="inline-block bg-[#115173] hover:bg-[#115173]/80 text-white font-bold py-3 px-8 rounded-full transition duration-300 shadow-md">
+            +123 456 789
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-16 text-center">
+      <a href="/contact" class="inline-flex items-center px-8 py-4 bg-[#022C43] hover:bg-[#022C43]/80 text-white font-bold rounded-full transition duration-300 shadow-lg">
+        <span>زيارة صفحة الاتصال الكاملة</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+      
+ 
     </div>
   );
-};
-
-export default About;
-
-
+}

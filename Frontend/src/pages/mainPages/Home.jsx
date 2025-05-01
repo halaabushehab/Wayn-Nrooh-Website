@@ -36,10 +36,10 @@ const Home = () => {
       <JordanDestinations />
       
       {/* ***** Seasonal Destinations Section ***** */}
-      <SeasonalDestinations />
+      {/* <SeasonalDestinations /> */}
       
       {/* ***** Map Section ***** */}
-      {/* <MapSection /> */}
+      <MapSection />
 
 
           {/* <ExploreJordanSection /> */}

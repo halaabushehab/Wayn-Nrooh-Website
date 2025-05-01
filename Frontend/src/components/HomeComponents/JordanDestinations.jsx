@@ -257,7 +257,7 @@ function JordanGallery() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-[#f8f9fa] to-white">
+    <section className="py-16 ">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-[#022C43] mb-4">معرض الأردن الساحر</h2>
