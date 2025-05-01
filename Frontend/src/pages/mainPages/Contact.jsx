@@ -53,7 +53,7 @@ const ContactSection = () => {
     <div className="bg-gradient-to-b from-amber-50 to-white">
       {/* Hero Section with Creative Design */}
       <div
-        className="relative h-96  w-full flex items-center justify-center bg-cover bg-center rounded-xl overflow-hidden mx-4 my-8"
+        className="relative h-120  w-full flex items-center justify-center bg-cover bg-center  overflow-hidden  "
         style={{ backgroundImage: "url('https://i.pinimg.com/736x/7a/39/c9/7a39c98897363a0625c40c57d8522bc7.jpg')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-amber-900/70 to-black/60 backdrop-blur-sm"></div>

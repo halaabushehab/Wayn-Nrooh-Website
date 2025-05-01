@@ -20,7 +20,7 @@ const AboutSection = () => {
   }, []);
 
   return (
-    <section id="about" className="py-16 bg-[#F8F9FA]">
+    <section id="about" className="py-16 ">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-12">
           {/* النص والوصف */}

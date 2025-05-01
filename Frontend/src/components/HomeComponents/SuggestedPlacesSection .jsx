@@ -134,68 +134,142 @@
 
 
 
-import React from "react";
-import { Link } from "react-router-dom";
+
+
+// import React from "react";
+// import { Link } from "react-router-dom";
+// import { SparklesIcon, StarIcon, MapPinIcon, PalmtreeIcon } from "lucide-react";
+
+// export default function NewsletterSection() {
+//   return (
+//     <div 
+//       className="relative p-10 rounded-2xl shadow-lg overflow-hidden"
+//       style={{
+//         background: "url('https://i.pinimg.com/736x/2f/50/7d/2f507d4611eb45dbd2f0ec5cee94e36b.jpg')",
+//         backgroundSize: "cover",
+//         backgroundPosition: "center",
+//       }}
+//     >
+//       {/* التراكب الشفاف لتحسين قراءة النص */}
+//       <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70"></div>
+
+//       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        
+//         {/* العناصر الزخرفية اليسرى */}
+//         <div className="flex flex-col items-center gap-4"></div>
+
+//         {/* محتوى النص والزر */}
+//         <div className="text-center max-w-md py-8">
+
+//           <h2 className="text-white text-3xl font-bold mb-3 flex justify-center items-center gap-2" dir="rtl">
+//             هل زرت مكانًا مميزًا؟
+//           </h2>
+
+//           <div className="mb-2 flex justify-center">
+//             <div className="h-0.5 w-20 bg-yellow-400 rounded-full"></div>
+//           </div>
+
+//           <p className="text-white mb-8 leading-relaxed text-lg" dir="rtl">
+//             شاركنا تجربتك واقترح مكانًا رائعًا ليستمتع به الآخرون
+//             <br />
+//             في "وين نروح"
+//           </p>
+
+//           {/* زر باستخدام Link */}
+//           <Link
+//   to="/suggest"
+//   className="group relative bg-[#115173]  w-50 hover:bg-yellow-500 text-white font-bold text-base px-6 py-3 rounded-xl overflow-hidden transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
+//   dir="rtl"
+// >
+//   <span className="relative z-10 flex items-center gap-2">
+//     <MapPinIcon size={16} className="group-hover:animate-pulse  transition-all" />
+//     اقترح مكان
+//   </span>
+//   <div className="absolute inset-0 w-0 bg-white group-hover:w-full transition-all duration-300 z-0 opacity-20"></div>
+// </Link>
+
+
+//         </div>
+
+//         {/* العناصر الزخرفية اليمنى */}
+//         <div className="flex flex-col items-center gap-4"></div>
+        
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+import React, { useState } from 'react';
 import { SparklesIcon, StarIcon, MapPinIcon, PalmtreeIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function NewsletterSection() {
+const NewsletterArabic = () => {
+  const [email, setEmail] = useState('');
+
+  const handleSubmit = () => {
+    alert(`تم تسجيل البريد الإلكتروني: ${email}`);
+    setEmail('');
+  };
+
   return (
-    <div 
-      className="relative p-10 rounded-2xl shadow-lg overflow-hidden"
-      style={{
-        background: "url('https://i.pinimg.com/736x/2f/50/7d/2f507d4611eb45dbd2f0ec5cee94e36b.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* التراكب الشفاف لتحسين قراءة النص */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70"></div>
+    <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 rounded-lg shadow-sm w-full max-w-6xl mx-auto my-20">
+   <div className="hidden md:block w-64 h-64 mr-4">
+  <img 
+  
+  src="https://i.pinimg.com/736x/55/a1/98/55a1987d73befaa68d245786bdcbbd73.jpg" 
+  // src="https://i.pinimg.com/736x/22/c0/3a/22c03a8808e1ebd7b33b424c9134cbe7.jpg" 
+    alt="صورة زخرفية" 
+    className="w-full h-full object-cover rounded-lg"
+  />
+</div>
+      
+      {/* القسم الأوسط - النص وحقل الإدخال */}
+      <div className="flex flex-col items-center flex-1 px-6 mb-4 md:mb-0">
+  <div className="text-center w-full mb-4" dir="rtl">
+    <h2 className="text-[#022C43] text-2xl font-bold mb-3 text-center flex items-center justify-center gap-2">
+      هل زرت مكانًا مميزًا؟
+    </h2>
 
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-        
-        {/* العناصر الزخرفية اليسرى */}
-        <div className="flex flex-col items-center gap-4"></div>
+    <p className="text-[#115173] text-center mb-6 leading-relaxed">
+      شاركنا تجربتك واقترح مكانًا رائعًا ليستمتع به الآخرون
+      <br />
+      في "وين نروح"
+    </p>
+  </div>
 
-        {/* محتوى النص والزر */}
-        <div className="text-center max-w-md py-8">
+  <Link
+    to="/suggest"
+    className="relative bg-[#FFD700] text-white font-bold px-8 py-3 rounded-xl overflow-hidden group-hover:shadow-xl transition-all duration-300 flex items-center gap-2 no-underline"
+    style={{ textDecoration: "none" }}
+  >
+    <span className="relative z-10 flex items-center gap-2">
+      <StarIcon
+        size={18}
+        className="group-hover:rotate-45 transition-all"
+      />
+      اقترح مكان
+    </span>
+  </Link>
+</div>
 
-          <h2 className="text-white text-3xl font-bold mb-3 flex justify-center items-center gap-2" dir="rtl">
-            هل زرت مكانًا مميزًا؟
-          </h2>
-
-          <div className="mb-2 flex justify-center">
-            <div className="h-0.5 w-20 bg-yellow-400 rounded-full"></div>
-          </div>
-
-          <p className="text-white mb-8 leading-relaxed text-lg" dir="rtl">
-            شاركنا تجربتك واقترح مكانًا رائعًا ليستمتع به الآخرون
-            <br />
-            في "وين نروح"
-          </p>
-
-          {/* زر باستخدام Link */}
-          <Link
-  to="/suggest"
-  className="group relative bg-[#115173]  w-50 hover:bg-yellow-500 text-white font-bold text-base px-6 py-3 rounded-xl overflow-hidden transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
-  dir="rtl"
->
-  <span className="relative z-10 flex items-center gap-2">
-    <MapPinIcon size={16} className="group-hover:animate-pulse  transition-all" />
-    اقترح مكان
-  </span>
-  <div className="absolute inset-0 w-0 bg-white group-hover:w-full transition-all duration-300 z-0 opacity-20"></div>
-</Link>
-
-
-        </div>
-
-        {/* العناصر الزخرفية اليمنى */}
-        <div className="flex flex-col items-center gap-4"></div>
-        
-      </div>
+      
+      {/* القسم الأيمن - الصورة */}
+      <div className="hidden md:block w-64 h-64 mr-4">
+  <img 
+    // src="https://i.pinimg.com/736x/04/fa/5a/04fa5aa69af8b601c992056390391707.jpg" 
+    // src="https://i.pinimg.com/736x/4a/79/f2/4a79f27ba8e183c272896d8a3cadeb64.jpg" 
+    src="https://i.pinimg.com/736x/04/fa/5a/04fa5aa69af8b601c992056390391707.jpg" 
+    alt="صورة زخرفية" 
+    className="w-full h-full object-cover  w-45 h-45 rounded-lg"
+  />
+</div>
+      
     </div>
   );
-}
+};
 
-
-
+export default NewsletterArabic;

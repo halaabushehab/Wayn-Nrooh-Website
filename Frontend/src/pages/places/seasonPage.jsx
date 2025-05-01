@@ -39,7 +39,7 @@ const SeasonalSection = () => {
     {
       id: "صيف",
       name: "الصيف",
-      icon: <SunIcon className="w-5 h-5" />,
+      icon: <SunIcon className="w-8 h-5" />,
       color: "from-amber-400 to-orange-500",
       bgColor: "bg-gradient-to-br from-amber-50 to-orange-50",
       seasonImage:
@@ -127,18 +127,44 @@ const SeasonalSection = () => {
   };
 
   return (
-    <section className={`py-16 ${activeSeasonObj.bgColor} transition-colors duration-500 my-20`}>
-      <div className="container mx-auto px-4">
+<>
+        {/* Hero Section for Seasonal Destinations */}
+        <div
+  className="relative h-110 w-full flex items-center justify-center bg-cover bg-center overflow-hidden"
+  style={{ backgroundImage: "url('https://i.pinimg.com/736x/c2/eb/cf/c2ebcfed023edb4c96f9dd3e1a6e93a2.jpg')" }}
+>
+  {/* طبقة التدرج والتأثير البصري مع بلر أخف */}
+  <div className="absolute inset-0  bg-black/20"></div>
+
+  {/* المحتوى */}
+  <div className="relative z-10 text-center text-white p-6 max-w-2xl bg-black/30 rounded-xl shadow-md">
+    <div className="mb-4 transform -rotate-2">
+      <h3 className="text-5xl font-extrabold mb-2 drop-shadow-xl text-white">الوجهات الموسمية</h3>
+      <div className="h-1 w-20 bg-amber-400 mx-auto rounded-full"></div>
+    </div>
+    <p className="text-lg text-amber-100 leading-relaxed font-medium">
+      استكشف أجمل الوجهات حسب كل موسم! استمتع بالثلوج شتاءً، وازهار الربيع، وشواطئ الصيف، وألوان الخريف الساحرة في مغامرات لا تُنسى.
+    </p>
+  </div>
+
+  {/* تدرج في الأسفل */}
+  <div className="absolute  bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent"></div>
+</div>
+
+   <section
+  className={`${activeSeasonObj.bgColor}  transition-colors duration-500 `}
+>
+  <div className="container mx-auto px-4 mb-12">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-gray-800">السياحة الموسمية في الأردن</h2>
+        {/* <div className="text-center">
+          <h2 className="text-4xl font-bold mb-4 text-gray-800 ةغ">السياحة الموسمية في الأردن</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             اكتشف أجمل الوجهات السياحية في الأردن التي تتناسب مع كل فصل من فصول السنة. اختر الموسم وشاهد أفضل الأماكن للزيارة
           </p>
-        </div>
+        </div> */}
 
         {/* Seasons Selector */}
-        <div className="flex justify-center mb-16">
+        <div className="flex justify-center mb-16 my-20">
           <div className="inline-flex bg-white p-1 rounded-full shadow-lg border border-gray-100">
             {seasons.map((season) => (
               <button
@@ -224,56 +250,84 @@ const SeasonalSection = () => {
     
 {/* Places Grid */}
 {!loading && !error && activePlaces.length > 0 && (
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {activePlaces.map((place) => (
-    <div key={place._id} className="rounded-2xl overflow-hidden shadow-md bg-white">
-      {/* الصورة */}
-      <div className="relative h-48">
-        <img
-          src={place.images?.[0] || 'https://via.placeholder.com/500'}
-          alt={place.name}
-          className="w-full h-full object-cover"
-        />
-        {/* زر الإعجاب */}
-        <button
-          onClick={() => toggleLike(place._id)}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition ${
-            likedPlaces[place._id]
-              ? 'bg-rose-500/90 text-white'
-              : 'bg-white/90 text-gray-700 hover:bg-white'
-          }`}
-        >
-          <HeartIcon className="w-5 h-5" fill={likedPlaces[place._id] ? 'currentColor' : 'none'} />
-        </button>
-      </div>
-
-      {/* التفاصيل */}
-      <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-800 mb-1">{place.name}</h3>
-        <div className="text-sm text-gray-600 flex items-center gap-1 mb-1">
-          <MapPinIcon className="w-4 h-4 text-gray-500" />
-          <span>{place.description}</span>
-        </div>
-        <div className="text-sm text-gray-500 mb-2">{place.city || 'عمان'}</div>
-
-        {/* الموسم والرابط */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-1 text-yellow-600 font-medium">
-            <StarIcon className="w-4 h-4" />
-            <span>{place.season || 'الربيع والخريف'}</span>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {activePlaces.map((place) => (
+      <div
+        key={place._id}
+        className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
+      >
+        <div className="relative">
+          {/* Image with overlay gradient */}
+          <div className="h-52 overflow-hidden">
+            <img
+              src={place.images?.[0] || 'https://via.placeholder.com/500'}
+              alt={place.name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
           </div>
+          
+          {/* Season tag */}
+          <div className="absolute top-4 right-4 bg-[#FFD700] text-[#022C43] px-3 py-1 rounded-full text-sm font-bold shadow-md">
+            {place.best_season || 'الربيع والخريف'}
+          </div>
+          
+          {/* Enhanced Favorite button with state indication */}
           <button
-                        className="text-indigo-600 text-sm font-medium hover:text-indigo-800"
-                        onClick={() => handleDetails(place)}
-                      >
-                        عرض التفاصيل
-                      </button>
+  className={`absolute top-4 left-4 p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
+    likedPlaces[place._id]
+      ? 'animate-heartbeat'
+      : ''
+  }`}
+  onClick={(e) => {
+    e.stopPropagation();
+    toggleLike(place._id);
+  }}
+>
+  <HeartIcon 
+    className={`w-8 h-8 transition-colors duration-300 ${
+      likedPlaces[place._id] ? 'text-red-500 fill-red-500' : 'text-white'
+    }`} 
+  />
+</button>
+
+          {/* Place name overlay */}
+          <div className="absolute bottom-0 left-0 right-0 px-5 py-4">
+            <h3 className="font-bold text-xl text-white drop-shadow-lg">
+              {place.name}
+            </h3>
+          </div>
+        </div>
+        
+        <div className="p-5">
+          {/* Location with icon */}
+          <div className="flex items-center text-gray-600 mb-4">
+            <MapPinIcon className="w-5 h-5 ml-2 text-[#115173]" />
+            <span className="text-sm">{place.short_description}</span>
+          </div>
+          
+          {/* City tag */}
+          <div className="mb-4">
+            <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-3 py-1 rounded-full">
+              {place.city || 'عمان'}
+            </span>
+          </div>
+          
+          {/* Action button */}
+          <button
+            onClick={() => handleDetails(place)}
+            className="w-full bg-[#115173] text-white py-3 rounded-xl hover:bg-[#022C43] transition-colors duration-300 flex items-center justify-center group"
+          >
+            <span>عرض التفاصيل</span>
+            <svg className="w-5 h-5 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
         </div>
       </div>
-    </div>
-  ))}
-</div>
-
+    ))}
+  </div>
 )}
 
 {!loading && !error && activePlaces.length === 0 && (
@@ -283,6 +337,7 @@ const SeasonalSection = () => {
 
       </div>
     </section>
+    </>
   );
 };
 

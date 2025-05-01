@@ -3,64 +3,47 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Link } from 'react-router-dom';
-
-
-const callouts = [
-  {
-    name: "مقال 1",
-    date: "1 يناير 2023",
-    imageSrc: "https://i.pinimg.com/736x/4b/a8/61/4ba861312c84b4087009e5aae8b6ceed.jpg",
-    discription:"اكتشاف وجهة جديدة: الحديقة اليابانية في عمّان",
-  },
-  {
-    name: "مقال 2",
-    date: "2 يناير 2023",
-    imageSrc: "https://www.family.abbott/content/dam/an/familyabbott/jo-ar/abbott-family/FAM_Jordan%20homepage%20banner.jpg",
-    discription:"استكشاف قلعة عجلون: تاريخ وحكايات من العصور الوسطى",
-  },
-  {
-    name: "مقال 3",
-    date: "4 يناير 2023",
-    imageSrc: "https://assets.nn.najah.edu/CACHE/images/uploads/weblog/2017/03/31/faae1cb1ec/0331491da6b91d195b61fb927589d05c.jpg",
-    discription:"أهمية الترويح عن النفس: قضاء وقت ممتع مع أطفالك",
-  },
-  {
-    name: "مقال 4",
-    date: "5 يناير 2023",
-    imageSrc: "https://assets.nn.najah.edu/CACHE/images/uploads/weblog/2017/03/31/faae1cb1ec/0331491da6b91d195b61fb927589d05c.jpg",
-    discription:"متحف ألف مخترع ومخترع: أفضل وجهة تعليمية للأطفال في الأردن",
-  },
-  
-]; 
-
+import { 
+  FaCalendarAlt, 
+  FaEye, 
+  FaHeart, 
+  FaComment, 
+  FaTags,
+  FaShareAlt,
+  FaPaperPlane,
+  FaInstagram,
+  FaTwitter,
+  FaLinkedin,
+  FaBookmark
+} from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi";
 
 const PlogDetails = () => {
-  const { id } = useParams(); // جلب معرف المقال من الرابط
+  const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState(""); // To store the new comment text
-  const [user, setUser] = useState(null);  // Initialize user state
   const [content, setContent] = useState('');
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('recent');
+  const [sidebarArticles, setSidebarArticles] = useState([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
-
+  // تحميل بيانات المستخدم من الكوكيز
   useEffect(() => {
     const loadUserFromCookies = () => {
       const userCookie = Cookies.get("user");
       if (userCookie) {
         try {
           const parsedUser = JSON.parse(userCookie);
-          console.log("🧖 Loading user from cookies:", parsedUser);
-  
           if (parsedUser.token) {
             setUser({
               username: parsedUser.username,
               userId: parsedUser.userId,
               isAdmin: parsedUser.isAdmin || false,
-              email: parsedUser.email, // Ensure the email is also saved in the user state
-              photo: parsedUser.photo || 'http://localhost:9527/uploads/placeholder.jpg', // تأكد من أن الـ photo موجودة
+              email: parsedUser.email,
+              photo: parsedUser.photo || 'http://localhost:9527/uploads/placeholder.jpg',
             });
-  
             axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
           }
         } catch (error) {
@@ -69,267 +52,461 @@ const PlogDetails = () => {
         }
       }
     };
-  
     loadUserFromCookies();
   }, []);
-  
 
+  // جلب بيانات المقال والتعليقات
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [articleRes, commentsRes] = await Promise.all([
+        const [articleRes, sidebarRes] = await Promise.all([
           axios.get(`http://localhost:9527/articles/${id}`),
+          axios.get('http://localhost:9527/articles?limit=4')
         ]);
         setArticle(articleRes.data);
-           fetchComments();
+        setSidebarArticles(sidebarRes.data);
+        fetchComments();
+        
+        // التحقق من وضع المقال في المفضلة
+        if (user?.userId) {
+          const bookmarkRes = await axios.get(`http://localhost:9527/api/bookmarks/check?userId=${user.userId}&articleId=${id}`);
+          setIsBookmarked(bookmarkRes.data.isBookmarked);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, [id]);
-  
- // في ملف PlogDetails.jsx
- const fetchComments = async () => {
-  try {
-    const response = await axios.get(`http://localhost:9527/api/comments/${id}`);
-    console.log("التعليقات:", response.data.comments);
+  }, [id, user?.userId]);
 
-    // تعديل البيانات بإضافة الصورة للمستخدم
-    const updatedComments = response.data.comments.map(comment => {
-      // التحقق من وجود userId و username
-      const user = comment.userId ? {
-        username: comment.userId.username || 'مجهول',
-        photo: comment.userId.profilePicture || 'http://localhost:9527/uploads/placeholder.jpg',
-      } : { username: 'مجهول', photo: 'http://localhost:9527/uploads/placeholder.jpg' };
-
-      return {
+  // جلب التعليقات
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`http://localhost:9527/api/comments/${id}`);
+      const updatedComments = response.data.comments.map(comment => ({
         ...comment,
-        user,
+        user: {
+          username: comment.userId?.username || 'مجهول',
+          photo: comment.userId?.profilePicture || 'http://localhost:9527/uploads/placeholder.jpg',
+        },
         createdAt: new Date(comment.createdAt),
-      };
-    });
+      }));
+      setComments(updatedComments);
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+    }
+  };
 
-    setComments(updatedComments);
-  } catch (error) {
-    console.error('Failed to fetch comments:', error);
-    alert("حدث خطأ أثناء جلب التعليقات");
-  }
-};
+  // إضافة تعليق جديد
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
+      return;
+    }
 
-//comment
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!user || !user.userId) {
-    alert("يجب عليك تسجيل الدخول لتتمكن من إضافة تعليق");
-    return;
-  }
-
-  try {
-    const response = await axios.post('http://localhost:9527/api/comments', {
-      userId: user.userId,
-      articleId: id,
-      content
-    });
-
-    console.log("التعليق المضاف:", response.data);  // عرض بيانات التعليق المضاف
-    const newComment = {
-      _id: response.data._id, // أو id حسب شو بيرجع السيرفر
-      content: response.data.content,
-      user: {
-        username: user.username,
-        photo: user.photo || 'http://localhost:9527/uploads/placeholder.jpg',
-      },
-      createdAt: new Date(response.data.createdAt),
-    };
-    
-    setComments(prev => [newComment, ...prev]);
-    
-    setContent("");
-  } catch (error) {
-    console.error("Error submitting comment:", error.response?.data || error.message);
-    alert("حدث خطأ أثناء إرسال التعليق");
-  }
-};
-
-
-
-if (loading) return <p>جاري تحميل المقال...</p>;
-if (!article) return <p>تعذر تحميل المقال.</p>;
-
-return (
-  <div className="container mx-auto p-5 font-sans" dir="rtl">
-    {/* Hero Section */}
-    <div className="relative h-64 mb-8 flex items-center justify-center bg-cover bg-center rounded-lg shadow-lg">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg"></div>
-      <div className="relative z-10 text-center text-white px-6 max-w-2xl">
-        <h3 className="text-4xl font-extrabold mb-4 drop-shadow-lg">مدونتنا</h3>
-        <p className="text-lg text-gray-200 leading-relaxed">
-          اكتشف مقالات شيقة وملهمة حول أفضل الوجهات، التجارب الفريدة، والنصائح المفيدة لكل محب للسفر والاستكشاف.
-          نقدم لكم محتوى ثري يجمع بين المعرفة والتجربة، لتكونوا على اطلاع دائم بأجمل الأماكن وأحدث الاتجاهات.
-        </p>
-      </div>
-    </div>
-
-    {/* Blog Area */}
-    <div className="flex flex-col lg:flex-row gap-8">
-      {/* Main Content */}
-      <div className="w-full lg:w-2/3 order-2 lg:order-1">
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          {/* Article Image */}
-          <img className="w-full rounded-lg mb-4 h-64 object-cover" src={article.imageSrc} alt={article.title} />
-
-          {/* Article Title */}
-          <h2 className="text-3xl font-bold text-blue-900 mb-3">{article.title}</h2>
-
-          {/* Article Metadata */}
-          <div className="flex flex-wrap gap-4 text-gray-600 mb-3">
-            {article.tags && article.tags.length > 0 && (
-              <span className="flex items-center">
-                <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                </svg>
-                {article.tags.join("، ")}
-              </span>
-            )}
-            <span className="flex items-center">
-              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-              </svg>
-              {article.views} مشاهدة
-            </span>
-            <span className="flex items-center">
-              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-              </svg>
-              {article.likeCount} إعجاب
-            </span>
-            <span className="flex items-center">
-              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
-              </svg>
-              3 تعليقات
-            </span>
-          </div>
-
-          {/* Article Date */}
-          <p className="text-gray-500 text-sm mb-4">
-            {new Date(article.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-
-          {/* Main Content */}
-          <p className="text-lg text-gray-700 mb-6 leading-relaxed">{article.content}</p>
-
-          {/* Quote Box */}
-          <div className="bg-gray-100 border-r-4 border-blue-900 p-4 my-6">
-            <blockquote className="text-gray-700 italic pr-4">
-              "{article.content_1}"
-            </blockquote>
-          </div>
-
-          {/* Additional Content */}
-          <p className="text-gray-700 leading-relaxed">{article.content}</p>
-        </div>
-
-        {/* Comments Section */}
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-      <h4 className="text-xl font-bold mb-6">التعليقات ({comments.length})</h4>
+    try {
+      const response = await axios.post('http://localhost:9527/api/comments', {
+        userId: user.userId,
+        articleId: id,
+        content
+      });
       
-      {comments.map((comment, index) => (
-        <div key={index} className="flex mb-6 border-b pb-6">
-          <img
+      const newComment = {
+        ...response.data,
+        user: {
+          username: user.username,
+          photo: user.photo,
+        },
+        createdAt: new Date(),
+      };
+      
+      setComments(prev => [newComment, ...prev]);
+      setContent("");
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+      alert("حدث خطأ أثناء إرسال التعليق");
+    }
+  };
+
+  // إضافة/إزالة المقال من المفضلة
+  const toggleBookmark = async () => {
+    if (!user) {
+      alert("يجب تسجيل الدخول لإضافة المقال إلى المفضلة");
+      return;
+    }
+
+    try {
+      if (isBookmarked) {
+        await axios.delete(`http://localhost:9527/api/bookmarks?userId=${user.userId}&articleId=${id}`);
+      } else {
+        await axios.post('http://localhost:9527/api/bookmarks', {
+          userId: user.userId,
+          articleId: id
+        });
+      }
+      setIsBookmarked(!isBookmarked);
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#115173]"></div>
+    </div>
+  );
+
+  if (!article) return (
+    <div className="text-center py-20">
+      <h2 className="text-3xl font-bold text-[#022C43] mb-4">تعذر تحميل المقال</h2>
+      <Link to="/blog" className="text-[#115173] hover:text-[#FFD700] flex items-center justify-center">
+        <FiArrowLeft className="ml-2" /> العودة إلى المدونة
+      </Link>
+    </div>
+  );
+
+  return (
+
+    <> 
+     {/* Hero Section with Creative Design */}
+    <div
+     className="relative h-120  w-full flex items-center justify-center bg-cover bg-center  overflow-hidden  "
+     style={{ backgroundImage: "url('https://i.pinimg.com/736x/1a/f0/88/1af08855656916032def657d64930760.jpg')" }}
+   >
+     <div className="absolute inset-0 bg-gradient-to-r "></div>
+     <div className="relative z-10 text-center text-white p-5 max-w-5xl">
+  <div className="mb-4 transform -rotate-2">
+    {/* يمكنك إضافة عنوان هنا إذا لزم */}
+  </div>
+  
+  {/* الخلفية السوداء الشفافة مع Blur وراء النص فقط */}
+  <div className="relative inline-block px-4 py-5 rounded-lg bg-black/40 backdrop-blur-10">
+    <p className="text-lg text-white leading-relaxed drop-shadow">
+      اكتشف معنا تفاصيل المقال واستمتع بمحتوى غني بالمعلومات والتجارب المُلهمة.
+      نأخذك في رحلة فريدة عبر الكلمات والصور لتعيش كل لحظة وكأنك فيها.
+    </p>
+  </div>
+</div>
+
+     
+     <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/100 to-transparent"></div>
+   </div>
+   
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans" dir="rtl">
+     
+  
+      {/* Breadcrumbs */}
+      <nav className="flex mb-8" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 md:space-x-3">
+          <li className="inline-flex items-center">
+            <Link to="/" className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-[#FFD700]">
+              الرئيسية
+            </Link>
+          </li>
+          <li>
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+              </svg>
+              <Link to="/article" className="mr-1 text-sm font-medium text-gray-700 hover:text-[#FFD700]">
+                المدونة
+              </Link>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+              </svg>
+              <span className="mr-1 text-sm font-medium text-gray-500">{article.title}</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Article Content */}
+        <div className="w-full lg:w-2/3">
+          {/* Article Header */}
+          <div className="mb-8">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-[#022C43] mb-2">{article.title}</h1>
+                <div className="flex flex-wrap items-center gap-4 text-gray-600">
+                  <span className="flex items-center">
+                    <FaCalendarAlt className="ml-2 text-[#FFD700]" />
+                    {new Date(article.date).toLocaleDateString('ar-EG', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })}
+                  </span>
+                  <span className="flex items-center">
+                    <FaEye className="ml-2 text-[#FFD700]" />
+                    {article.views} مشاهدة
+                  </span>
+                  <span className="flex items-center">
+                    <FaHeart className="ml-2 text-[#FFD700]" />
+                    {article.likeCount} إعجاب
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={toggleBookmark}
+                className={`p-2 rounded-full ${isBookmarked ? 'text-[#FFD700]' : 'text-gray-400 hover:text-[#115173]'}`}
+                aria-label={isBookmarked ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+              >
+                <FaBookmark className="text-xl" />
+              </button>
+            </div>
+
+            {/* Article Categories */}
+            {article.tags && article.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {article.tags.map((tag, index) => (
+                  <Link 
+                    key={index} 
+                    to={`/tag/${tag}`}
+                    className="px-3 py-1 text-sm rounded-full bg-[#115173]/10 text-[#115173] hover:bg-[#115173] hover:text-white transition-colors"
+                  >
+                    #{tag}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Featured Image */}
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-xl">
+            <img 
+              className="w-full h-auto max-h-[500px] object-cover" 
+              src={article.imageSrc} 
+              alt={article.title} 
+              loading="lazy"
+            />
+          </div>
+
+          {/* Article Body */}
+          <article className="prose prose-lg max-w-none text-gray-700 mb-12">
+            <p className="text-xl leading-relaxed mb-6">{article.content}</p>
+            
+            {/* Quote */}
+            {article.content_1 && (
+              <blockquote className="border-r-4 border-[#FFD700] bg-[#115173]/5 p-6 my-8 rounded-lg">
+                <p className="text-2xl italic font-medium text-[#022C43]">"{article.content_1}"</p>
+              </blockquote>
+            )}
+
+            <div className="space-y-6">
+              <p className="text-xl leading-relaxed">{article.content}</p>
+              
+              {/* Additional content sections can be added here */}
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="bg-[#115173]/5 p-6 rounded-xl">
+                  <h3 className="text-xl font-bold text-[#022C43] mb-3">نقاط رئيسية</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-[#FFD700] mr-2">•</span>
+                      <span>اكتشف الأماكن المخفية في المدينة</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#FFD700] mr-2">•</span>
+                      <span>تعرف على الثقافة المحلية</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#FFD700] mr-2">•</span>
+                      <span>نصائح للسفر بميزانية محدودة</span>
+                    </li>
+                  </ul>
+                </div>
+             <div className="bg-[#FFD700]/10 p-6 rounded-xl">
+  <h3 className="text-xl font-bold text-[#022C43] mb-3">هل تعلم؟</h3>
+  <p>قراءة المقالات بشكل منتظم توسع مداركك وتمنحك منظورًا أعمق حول المواضيع التي تهمك.</p>
+</div>
+
+              </div>
+            </div>
+          </article>
+
+          {/* Share Options */}
+          <div className="bg-[#115173]/5 p-6 rounded-xl mb-12">
+  <h3 className="text-xl font-bold text-[#022C43] mb-4">شارك المقال</h3>
+  <div className="flex flex-wrap gap-4">
+    <a
+      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-4 py-2 bg-[#3b5998] text-white rounded-lg hover:opacity-90 transition-opacity"
+    >
+      <FaShareAlt /> فيسبوك
+    </a>
+    <a
+      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-4 py-2 bg-[#1da1f2] text-white rounded-lg hover:opacity-90 transition-opacity"
+    >
+      <FaTwitter /> تويتر
+    </a>
+    <a
+      href={`https://www.linkedin.com/shareArticle?url=${encodeURIComponent(window.location.href)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-4 py-2 bg-[#0077b5] text-white rounded-lg hover:opacity-90 transition-opacity"
+    >
+      <FaLinkedin /> لينكدإن
+    </a>
+    <a
+      href={`https://www.instagram.com/`} // إنستغرام ما بدعم مشاركة رابط مباشرة، ممكن توجه المستخدم لحسابك
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-lg hover:opacity-90 transition-opacity"
+    >
+      <FaInstagram /> إنستغرام
+    </a>
+  </div>
+</div>
+
+
+          {/* Comments Section */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-[#022C43] mb-6 pb-4 border-b border-gray-200">
+              التعليقات ({comments.length})
+            </h3>
+            
+            {comments.length > 0 ? (
+              <div className="space-y-6">
+                {comments.map((comment, index) => (
+                  <div key={index} className="flex gap-4 p-4 bg-white rounded-xl shadow-sm">
+                   <img
             className="w-12 h-12 rounded-full"
             src={comment.profilePicture || 'http://localhost:9527/uploads/placeholder.jpg'}
             alt={comment.user?.username}
           />
-          <div className="mr-4 flex-1">
-            <div className="flex justify-between items-center mb-1">
-              <h5 className="font-bold">{comment.user?.username}</h5>
-              <p className="text-sm text-gray-500">
-                {new Date(comment.createdAt).toLocaleDateString()}
-              </p>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <h4 className="font-bold text-[#022C43]">{comment.user.username}</h4>
+                        <span className="text-sm text-gray-500">
+                          {comment.createdAt.toLocaleDateString('ar-EG', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 mb-2">{comment.content}</p>
+                      <button className="text-sm text-[#115173] hover:text-[#FFD700] transition-colors">
+                        رد
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">لا توجد تعليقات بعد. كن أول من يعلق!</p>
+            )}
+
+            {/* Comment Form */}
+            <div className="mt-10">
+              <h4 className="text-xl font-bold text-[#022C43] mb-4">أضف تعليقاً</h4>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent text-gray-700"
+                  placeholder="شاركنا رأيك..."
+                  rows="5"
+                  required
+                ></textarea>
+                <button 
+                  type="submit" 
+                  className="bg-gradient-to-r from-[#115173] to-[#022C43] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                  disabled={!user}
+                >
+                  <FaPaperPlane />
+                  {user ? 'إرسال التعليق' : 'يجب تسجيل الدخول للتعليق'}
+                </button>
+              </form>
             </div>
-            <p className="text-gray-700 mb-2">{comment.content}</p>
-            <button className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-              </svg>
-              رد
-            </button>
           </div>
         </div>
-      ))}
 
-      <h4 className="text-xl font-bold mb-4">اترك تعليقاً</h4>
-      <form onSubmit={handleSubmit} className="mt-4">
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-900 mb-4"
-          placeholder="اكتب تعليقك هنا..."
-          rows="4"
-          required
-        ></textarea>
-        <button 
-          type="submit" 
-          className="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition-colors"
-          disabled={!user}
-        >
-          {user ? 'إرسال التعليق' : 'يجب تسجيل الدخول'}
-        </button>
-      </form>
-    </div>
+        {/* Sidebar */}
+        <div className="w-full lg:w-1/3 space-y-8">
+          {/* About Author */}
+          {article.author && (
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h4 className="text-xl font-bold text-[#022C43] mb-4">عن الكاتب</h4>
+              <div className="flex items-center gap-4">
+                <img
+                  className="w-16 h-16 rounded-full object-cover"
+                  src={article.author.photo || 'http://localhost:9527/uploads/placeholder.jpg'}
+                  alt={article.author.name}
+                />
+                <div>
+                  <h5 className="font-bold text-[#022C43]">{article.author.name}</h5>
+                  <p className="text-gray-600 text-sm">{article.author.bio || 'كاتب ومدون متخصص في السفر والثقافة'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Articles */}
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-xl font-bold text-[#022C43]">مقالات قد تعجبك</h4>
+              <div className="flex gap-2">
+              </div>
+            </div>
+            <div className="space-y-4">
+            {sidebarArticles.slice(0, 4).map((post) => (
+    <Link 
+      key={post._id} 
+      to={`/article/${post._id}`}
+      className="flex gap-4 group"
+    >
+      <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden">
+        <img
+          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+          src={post.imageSrc}
+          alt={post.title}
+          loading="lazy"
+        />
       </div>
-
-    {/* Sidebar */}
-    <div className="col-lg-4">
-                  <div className="bg-white shadow-sm rounded p-4 mb-4">
-                    <h5 className="font-bold mb-3" style={{ color: '#000', textAlign: 'right' }}>المقالات الأخيرة</h5>
-                    <ul className="list-unstyled">
-                      {callouts.map((post, index) => (
-                        <li className="d-flex align-items-center mb-3" key={index}>
-                          <img
-                            className="img-fluid"
-                            src={post.imageSrc}
-                            alt="مقال حديث"
-                            style={{ width: "30%" }}
-                          />
-                          <div className="ms-3">
-                            <Link to={post.href} style={{ color: '#000', textDecoration: 'none' }}>
-                              {post.discription}
-                            </Link>
-                            <small className="d-block text-muted">{post.date}</small>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-        
-                  <div className="bg-white shadow-sm rounded p-4 mb-4">
-            <h5 className="font-bold mb-4" style={{ color: "#000", textAlign: "right" }}>
-              سحابة الكلمات الدلالية
-            </h5>
-            <div className="d-flex flex-wrap">
-              {["#مشاريع", "#تكنولوجيا", "#سفر", "#مطاعم", "#أسلوب الحياة", "#تصميم", "#رسم"].map(
-                (tag, index) => (
-                  <span key={index} className="badge m-2" style={{ backgroundColor: "#115173", color: "#fff" }}>
-                    {tag}
-                  </span>
-                )
-              )}
+      <div>
+        <h5 className="font-medium text-[#022C43] group-hover:text-[#FFD700] transition-colors line-clamp-2">
+          {post.title}
+        </h5>
+        <p className="text-sm text-gray-500 mt-1">
+          {new Date(post.date).toLocaleDateString('ar-EG', { 
+            day: 'numeric', 
+            month: 'short' 
+          })}
+        </p>
+      </div>
+    </Link>
+  ))}
             </div>
           </div>
-            {/* قسم الصور من إنستغرام */}
-            <div className="bg-white shadow-sm rounded p-4 mb-4">
-            <h5 className="font-bold mb-3" style={{ color: "#000", textAlign: "right" }}>
-              صور من إنستغرام
-            </h5>
-            <div className="d-flex flex-wrap">
+
+          {/* Tags */}
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+  <h4 className="text-xl font-bold text-[#022C43] mb-4">مقالنا القادم</h4>
+  <p className="text-sm text-gray-500 mb-4">هل ترغب في معرفة المزيد عن أحدث الاتجاهات في السفر؟ ترقب مقالنا القادم حول الوجهات السياحية الأكثر شعبية هذا العام!</p>
+  {/* <button className="px-4 py-2 bg-[#115173] text-white rounded-lg hover:bg-[#022C43] transition-colors">
+    تابعنا لقراءة المقال القادم
+  </button> */}
+</div>
+
+
+          {/* Instagram Feed */}
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h4 className="text-xl font-bold text-[#022C43] mb-4">صور على إنستغرام</h4>
+            <div className="grid grid-cols-3 gap-2">
               {[
                 "https://i.pinimg.com/736x/13/0e/ce/130eceb043f953af63f10c266ea64f95.jpg",
                 "https://i.pinimg.com/736x/09/6f/8b/096f8b050095e82cc66af6fd813b5795.jpg",
@@ -338,34 +515,53 @@ return (
                 "https://i.pinimg.com/736x/f9/01/a0/f901a043b3799805e978d6da9f63d9b4.jpg",
                 "https://i.pinimg.com/736x/1d/f8/16/1df8161901846a6e8674ad70c56324f6.jpg",
               ].map((src, index) => (
-                <img key={index} className="img-fluid m-1" src={src} alt="صورة من إنستغرام" style={{ width: "30%" }} />
+                <a 
+                  key={index} 
+                  href="#" 
+                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  <img 
+                    className="w-full h-full object-cover" 
+                    src={src} 
+                    alt="Instagram post" 
+                    loading="lazy"
+                  />
+                </a>
               ))}
             </div>
+            {/* <a 
+              href="#" 
+              className="inline-flex items-center justify-center mt-4 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <FaInstagram className="ml-2" /> تابعنا
+            </a> */}
           </div>
 
-
-        
-                   {/* قسم الاشتراك في النشرة الإخبارية */}
-          <div className="bg-white shadow-sm rounded p-4 mb-4">
-            <h5 className="font-bold" style={{ textAlign: "right", color: "#000" }}>
-              اشترك في نشرتنا الإخبارية
-            </h5>
-            <form>
-              <div className="mb-3">
-                <input type="email" className="form-control" placeholder="أدخل بريدك الإلكتروني" required />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ backgroundColor: "#FFD700" }}>
-                اشترك
-              </button>
+          {/* Newsletter */}
+          <div className="bg-gradient-to-br  p-6 rounded-xl text-black">
+            <h4 className="text-xl font-bold mb-2">النشرة البريدية</h4>
+            <p className="mb-4 opacity-90">اشترك ليصلك كل جديد من مقالات وعروض حصرية</p>
+            <form className="space-y-3">
+              <input 
+                type="email" 
+                className="w-full px-4 py-3  bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFD700] placeholder-white/70" 
+                placeholder="بريدك الإلكتروني" 
+                required 
+              />
+                       <button 
+  type="submit" 
+  className="w-full py-2 px-4 my-4 bg-gradient-to-r from-[#022C43] to-[#115173] text-[#FFD700] rounded-lg hover:opacity-90 transition duration-300 font-medium"
+>
+  اشترك الآن
+</button>
             </form>
           </div>
-                </div>
-
- 
-      
+          
+        </div>
+      </div>
     </div>
-  </div>
-);
+    </>
+  );
 };
 
 export default PlogDetails;

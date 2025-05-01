@@ -266,28 +266,6 @@ if (!isOpen) return null;
 
 // ================================================================================================================
 
-// useEffect(() => {
-//   const script = document.createElement("script");
-//   script.src = "https://accounts.google.com/gsi/client";
-//   script.async = true;
-//   script.defer = true;
-//   script.onload = () => {
-//     window.google.accounts.id.initialize({
-//       client_id:
-//         "433961052087-ksa4nir2mjgih7oudtn24lkb7l02m609.apps.googleusercontent.com",
-//       callback: handleGoogleLogin,
-//       ux_mode: "popup",
-//       scope: "profile email",  // إضافة الأذونات للحصول على بيانات المستخدم
-//     });
-
-//     window.google.accounts.id.renderButton(
-//       document.getElementById("google-signin-btn"),
-//       { theme: "white", size: "large" }  // تغيير الثيم والحجم
-//     );
-//   };
-//   document.body.appendChild(script);
-// }, [navigate]);
-
 useEffect(() => {
   const script = document.createElement("script");
   script.src = "https://accounts.google.com/gsi/client";
@@ -361,52 +339,6 @@ const handleGoogleLogin = async (response) => {
 };
 
 
-// const handleGoogleLogin = async (response) => {
-//   try {
-//     const res = await axios.post(
-//       "http://localhost:9527/api/auth/google-login",
-//       { credential: response.credential }
-//     );
-
-//     console.log("🔍 Google login response:", res.data); // تحقق من استجابة الخادم
-
-//     const userData = res.data;
-
-//     if (userData.token) {
-//       Cookies.set("user", JSON.stringify({
-//         token: userData.token,
-//         username: userData.username,
-//         email: userData.email,
-//         userId: userData.user_id, // تأكد من استخدام user_id
-//         isAdmin: userData.isAdmin || false,
-//       }), { expires: 7 });
-
-//       axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
-
-//       Swal.fire({
-//         icon: "success",
-//         title: `مرحباً ${userData.username}!`,
-//         text: "تم تسجيل الدخول باستخدام Google بنجاح!",
-//         background: "#FFFFFF",
-//       }).then(() => {
-//         window.location.reload();
-//         navigate("/");
-//       });
-//     } else {
-//       throw new Error("Token not received");
-//     }
-
-//   } catch (error) {
-//     Swal.fire({
-//       icon: "error",
-//       title: "تم رفض الوصول",
-//       text: error.response?.data?.message || "فشل في التوثيق عبر Google.",
-//       background: "#FFFFFF",
-//       color: "#115173",
-//       confirmButtonColor: "#115173",
-//     });
-//   }
-// };
 
 
 
