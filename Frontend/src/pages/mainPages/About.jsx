@@ -1,18 +1,63 @@
-import { useState } from 'react';
-import { Plane, Pin } from 'lucide-react';
+import { Plane, Pin, MapPin } from 'lucide-react';
+
+import { motion } from "framer-motion"
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+
+
+
 
 export default function TravelWebsite() {
   const [hoveredDestination, setHoveredDestination] = useState(null);
+  const [placeCount, setPlaceCount] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
+  const [cityCount, setCityCount] = useState(3); // ثابت
+  const [bookingCount, setBookingCount] = useState(0);
 
+  useEffect(() => {
+    // عدد الأماكن السياحية
+    axios.get('http://localhost:9527/api/places/count')
+      .then(res => {
+        console.log("Place count response:", res.data);
+        setPlaceCount(res.data.count);
+      })
+      .catch(err => console.error("Error fetching place count:", err));
+  
+    // عدد التقييمات
+    axios.get('http://localhost:9527/api/ratings/total/count')
+    .then(res => {
+      console.log("Rating count response:", res.data);
+      setRatingCount(res.data.totalRatings); // الوصول إلى totalRatings وتعيينها للحالة
+    })
+      .catch(err => console.error("Error fetching rating count:", err));
+  
+    // عدد الحجوزات
+    axios.get('http://localhost:9527/api/payments/stats/total-tickets')
+    .then(res => {
+      console.log("Booking count response:", res.data);
+      setBookingCount(res.data.totalTickets);
+    })
+      .catch(err => console.error("Error fetching booking count:", err));
+  }, []);
+  
+
+// لمراقبة تغييرات ratingCount
+useEffect(() => {
+  console.log("Updated Rating count:", ratingCount);
+}, [ratingCount]); // سيتم طباعة القيمة الجديدة لـ ratingCount عند تغييرها
+
+
+  
   return (
     <div className="font-sans text-gray-800">
-      {/* "url('https://images.pexels.com/photos/158827/field-corn-air-frisch-158827.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')" */}
+      {/* "url('https://static.vecteezy.com/system/resources/previews/012/658/075/non_2x/outline-amman-jordan-skyline-with-blue-buildings-vector.jpg')" */}
       {/* Hero Section */}
       <section
   className="relative h-[50vh] bg-cover bg-center"
   style={{
     backgroundImage:
-      "url('https://images.pexels.com/photos/8354534/pexels-photo-8354534.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+      "url('https://static.tildacdn.com/tild3730-3836-4534-b735-346236376365/caption.jpg')",
   }}
 >
   {/* Overlay */}
@@ -47,58 +92,109 @@ export default function TravelWebsite() {
 
 
       {/* Emotional Section */}
-      <section dir="rtl" className="py-16 px-4 sm:px-6 md:px-16 lg:px-32 bg-white">
-  <div className="max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
-    {/* Image Section */}
-    <div className="w-full md:w-1/2">
-      <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden shadow-lg">
-        <img 
-          src="https://i.pinimg.com/736x/1a/f0/88/1af08855656916032def657d64930760.jpg" 
-          alt="تجربة ركوب الفيل" 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-        />
+      <section dir="rtl" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-16">
+          {/* Image Section */}
+          <motion.div
+            className="w-full md:w-1/2"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative">
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#FFD700]/10 rounded-full -z-10"></div>
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-[#FFD700]/20 rounded-full -z-10"></div>
+
+              {/* Main image */}
+              <div className="relative w-full h-80 sm:h-96 md:h-[450px] rounded-xl overflow-hidden shadow-xl">
+                <img
+                  src="https://i.pinimg.com/736x/1a/f0/88/1af08855656916032def657d64930760.jpg"
+                  alt="تجربة ركوب الفيل"
+                  className="w-full h-full object-cover transition-all duration-700 hover:scale-105 hover:rotate-1"
+                />
+
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Content Section */}
+          <motion.div
+            className="w-full md:w-1/2 space-y-8"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div>
+              <div className="inline-block px-3 py-1 bg-[#FFD700]/10 rounded-full mb-4">
+                <span className="text-sm font-medium text-amber-700">استكشف الأردن</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">!دع مشاعرك تقودك للمغامرة</h2>
+            </div>
+
+            <div className="space-y-4 text-gray-600 leading-relaxed text-lg">
+              <p>
+                <span className="font-semibold text-amber-700">وين نروح</span> هو موقع إلكتروني أُطلق في عام 2025 بهدف
+                مساعدة المستخدمين على استكشاف أماكن جديدة ومميزة في الأردن بطريقة سهلة وتفاعلية.
+              </p>
+              <p>
+                جاءت فكرة الموقع نتيجة الحاجة إلى منصة عربية تُقدم معلومات موثوقة ومفصلة عن الأماكن السياحية والترفيهية،
+                خاصةً للعائلات والشباب الذين يبحثون عن تجارب محلية ممتعة.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">مميزاتنا:</h3>
+              <ul className="space-y-4">
+                {[
+                  "اقتراحات مخصصة حسب موقعك واهتماماتك",
+                  "معلومات دقيقة عن الأماكن: صور، أوقات العمل، التكاليف، الفئات المناسبة",
+                  "تقييمات وتعليقات من الزوار لتساعدك في اتخاذ القرار",
+                  "سهولة في الاستخدام وتجربة عربية بالكامل",
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    className="flex items-start gap-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 * index }}
+                    viewport={{ once: true }}
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD700]/20 flex items-center justify-center mt-0.5">
+                      <span className="w-2 h-2 bg-[#FFD700] rounded-full"></span>
+                    </span>
+                    <span className="text-gray-700">{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="pt-4">
+              {/* <button className="px-8 py-3 bg-gradient-to-r from-amber-500 to-[#FFD700] text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                استكشف الوجهات
+              </button> */}
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
-    
-    {/* Content Section */}
-    <div className="w-full md:w-1/2 space-y-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-800">!دع مشاعرك تقودك للمغامرة</h2>
-      
-      <div className="space-y-4 text-gray-600 leading-relaxed">
-        <p><span className="font-semibold text-black">وين نروح</span> هو موقع إلكتروني أُطلق في عام 2025 بهدف مساعدة المستخدمين على استكشاف أماكن جديدة ومميزة في الأردن بطريقة سهلة وتفاعلية.</p>
-        <p>جاءت فكرة الموقع نتيجة الحاجة إلى منصة عربية تُقدم معلومات موثوقة ومفصلة عن الأماكن السياحية والترفيهية، خاصةً للعائلات والشباب الذين يبحثون عن تجارب محلية ممتعة.</p>
-        <p>يُقدم الموقع دليلاً شاملاً يشمل المواقع الطبيعية، الثقافية، والأسواق المحلية، مع إمكانية التصفية حسب الفئة أو الموقع الجغرافي.</p>
-      </div>
-
-      <ul className="space-y-3">
-        <li className="flex items-start">
-          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
-          <span>اقتراحات مخصصة حسب موقعك واهتماماتك</span>
-        </li>
-        <li className="flex items-start">
-          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
-          <span>معلومات دقيقة عن الأماكن: صور، أوقات العمل، التكاليف، الفئات المناسبة</span>
-        </li>
-        <li className="flex items-start">
-          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
-          <span>تقييمات وتعليقات من الزوار لتساعدك في اتخاذ القرار</span>
-        </li>
-        <li className="flex items-start">
-          <span className="w-2 h-2 bg-[#FFD700] rounded-full mt-2 ml-2 flex-shrink-0"></span>
-          <span>سهولة في الاستخدام وتجربة عربية بالكامل</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-</section>
+    </section>
 
 
 
 
-      
 
 
-            {/* Stats Section */}
+
+
+
+
+
+ {/* Stats Section */}
             <section className="py-16 px-6 md:px-16 lg:px-32 bg-white relative overflow-hidden" dir="rtl">
   {/* Decorative elements */}
   <div className="absolute inset-0 overflow-hidden">
@@ -114,6 +210,12 @@ export default function TravelWebsite() {
     <div className="w-20 h-1 bg-gradient-to-r from-[#FFD700] to-[#115173] mx-auto"></div>
   </div>
 
+
+
+
+
+
+
   {/* Statistics grid - quarter layout */}
   <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
     {/* Top left - Tourist destinations */}
@@ -127,16 +229,12 @@ export default function TravelWebsite() {
         </div>
         <div>
           <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="320">0</span>+
+            <span className="counter" data-target="320">{placeCount}</span>+
           </h3>
-          <p className="text-[#115173] font-medium">وجهة سياحية</p>
+          <p className="text-[#115173] font-medium">الاماكن المضافة </p>
         </div>
       </div>
     </div>
-
-
-
-
     {/* Top right - Ratings */}
     <div className="bg-white p-6 rounded-xl shadow-sm border border-[#115173]/10 hover:shadow-md transition duration-300">
       <div className="flex items-center gap-4">
@@ -147,7 +245,7 @@ export default function TravelWebsite() {
         </div>
         <div>
           <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="1200">0</span>+
+            <span className="counter" data-target="1200">{ratingCount}</span>+
           </h3>
           <p className="text-[#115173] font-medium">تقييم من الزوار</p>
         </div>
@@ -164,7 +262,7 @@ export default function TravelWebsite() {
         </div>
         <div>
           <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="3">0</span>
+            <span className="counter" data-target="3">3</span>+
           </h3>
           <p className="text-[#115173] font-medium">مدن رئيسية</p>
         </div>
@@ -181,13 +279,15 @@ export default function TravelWebsite() {
         </div>
         <div>
           <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="850">0</span>+
+            <span className="counter" data-target="850">{bookingCount}</span>+
           </h3>
           <p className="text-[#115173] font-medium">حجز تم عبر المنصة</p>
         </div>
       </div>
     </div>
   </div>
+
+
 
   {/* Counter animation script (add this to your JS) */}
   <script dangerouslySetInnerHTML={{
@@ -227,9 +327,31 @@ export default function TravelWebsite() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       {/* our vision */}
 
-<section dir="rtl" className="py-20 px-4 sm:px-6 md:px-16 lg:px-32 bg-gradient-to-b from-[#F8F4E9] to-[#FFF9EE] relative overflow-hidden">
+<section dir="rtl" className="py-20 px-4 sm:px-6 md:px-16 lg:px-32 b relative overflow-hidden">
   {/* <!-- عناصر زخرفية --> */}
   <div className="absolute top-0 left-0 w-40 h-40 bg-[#FFD700]/10 rounded-full filter blur-3xl"></div>
   <div className="absolute bottom-10 right-20 w-60 h-60 bg-[#FF6B6B]/10 rounded-full filter blur-3xl"></div>
@@ -323,8 +445,8 @@ export default function TravelWebsite() {
   </div>
 </section>
 
-      {/* Offbeat Stays Section */}
-      <div className="flex flex-col items-center justify-center min-h-screen bg-amber-50 p-8 relative">
+      {/* Offbeat Stays Section */}  
+      <div className="flex flex-col items-center justify-center  bg-amber-50 p-8 relative">
   {/* Decorative border frame */}
   <div className="absolute inset-0 border-2 border-amber-200 m-6 pointer-events-none rounded-lg"></div>
 
@@ -350,7 +472,7 @@ export default function TravelWebsite() {
       <div className="relative transform -rotate-10 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            src="https://scontent.famm6-1.fna.fbcdn.net/v/t39.30808-6/490469666_1573207290278530_6930899566442259904_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aAcQWJf7KGYQ7kNvwFPm5SC&_nc_oc=AdklpkkhaZX0eDAAUcZR7Q2ShT0gIWr3LcDs89GLnEqpNjkwTvlQDw9cQj4ApvWAylQ&_nc_zt=23&_nc_ht=scontent.famm6-1.fna&_nc_gid=s67Kctb6de8KDD3H1Vu-Fg&oh=00_AfF1AIO-aOJvojUCHGESs0LvdXAcWf05n9FP65pLsqW3Fg&oe=681AC889"
             alt="العائلة في عمان"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
@@ -361,7 +483,7 @@ export default function TravelWebsite() {
           </div>
           <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
             <p className="text-base font-serif font-semibold text-white">
-              الأردن - عمان
+              عمان - مزرعة السوسنة السوداء
             </p>
           </div>
         </div>
@@ -371,7 +493,7 @@ export default function TravelWebsite() {
       <div className="relative transform rotate-2 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            src="https://scontent.famm6-1.fna.fbcdn.net/v/t39.30808-6/482219606_1066285338637166_5215094800110831314_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=833d8c&_nc_ohc=u_Eic8UMC28Q7kNvwH5RMce&_nc_oc=AdkdX0Jlx3z5Ali0tWG8unGJBigQZa6e_A0_bAQuqOM_GFE7JtJOQ9w4hF6g90G3pdw&_nc_zt=23&_nc_ht=scontent.famm6-1.fna&_nc_gid=kOd0nihbDYlvTLAraSbs8A&oh=00_AfFtKfixV9ZSxo0gQUdEiLdOp3UbYWyY7nAoH0pmd34G-Q&oe=681AB56B"
             alt="العائلة في الزرقاء"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
@@ -382,7 +504,7 @@ export default function TravelWebsite() {
           </div>
           <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
             <p className="text-base font-serif font-semibold text-white">
-              الأردن - الزرقاء
+            الزرقاء - نادي اتحاد الزرقاء 
             </p>
           </div>
         </div>
@@ -392,7 +514,7 @@ export default function TravelWebsite() {
       <div className="relative transform -rotate-4 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://images.pexels.com/photos/20327504/pexels-photo-20327504/free-photo-of-family-with-two-kids-holding-hands-and-walking-in-a-city.jpeg"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGnG3_Zc2rtzFFqEnaU0I_F-T8GtvRoIDDap3EKHAbUn9MVPRm83kHfZgwDTejfHjMtl8&usqp=CAU"
             alt="العائلة في عمان"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
@@ -402,8 +524,8 @@ export default function TravelWebsite() {
             <Pin size={28} className="text-amber-600" />
           </div>
           <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
-            <p className="text-base font-serif font-semibold text-white">
-              الأردن - عمان
+            <p className="text-base font-serif font-semibold text-amber-600">
+              اربد - متحف دار السرايا 
             </p>
           </div>
         </div>
@@ -419,6 +541,8 @@ export default function TravelWebsite() {
   </div>
 </div>
 
+
+ 
 
       {/* our  value */}
       <section dir="rtl" className="py-16 px-4 sm:px-6 md:px-16 lg:px-32 bg-white">
@@ -539,7 +663,7 @@ export default function TravelWebsite() {
           <h3 class="text-2xl font-bold text-[#022C43] mb-3">اتصل بنا</h3>
           <p class="text-[#115173] mb-6">متاحون للمساعدة من الأحد إلى الخميس</p>
           <a href="tel:+123456789" class="inline-block bg-[#115173] hover:bg-[#115173]/80 text-white font-bold py-3 px-8 rounded-full transition duration-300 shadow-md">
-            +123 456 789
+            +962 787967253
           </a>
         </div>
       </div>
@@ -547,7 +671,7 @@ export default function TravelWebsite() {
     
     <div class="mt-16 text-center">
       <a href="/contact" class="inline-flex items-center px-8 py-4 bg-[#022C43] hover:bg-[#022C43]/80 text-white font-bold rounded-full transition duration-300 shadow-lg">
-        <span>زيارة صفحة الاتصال الكاملة</span>
+        <span>زيارة صفحة الاتصال </span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
         </svg>

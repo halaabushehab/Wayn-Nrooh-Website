@@ -532,3 +532,38 @@ exports.createPayment = async (req, res) => {
     res.status(500).json({ error: "حدث خطأ أثناء إنشاء عملية الدفع" });
   }
 };
+
+
+// احصل على عدد التذاكر المحجوزة لجميع الأماكن
+exports.getTotalTickets = async (req, res) => {
+  try {
+    const result = await Payment.aggregate([
+      { $group: { _id: null, totalTickets: { $sum: "$ticketCount" } } }
+    ]);
+
+    const total = result[0]?.totalTickets || 0;
+    res.status(200).json({ totalTickets: total });
+  } catch (error) {
+    console.error("❌ Error getting total tickets:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء حساب عدد التذاكر" });
+  }
+};
+
+
+// احصل على عدد التذاكر المحجوزة لمكان محدد
+exports.getTicketsByPlace = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+
+    const result = await Payment.aggregate([
+      { $match: { placeId } },
+      { $group: { _id: "$placeId", totalTickets: { $sum: "$ticketCount" } } }
+    ]);
+
+    const total = result[0]?.totalTickets || 0;
+    res.status(200).json({ placeId, totalTickets: total });
+  } catch (error) {
+    console.error("❌ Error getting tickets by place:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء حساب التذاكر للمكان" });
+  }
+};

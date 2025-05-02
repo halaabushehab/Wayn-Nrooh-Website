@@ -1,4 +1,5 @@
 const Rating = require('../models/Rating');
+const Place = require('../models/places'); // تأكد من وجود هذا النموذج
 
 // 📌 إضافة تقييم جديد
 exports.addRating = async (req, res) => {
@@ -70,3 +71,61 @@ exports.getRatingsForPlace = async (req, res) => {
     res.status(500).json({ error: "❌ حدث خطأ أثناء جلب التقييمات" });
   }
 };
+
+
+
+// 📌 جلب المكان الأعلى تقييماً من قبل المستخدمين
+exports.getTopRatedPlace = async (req, res) => {
+  try {
+    // تجميع التقييمات لحساب المتوسط لكل مكان
+    const topPlace = await Rating.aggregate([
+      {
+        $group: {
+          _id: "$placeId",
+          averageRating: { $avg: "$rating" },
+          totalRatings: { $sum: 1 }
+        }
+      },
+      { $sort: { averageRating: -1, totalRatings: -1 } },
+      { $limit: 1 }
+    ]);
+
+    if (!topPlace.length) {
+      return res.status(404).json({ message: "❌ لا يوجد تقييمات حتى الآن" });
+    }
+
+    // جلب بيانات المكان المرتبط
+    const place = await Place.findById(topPlace[0]._id);
+
+    res.json({
+      place: {
+        _id: place._id,
+        name: place.name,
+        image: place.image,
+        description: place.description,
+        averageRating: topPlace[0].averageRating.toFixed(1),
+        totalRatings: topPlace[0].totalRatings
+      }
+    });
+  } catch (error) {
+    console.error("❌ خطأ أثناء جلب أعلى مكان:", error);
+    res.status(500).json({ error: "❌ حدث خطأ أثناء جلب أعلى مكان" });
+  }
+};
+
+// 📌 جلب عدد التقييمات الكليّة على الموقع
+exports.getTotalRatingsCount = async (req, res) => {
+  try {
+    const count = await Rating.countDocuments();
+    
+    if (count === 0) {
+      return res.json({ message: "❌ لا توجد تقييمات حتى الآن" });
+    }
+
+    res.json({ totalRatings: count });
+  } catch (error) {
+    console.error("❌ خطأ أثناء جلب عدد التقييمات:", error);
+    res.status(500).json({ error: "❌ حدث خطأ أثناء جلب عدد التقييمات" });
+  }
+};
+

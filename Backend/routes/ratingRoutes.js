@@ -9,6 +9,14 @@ router.post('/', ratingController.addRating);
 router.get('/:placeId', ratingController.getRatingsForPlace);
 
 
+
+// 📌 جلب المكان الأعلى تقييماً من قبل المستخدمين
+router.get('/top-rated/place', ratingController.getTopRatedPlace);
+
+// 📌 جلب عدد التقييمات الكليّة
+router.get('/total/count', ratingController.getTotalRatingsCount);
+
+
 module.exports = router;
 
 
