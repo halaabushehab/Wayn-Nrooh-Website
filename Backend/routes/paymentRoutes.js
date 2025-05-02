@@ -6,7 +6,9 @@ const {
   getAllPayments,
   getPaymentById,
   verifyPayment,
-  createPayment
+  createPayment,
+  getTotalTickets,
+  getTicketsByPlace
 } = require("../controllers/paymentController");
 const paymentController = require('../controllers/paymentController');  // تأكد من أن هذا المسار صحيح
 
@@ -34,5 +36,10 @@ router.get("/verify", verifyPayment);
 
 // رابط POST لإضافة عملية الدفع الجديدة
 router.post('/create-payment', paymentController.createPayment);  // تأكد من أن الدالة تم استيرادها بشكل صحيح
+
+
+router.get("/stats/total-tickets", getTotalTickets);
+router.get("/stats/place-tickets/:placeId", getTicketsByPlace);
+
 
 module.exports = router;

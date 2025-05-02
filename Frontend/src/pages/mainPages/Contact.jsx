@@ -1,11 +1,10 @@
-
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { Link } from 'react-router-dom';
 
 const ContactSection = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [formdata, setFormData] = useState({
     name: "",
@@ -32,7 +31,7 @@ const ContactSection = () => {
         title: "تم الإرسال بنجاح!",
         text: "سنتواصل معك قريبًا",
         icon: "success",
-        confirmButtonColor: "#C2A878",
+        confirmButtonColor: "#115173",
       });
   
       setFormData({ name: "", email: "", title: "", message: "" });
@@ -42,7 +41,7 @@ const ContactSection = () => {
         title: "خطأ",
         text: "فشل في إرسال الرسالة، يرجى المحاولة مرة أخرى",
         icon: "error",
-        confirmButtonColor: "#C2A878",
+        confirmButtonColor: "#115173",
       });
     } finally {
       setLoading(false);
@@ -50,57 +49,60 @@ const ContactSection = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-amber-50 to-white">
+    <div className="bg-gradient-to-b from-white to-[#f5f5f5]">
       {/* Hero Section with Creative Design */}
       <div
-        className="relative h-120  w-full flex items-center justify-center bg-cover bg-center  overflow-hidden  "
+        className="relative h-120 w-full flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{ backgroundImage: "url('https://i.pinimg.com/736x/7a/39/c9/7a39c98897363a0625c40c57d8522bc7.jpg')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/70 to-black/60 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#022C43]/70 to-[#115173]/80 backdrop-blur-sm"></div>
         <div className="relative z-10 text-center text-white p-6 max-w-2xl">
           <div className="mb-4 transform -rotate-2">
             <h3 className="text-5xl font-extrabold mb-2 drop-shadow-lg">تواصل معنا</h3>
-            <div className="h-1 w-20 bg-amber-400 mx-auto rounded-full"></div>
+            <div className="h-1 w-20 bg-[#FFD700] mx-auto rounded-full"></div>
           </div>
-          <p className="text-lg text-amber-50 leading-relaxed">
+          <p className="text-lg text-gray-100 leading-relaxed">
             نسعد بالتواصل معكم ونسعى لتقديم تجارب استثنائية تمزج بين الشغف والمغامرة في أروع الوجهات الفريدة.
           </p>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#022C43]/40 to-transparent"></div>
       </div>
 
       {/* Contact Info Section with Creative Cards */}
       <section className="py-16">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+          <Link to="/suggest ">
+  <ContactCard
+    icon={<MapPin className="w-10 h-10 text-[#115173]" />}
+    title="اقتراح مكان جديد"
+    description="دلنا على مكان جديد اكتشفته"
+    className="text-blue-600 bg-gradient-to-br  from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700] cursor-pointer"
+  />
+</Link>
+
             <ContactCard
-              icon={<MapPin className="w-10 h-10 text-amber-700" />}
-              title="اقتراح مكان جديد"
-              description="دلنا على مكان جديد اكتشفته"
-              onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-br from-amber-50 to-white shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-amber-400"
-            />
-            <ContactCard
-              icon={<Phone className="w-10 h-10 text-amber-700" />}
+              icon={<Phone className="w-10 h-10 text-[#115173]" />}
               title="تواصل معنا"
               description="+962 79 0000 000"
               link="tel://962790000000"
-              className="bg-gradient-to-br from-amber-50 to-white shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-amber-400"
+              className="bg-gradient-to-br from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700]"
             />
             <ContactCard
-              icon={<Mail className="w-10 h-10 text-amber-700" />}
+              icon={<Mail className="w-10 h-10 text-[#115173]" />}
               title="البريد الإلكتروني"
-              description="info@waynNrooh.com"
+              description="     contact@wayn-nrouh.com"
               link="mailto:info@waynNrooh.com"
-              className="bg-gradient-to-br from-amber-50 to-white shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-amber-400"
+              className="bg-gradient-to-br from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700]"
             />
             <ContactCard
-              icon={<Globe className="w-10 h-10 text-amber-700" />}
+              icon={<Globe className="w-10 h-10 text-[#115173]" />}
               title="الموقع الإلكتروني"
               description="waynNrooh.com"
               link="#"
-              className="bg-gradient-to-br from-amber-50 to-white shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-amber-400"
+              className="bg-gradient-to-br from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700]"
             />
           </div>
         </div>
@@ -116,10 +118,10 @@ const ContactSection = () => {
                 alt="Map"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent flex items-end">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#115173]/70 to-transparent flex items-end">
                 <div className="p-8 text-white">
                   <h3 className="text-2xl font-bold mb-2">استكشف</h3>
-                  <p className="text-amber-100">مغامرات جديدة بانتظارك</p>
+                  <p className="text-gray-100">مغامرات جديدة بانتظارك</p>
                 </div>
               </div>
             </div>
@@ -133,9 +135,6 @@ const ContactSection = () => {
           </div>
         </div>
       </section>
-
-      {/* Suggest Place Modal */}
-      {isModalOpen && <SuggestPlaceModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };
@@ -145,16 +144,16 @@ const ContactCard = ({ icon, title, description, link, onClick, className }) => 
     className={`${className} group cursor-pointer`}
     onClick={onClick}
   >
-    <div className="flex justify-center mb-4 bg-amber-100 w-16 h-16 rounded-full mx-auto flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+    <div className="flex justify-center mb-4 bg-[#115173]/10 w-16 h-16 rounded-full mx-auto flex items-center justify-center group-hover:bg-[#115173]/20 transition-colors">
       {icon}
     </div>
-    <h3 className="text-lg font-bold mb-2 text-amber-900 text-center">{title}</h3>
+    <h3 className="text-lg font-bold mb-2 text-[#022C43] text-center">{title}</h3>
     {link ? (
-      <a href={link} className="text-amber-700 hover:text-amber-500 block text-center">
+      <a href={link} className="text-[#115173] hover:text-[#022C43] block text-center">
         {description}
       </a>
     ) : (
-      <p className="text-amber-700 text-center">{description}</p>
+      <p className="text-[#115173] text-center">{description}</p>
     )}
   </div>
 );
@@ -162,8 +161,8 @@ const ContactCard = ({ icon, title, description, link, onClick, className }) => 
 const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
   <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
     <div className="mb-8">
-      <h2 className="text-3xl font-bold mb-2 text-amber-900">تواصل معنا</h2>
-      <div className="h-1 w-16 bg-amber-400 rounded-full"></div>
+      <h2 className="text-3xl font-bold mb-2 text-[#022C43]">تواصل معنا</h2>
+      <div className="h-1 w-16 bg-[#FFD700] rounded-full"></div>
     </div>
     
     <form onSubmit={handlesubmit} className="space-y-4">
@@ -175,10 +174,10 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
             type="text"
             value={formdata.name}
             onChange={handleChange}
-            className="w-full p-3 border-2 border-amber-200 rounded-lg focus:ring focus:ring-amber-200 focus:border-amber-400 bg-amber-50/50 placeholder-amber-700/50 text-amber-900 font-medium"
+            className="w-full p-3 border-2 border-[#115173]/20 rounded-lg focus:ring focus:ring-[#115173]/20 focus:border-[#115173] bg-[#f5f5f5] placeholder-[#115173]/50 text-[#022C43] font-medium"
             placeholder="اسمك"
           />
-          <div className="absolute h-1 bg-amber-400 w-0 bottom-0 left-0 transition-all duration-300 group-focus-within:w-full"></div>
+          <div className="absolute h-1 bg-[#FFD700] w-0 bottom-0 left-0 transition-all duration-300 group-focus-within:w-full"></div>
         </div>
         
         <div className="relative">
@@ -189,7 +188,7 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
             required
             value={formdata.email}
             onChange={handleChange}
-            className="w-full p-3 border-2 border-amber-200 rounded-lg focus:ring focus:ring-amber-200 focus:border-amber-400 bg-amber-50/50 placeholder-amber-700/50 text-amber-900 font-medium"
+            className="w-full p-3 border-2 border-[#115173]/20 rounded-lg focus:ring focus:ring-[#115173]/20 focus:border-[#115173] bg-[#f5f5f5] placeholder-[#115173]/50 text-[#022C43] font-medium"
             placeholder="بريدك الإلكتروني"
           />
         </div>
@@ -198,7 +197,7 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
       <div className="relative">
         <input
           type="text"
-          className="w-full p-3 border-2 border-amber-200 rounded-lg focus:ring focus:ring-amber-200 focus:border-amber-400 bg-amber-50/50 placeholder-amber-700/50 text-amber-900 font-medium"
+          className="w-full p-3 border-2 border-[#115173]/20 rounded-lg focus:ring focus:ring-[#115173]/20 focus:border-[#115173] bg-[#f5f5f5] placeholder-[#115173]/50 text-[#022C43] font-medium"
           placeholder="الموضوع"
           id="title"
           name="title"
@@ -210,7 +209,7 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
       
       <div className="relative">
         <textarea
-          className="w-full p-3 border-2 border-amber-200 rounded-lg focus:ring focus:ring-amber-200 focus:border-amber-400 bg-amber-50/50 placeholder-amber-700/50 text-amber-900 font-medium"
+          className="w-full p-3 border-2 border-[#115173]/20 rounded-lg focus:ring focus:ring-[#115173]/20 focus:border-[#115173] bg-[#f5f5f5] placeholder-[#115173]/50 text-[#022C43] font-medium"
           placeholder="رسالتك"
           id="message"
           name="message"
@@ -224,9 +223,9 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-4 rounded-lg hover:from-amber-700 hover:to-amber-600 transition-all font-bold text-lg shadow-lg transform hover:translate-y-px flex items-center justify-center overflow-hidden group relative"
+        className="w-full bg-gradient-to-r from-[#115173] to-[#022C43] text-white py-4 rounded-lg hover:from-[#022C43] hover:to-[#115173] transition-all font-bold text-lg shadow-lg transform hover:translate-y-px flex items-center justify-center overflow-hidden group relative"
       >
-        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-400 to-amber-300 transition-transform duration-300 transform translate-y-full group-hover:translate-y-0"></span>
+        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#FFD700] to-[#FFD700]/80 transition-transform duration-300 transform translate-y-full group-hover:translate-y-0"></span>
         <span className="relative flex items-center justify-center gap-2">
           {loading ? (
             <svg
@@ -259,6 +258,5 @@ const ContactForm = ({ formdata, handleChange, handlesubmit, loading }) => (
     </form>
   </div>
 );
-
 
 export default ContactSection;

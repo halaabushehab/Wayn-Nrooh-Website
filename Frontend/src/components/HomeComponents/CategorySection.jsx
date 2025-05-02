@@ -116,17 +116,6 @@ const CategorySection = () => {
   const [error, setError] = useState(null);
   const categoriesRef = useRef(null);
 
-  const scrollLeft = () => {
-    if (categoriesRef.current) {
-      categoriesRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-    }
-  };
-  
-  const scrollRight = () => {
-    if (categoriesRef.current) {
-      categoriesRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-    }
-  };
 
   const categories = [
     { id: 'مطاعم', name: 'مطاعم', icon: <UtensilsIcon className="w-5 h-5" /> },
@@ -202,17 +191,6 @@ const CategorySection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          {/* <div className="inline-block mb-4">
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-16 h-16 mx-auto rounded-full flex items-center justify-center" 
-              style={{ backgroundColor: '#115173' }}
-            >
-              <Compass className="w-8 h-8 text-white" />
-            </motion.div>
-          </div> */}
           <h2 className="text-5xl font-bold mb-4" style={{ color: '#022C43' }}>
   استكشف حسب الفئة
 </h2>
@@ -224,16 +202,7 @@ const CategorySection = () => {
         </motion.div>
 
         <div className="relative mb-12">
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={scrollRight}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 focus:outline-none hidden md:block"
-            style={{ backgroundColor: '#FFD700' }}
-          >
-          
-          </motion.button>
-
+      
           <div 
             ref={categoriesRef}
             className="flex overflow-x-auto py-2 px-4 scrollbar-hide scroll-smooth"
@@ -266,15 +235,7 @@ const CategorySection = () => {
             </div>
           </div>
 
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={scrollLeft}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 focus:outline-none hidden md:block"
-            style={{ backgroundColor: '#FFD700' }}
-          >
-        
-          </motion.button>
+      
         </div>
 
         {loading ? (
