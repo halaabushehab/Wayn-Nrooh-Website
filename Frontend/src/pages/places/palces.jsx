@@ -7,6 +7,8 @@ import bgVideo from "../../components/img/amman-vedio.mp4";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
+
 const CityPage = () => {
   const [user, setUser] = useState(null);
   const [places, setPlaces] = useState([]);
@@ -341,7 +343,7 @@ const categories = [
                         <div className="relative">
                           <div className="h-52 overflow-hidden">
                             <img
-                              src={place.gallery[0]}
+                              src={place.images[0]}
                               alt={place.name}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />

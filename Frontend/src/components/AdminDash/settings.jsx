@@ -9,8 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function SettingsTab() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState(null);
- 
+  const [selectedFile, setSelectedFile] = useState(null); 
   const [activeTab, setActiveTab] = useState('profile');
   const [notificationSettings, setNotificationSettings] = useState({
     newBookings: true,
@@ -60,7 +59,7 @@ export default function SettingsTab() {
     phone: '',
     city: '',
     bio: '',
-    photo: '',
+
     role: '',
   });
 
@@ -137,40 +136,41 @@ export default function SettingsTab() {
   };
 
   const handleSaveProfile = async () => {
-    if (!userCookie || !userCookie.token) {
-      toast.error('يجب تسجيل الدخول أولاً');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('username', tempData.username);
-    formData.append('email', tempData.email);
-    formData.append('phone', tempData.phone);
-    formData.append('city', tempData.city);
-    formData.append('bio', tempData.bio);
-
-    if (selectedFile) {
-      formData.append('photo', selectedFile);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('username', tempData.username);
+      formData.append('email', tempData.email);
+      formData.append('phone', tempData.phone);
+      formData.append('city', tempData.city);
+      formData.append('bio', tempData.bio);
+      
+      if (selectedFile) {
+        formData.append('image', selectedFile); // يجب أن يتطابق مع upload.single('image')
+      }
+  
       const response = await axios.put(
         `http://localhost:9527/api/auth/profile/me/${userId}`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${userCookie.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
+            'Authorization': `Bearer ${userCookie.token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         }
       );
-
-      setUserData(tempData);
+  
+      // تحديث الحالة مباشرةً بالبيانات الجديدة
+      setUserData(prev => ({
+        ...prev,
+        ...response.data.user,
+        photo: response.data.user.photo + `?${Date.now()}` // إضافة timestamp لمنع الكاش
+      }));
+      
+      setTempProfileImage(response.data.user.photo + `?${Date.now()}`);
       setIsEditing(false);
-      toast.success('تم تحديث الملف الشخصي بنجاح');
+      toast.success('تم التحديث بنجاح!');
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('حدث خطأ أثناء تحديث الملف الشخصي');
+      toast.error(error.response?.data?.message || 'فشل التحديث');
     }
   };
 
@@ -253,18 +253,6 @@ export default function SettingsTab() {
               text="الملف الشخصي"
               active={activeTab === 'profile'}
               onClick={() => setActiveTab('profile')}
-            />
-            <SettingsSidebarItem
-              icon={<Bell size={18} />}
-              text="الإشعارات"
-              active={activeTab === 'notifications'}
-              onClick={() => setActiveTab('notifications')}
-            />
-            <SettingsSidebarItem
-              icon={<Shield size={18} />}
-              text="الأمان"
-              active={activeTab === 'security'}
-              onClick={() => setActiveTab('security')}
             />
           </div>
         </div>
@@ -401,7 +389,7 @@ export default function SettingsTab() {
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-4 py-2 bg-[#115173] text-white rounded-md hover:bg-blue-700"
                   >
                     تعديل الملف الشخصي
                   </button>
@@ -410,83 +398,7 @@ export default function SettingsTab() {
             </div>
           )}
 
-          {activeTab === 'notifications' && (
-            <div>
-              <h2 className="text-xl font-bold mb-6">إعدادات الإشعارات</h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-medium mb-4">إشعارات البريد الإلكتروني</h3>
-                  <div className="space-y-3">
-                    <NotificationSetting
-                      title="الحجوزات الجديدة"
-                      description="إشعار عند وجود حجز جديد"
-                      settingKey="newBookings"
-                    />
-                    <NotificationSetting
-                      title="الدفعات"
-                      description="إشعار عند اكتمال الدفع"
-                      settingKey="payments"
-                    />
-                    <NotificationSetting
-                      title="الرسائل"
-                      description="إشعار عند استلام رسالة جديدة"
-                      settingKey="messages"
-                    />
-                    <NotificationSetting
-                      title="تقييمات المستخدمين"
-                      description="إشعار عند وجود تقييم جديد"
-                      settingKey="reviews"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-medium mb-4">إشعارات التطبيق</h3>
-                  <div className="space-y-3">
-                    <NotificationSetting
-                      title="تنبيهات النظام"
-                      description="إشعارات مهمة حول النظام"
-                      settingKey="systemAlerts"
-                    />
-                    <NotificationSetting
-                      title="الأماكن الجديدة"
-                      description="إشعار عند إضافة مكان جديد"
-                      settingKey="newPlaces"
-                    />
-                    <NotificationSetting
-                      title="التحديثات"
-                      description="إشعار عند توفر تحديثات جديدة"
-                      settingKey="updates"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={saveNotificationSettings}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  حفظ التغييرات
-                </button>
-              </div>
-            </div>
-          )}
 
-          {activeTab === 'security' && (
-            <div>
-              <h2 className="text-xl font-bold mb-6">إعدادات الأمان</h2>
-              <div className="space-y-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium mb-2">المصادقة الثنائية</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    قم بتمكين المصادقة الثنائية لحسابك لمزيد من الأمان
-                  </p>
-                  <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-                    تفعيل المصادقة الثنائية
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -495,15 +407,4 @@ export default function SettingsTab() {
 
 
 
-{/* <SettingsSidebarItem
-icon={<Shield size={18} />}
-text="الأمان والخصوصية"
-active={activeTab === 'security'}
-onClick={() => setActiveTab('security')}
-/>
-<SettingsSidebarItem
-icon={<Globe size={18} />}
-text="اللغة والمنطقة"
-active={activeTab === 'language'}
-onClick={() => setActiveTab('language')}
-/> */}
+

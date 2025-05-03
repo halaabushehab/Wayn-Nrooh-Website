@@ -5,6 +5,7 @@ import PlacesTabComponent from "../AdminDash/places"
 import MessagesTabComponent from "../AdminDash/messages"
 import BookingsTabComponent from "../AdminDash/bookings"
 import UsersTab from "../AdminDash/Users"
+import PlogAdd from "../AdminDash/PlogAdd"
 import SettingsTab from "../AdminDash/settings"
 import NavBarComponent from "../AdminDash/nav"
 import { useNavigate } from "react-router-dom";
@@ -75,6 +76,16 @@ export default function Dashboard() {
             hovered={hoveredItem === "messages"}
             onHover={() => setHoveredItem("messages")}
           />
+<SidebarItem
+  icon={<CreditCard className="transition-transform duration-300 group-hover:scale-110" />}
+  text="المقالات"
+  active={activeTab === "articles"}
+  onClick={() => setActiveTab("articles")}
+  hovered={hoveredItem === "articles"}
+  onHover={() => setHoveredItem("articles")}
+/>
+
+
           <SidebarItem
             icon={<Calendar className="transition-transform duration-300 group-hover:scale-110" />}
             text="الحجوزات"
@@ -112,9 +123,9 @@ export default function Dashboard() {
               onHover={() => setHoveredItem("logout")}
               isLogout={true}
             />
+            
           </div>
         </nav>
-    
       </div>
       
       {/* Main Content */}
@@ -126,13 +137,23 @@ export default function Dashboard() {
             {activeTab === "places" && <PlacesTabComponent />}
             {activeTab === "messages" && <MessagesTabComponent />}
             {activeTab === "bookings" && <BookingsTabComponent />}
+            {activeTab === "articles" && <PlogAdd  />}
+
             {activeTab === "users" && <UsersTab />}
             {activeTab === "settings" && <SettingsTab />}
+             {/* Sidebar Footer */}
+<div className="p-4 text-center text-xs text-[#7FB3D5] border-t border-[#115173]">
+  © 2023 <span className="font-semibold text-[#FFD700]">نظام الإدارة</span> – جميع الحقوق محفوظة.
+</div>
+         
           </div>
         </div>
       </div>
+      
+    
     </div>
   )
+  
 }
 
 

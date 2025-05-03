@@ -8,6 +8,8 @@ import {
   MapPinIcon, StarIcon,  HeartIcon, Clock,Ticket,  Map,CameraIcon, Share2, ChevronRight, ChevronLeft, MessageCircle,  Calendar, Info,  Compass,  ChevronUp,  MapPin ,  Zap , ExternalLink , AlertCircle , Bookmark , User ,} from "lucide-react"
 import { toast } from "sonner"
 import Cookies from "js-cookie"
+import NearbyPlacesMap from './detailsplaces/NearbyPlacesMap';
+import SimilarPlaces from "./detailsplaces/SimilarPlaces";
 
 const categoryImages = {
   متاحف: "https://i.pinimg.com/736x/97/1c/12/971c12d6c4e11ce77db2c039e73bb0b5.jpg",
@@ -23,14 +25,18 @@ const PlaceDetails = () => {
   const [place, setPlace] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [userCoords, setUserCoords] = useState(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState([]); 
+   const [activeImageIndex, setActiveImageIndex] = useState(0)
+ 
+   const [isSimilarPlacesOpen, setIsSimilarPlacesOpen] = useState(false);
   const [relatedPlaces, setRelatedPlaces] = useState([])
-  const [nearbyPlaces, setNearbyPlaces] = useState([])
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [showGalleryModal, setShowGalleryModal] = useState(false)
   const [userId, setUserId] = useState(null)
   const [username, setUsername] = useState(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [showMap, setShowMap] = useState(false);
 
   // Rating states
   const [rating, setRating] = useState(null)
@@ -93,16 +99,47 @@ const PlaceDetails = () => {
   }, [id])
 
   useEffect(() => {
-    if (!place || !place.categories || place.categories.length === 0) return
+    if (!place || !place.categories || place.categories.length === 0) return;
 
-    const category = encodeURIComponent(place.categories[0])
+    const category = encodeURIComponent(place.categories[0]);
+    setLoading(true);  // تعيين التحميل إلى true عند بدء الطلب
+    setError(null);    // إعادة تعيين الأخطاء السابقة إن وجدت
+
     axios
       .get(`http://localhost:9527/api/places/category/${category}`)
       .then((response) => {
-        setRelatedPlaces(response.data.slice(0, 6))
+        setRelatedPlaces(response.data.slice(0, 6));
+        setLoading(false);  // تعيين التحميل إلى false بعد استلام البيانات
       })
-      .catch((error) => console.error("Error fetching related places:", error))
-  }, [place])
+      .catch((error) => {
+        console.error("Error fetching related places:", error);
+        setError("حدث خطأ أثناء جلب الأماكن المشابهة. يرجى المحاولة لاحقًا.");
+        setLoading(false);  // تعيين التحميل إلى false في حالة الخطأ
+      });
+  }, [place]);
+
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserCoords(coords);
+          console.log("Current Location:", coords);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
+  
+ 
 
   const handleRating = (star) => {
     setRating(star)
@@ -176,41 +213,51 @@ const PlaceDetails = () => {
     }
   }
 
-  const handleNearbyPlaces = () => {
-    if (!navigator.geolocation) {
-      return toast.error("متصفحك لا يدعم تحديد الموقع الجغرافي")
+  const handleNearbyPlaces = async () => {
+    if (showMap) {
+      setShowMap(false);
+      return;
     }
+  
+    setLoading(true);
+    setError(null);
+  
+    try {
+      // الحصول على الموقع الحالي
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+  
+      const coords = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      setUserCoords(coords);
+  
+      // جلب الأماكن القريبة من قاعدة البيانات
+      const response = await fetch(`/api/places/nearby?lat=${coords.lat}&lng=${coords.lng}`);
+      
+      if (!response.ok) {
+        throw new Error('فشل في جلب الأماكن القريبة');
+      }
+  
+      const data = await response.json();
+      setNearbyPlaces(data);
+      setShowMap(true);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching nearby places:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleToggleSimilarPlaces = () => {
+    setIsSimilarPlacesOpen((prev) => !prev);
+  };
 
-    toast.loading("جاري تحديد موقعك...")
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const userLat = position.coords.latitude
-        const userLng = position.coords.longitude
 
-        try {
-          const res = await axios.get("http://localhost:9527/api/places/nearby", {
-            params: {
-              lat: userLat,
-              lng: userLng,
-            },
-          })
-
-          setNearbyPlaces(res.data)
-          toast.success("تم العثور على أماكن قريبة!")
-
-          const section = document.getElementById("nearby-places")
-          if (section) section.scrollIntoView({ behavior: "smooth" })
-        } catch (error) {
-          console.error("Error fetching nearby places:", error)
-          toast.error("حدث خطأ أثناء جلب الأماكن القريبة")
-        }
-      },
-      () => {
-        toast.error("تعذر تحديد موقعك الجغرافي")
-      },
-    )
-  }
-
+  
   const getCategoryImage = (category) => {
     return categoryImages[category] || categoryImages["متاحف"]
   }
@@ -310,16 +357,17 @@ const PlaceDetails = () => {
 
 {/* Hero Section with Parallax */}
 <div
-  className="relative h-[85vh] bg-cover bg-center flex items-end"
+  className="relative h-[60vh] bg-cover bg-center flex items-end "
   style={{
-    backgroundImage: `url(${place.images?.[0]})`,
+    backgroundImage: `url(${place.images?.[1]})`,
     backgroundAttachment: "fixed",
   }}
+  dir="rtl" // إضافة اتجاه النص من اليمين لليسار
 >
-  <div className="absolute inset-0 bg-gradient-to-b from-[#022C43]/70 via-[#022C43]/80 to-[#022C43]/90"></div>
+  <div className="absolute inset-0 bg-gradient-to-b from-[#022C43]/10 via-[#022C43]/10 to-[#022C43]/10"></div>
 
   {/* Floating Category Pills */}
-  <div className="absolute top-32 left-1/2 transform -translate-x-1/2 flex gap-3 flex-wrap justify-center max-w-4xl px-4">
+  <div className="absolute top-10 right-1/4 transform translate-x-1/2 flex gap-3 flex-wrap justify-center max-w-4xl px-4">
     {place.categories.map((category, index) => (
       <span
         key={index}
@@ -332,17 +380,17 @@ const PlaceDetails = () => {
     ))}
   </div>
 
-  <div className="container mx-auto px-4 py-16 relative z-10">
+  <div className="container mx-auto px-10  relative z-10">
     <div className="max-w-4xl">
       {/* Price and Rating */}
-      <div className="flex items-center space-x-3 space-x-reverse rtl:space-x-reverse mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <span className="bg-[#FFD700] text-[#022C43] px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
           {place.is_free ? "مجاني" : `${place.ticket_price} دينار`}
         </span>
         <div className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full">
           <StarIcon className="w-5 h-5 text-[#FFD700] fill-[#FFD700]" />
-          <span className="ms-1 text-white font-semibold">{averageRating || place.rating}</span>
-          <span className="ms-1 text-white/80 text-sm">({ratings.length})</span>
+          <span className="mr-1 text-white font-semibold">{averageRating || place.rating}</span>
+          {/* <span className="mr-1 text-white/80 text-sm">({ratings.length})</span> */}
         </div>
 
         <button
@@ -354,11 +402,11 @@ const PlaceDetails = () => {
       </div>
 
       {/* Title and Description */}
-      <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 animate-fadeIn">
+      <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 animate-fadeIn text-right">
         {place.name}
       </h1>
       <p
-        className="text-xl text-white/90 max-w-2xl animate-fadeIn opacity-0 leading-relaxed"
+        className="text-xl text-white/90 max-w-2xl animate-fadeIn opacity-0 leading-relaxed text-right"
         style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
       >
         {place.short_description}
@@ -369,20 +417,76 @@ const PlaceDetails = () => {
         onClick={handleClick}
         className="mt-8 bg-[#115173] hover:bg-[#022C43] 
                   text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition duration-300 
-                  transform hover:translate-y-[-2px] animate-fadeIn opacity-0 flex items-center"
+                  transform hover:translate-y-[-2px] animate-fadeIn opacity-0 flex items-center justify-end"
         style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}
+        dir="rtl"
       >
-        <Ticket className="w-5 h-5 mr-2" />
+        <Ticket className="w-5 h-5 ml-2" />
         {place.is_free ? "استكشف المكان" : "احجز تذكرتك الآن"}
       </button>
     </div>
   </div>
 </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {/* Main Content */}
 <div className="bg-white">
-  <div className="container mx-auto px-4 py-12">
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div className="max-w-[1400px] mx-auto px-4 py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Column - Gallery and Details */}
       <div className="lg:col-span-2 space-y-8">
         {/* Gallery Section */}
@@ -636,62 +740,62 @@ const PlaceDetails = () => {
       </div>
 
       {/* Right Column - Info */}
-<div className="lg:col-span-1">
+      <div className="lg:col-span-1">
   <div className="sticky top-24 space-y-6">
     {/* Place Info Card */}
-    <div className="bg-[#022C43] text-white p-6 rounded-xl shadow-lg border border-[#115173]/30 overflow-hidden relative">
+    <div className="bg-gray-100 text-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
       {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-40 h-40 bg-[#FFD700]/10 rounded-full -mr-20 -mt-20"></div>
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#115173]/20 rounded-full -ml-16 -mb-16"></div>
-      
-      <h3 className="text-xl font-bold mb-6 pb-4 border-b border-[#115173] relative z-10 flex items-center">
-        <Info className="w-5 h-5 mr-2 text-[#FFD700]" />
+      <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-400/10 rounded-full -mr-20 -mt-20"></div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-gray-300/20 rounded-full -ml-16 -mb-16"></div>
+
+      <h3 className="text-xl font-bold mb-6 pb-4 border-b border-gray-300 relative z-10 flex items-center">
+        <Info className="w-5 h-5 mr-2 text-yellow-500" />
         معلومات المكان
       </h3>
 
       <div className="space-y-5 relative z-10">
         {/* Price */}
-        <div className="flex items-start bg-[#115173]/30 p-3 rounded-lg">
-          <div className="bg-[#FFD700] p-2 rounded-lg mr-3">
-            <Ticket className="w-5 h-5 text-[#022C43]" />
+        <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
+          <div className="bg-yellow-400 p-2 rounded-lg mr-3">
+            <Ticket className="w-5 h-5 text-gray-800" />
           </div>
           <div>
-            <h4 className="text-white/80 text-sm mb-1">سعر التذكرة</h4>
+            <h4 className="text-gray-600 text-sm mb-1">سعر التذكرة</h4>
             <p className="font-semibold text-lg">
               {place.is_free ? (
-                <span className="text-[#FFD700]">مجاني</span>
+                <span className="text-yellow-500">مجاني</span>
               ) : (
-                <span>{place.ticket_price} <span className="text-[#FFD700]">دينار</span></span>
+                <span>{place.ticket_price} <span className="text-yellow-500">دينار</span></span>
               )}
             </p>
           </div>
         </div>
 
         {/* Hours */}
-        <div className="flex items-start bg-[#115173]/30 p-3 rounded-lg">
-          <div className="bg-[#FFD700] p-2 rounded-lg mr-3">
-            <Clock className="w-5 h-5 text-[#022C43]" />
+        <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
+          <div className="bg-yellow-400 p-2 rounded-lg mr-3">
+            <Clock className="w-5 h-5 text-gray-800" />
           </div>
           <div>
-            <h4 className="text-white/80 text-sm mb-1">ساعات العمل</h4>
+            <h4 className="text-gray-600 text-sm mb-1">ساعات العمل</h4>
             <p className="font-semibold">{place.working_hours || "يومياً 9 صباحاً - 5 مساءً"}</p>
           </div>
         </div>
 
         {/* Location */}
-        <div className="flex items-start bg-[#115173]/30 p-3 rounded-lg">
-          <div className="bg-[#FFD700] p-2 rounded-lg mr-3">
-            <MapPin className="w-5 h-5 text-[#022C43]" />
+        <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
+          <div className="bg-yellow-400 p-2 rounded-lg mr-3">
+            <MapPin className="w-5 h-5 text-gray-800" />
           </div>
           <div>
-            <h4 className="text-white/80 text-sm mb-1">الموقع</h4>
+            <h4 className="text-gray-600 text-sm mb-1">الموقع</h4>
             <p className="font-semibold">{place.city || "الأردن"}</p>
             {place.location && (
               <a
                 href={`https://www.google.com/maps?q=${place.location.latitude},${place.location.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#FFD700] text-xs mt-1 flex items-center hover:underline"
+                className="text-yellow-500 text-xs mt-1 flex items-center hover:underline"
               >
                 عرض على الخريطة
                 <ExternalLink className="w-3 h-3 mr-1" />
@@ -701,12 +805,12 @@ const PlaceDetails = () => {
         </div>
 
         {/* Season */}
-        <div className="flex items-start bg-[#115173]/30 p-3 rounded-lg">
-          <div className="bg-[#FFD700] p-2 rounded-lg mr-3">
-            <Calendar className="w-5 h-5 text-[#022C43]" />
+        <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
+          <div className="bg-yellow-400 p-2 rounded-lg mr-3">
+            <Calendar className="w-5 h-5 text-gray-800" />
           </div>
           <div>
-            <h4 className="text-white/80 text-sm mb-1">الموسم المناسب</h4>
+            <h4 className="text-gray-600 text-sm mb-1">الموسم المناسب</h4>
             <p className="font-semibold">{place.season || "طوال العام"}</p>
           </div>
         </div>
@@ -715,14 +819,24 @@ const PlaceDetails = () => {
       {/* CTA Button */}
       <button
         onClick={handleClick}
-        className="w-full mt-6 bg-gradient-to-r from-[#FFD700] to-[#FFD700]/90 hover:from-[#FFD700]/90 hover:to-[#FFD700] 
-                  text-[#022C43] font-bold py-3 px-4 rounded-lg transition duration-300 
+        className="w-full mt-6 bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-400 
+                  text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 
                   flex items-center justify-center shadow-md hover:shadow-lg relative z-10"
       >
         <Ticket className="w-5 h-5 ml-2" />
         {place.is_free ? "الدخول مجاني" : "احجز تذكرتك الآن"}
       </button>
     </div>
+
+ 
+
+
+
+
+
+
+
+
 
     {/* Quick Actions Card */}
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -733,17 +847,62 @@ const PlaceDetails = () => {
         </h3>
 
         <div className="grid grid-cols-2 gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {/* Nearby Places */}
+
           <button
-            onClick={handleNearbyPlaces}
-            className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
-                      hover:bg-[#115173]/5 transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
-              <MapPin className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
-            </div>
-            <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">أماكن قريبة</span>
-          </button>
+  onClick={handleNearbyPlaces}
+  className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
+            hover:bg-[#115173]/5 transition-all duration-300"
+>
+  <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
+    <MapPin className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
+  </div>
+  <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">
+    أماكن قريبة
+  </span>
+</button>
+
+{/* {userCoords && (
+  <NearbyPlacesMap userCoords={userCoords} places={places} />
+)} */}
+{/* Nearby Places Map */}
+{loading && userCoords && (
+  <div className="p-4 text-center">جاري تحميل الخريطة...</div>
+)}
+
+{error && (
+  <div className="p-4 text-red-500 text-center">{error}</div>
+)}
+
+{showMap && userCoords && (
+  <NearbyPlacesMap userCoords={userCoords} places={nearbyPlaces} />
+)}
+   
 
           {/* Share */}
           <button
@@ -758,19 +917,26 @@ const PlaceDetails = () => {
           </button>
 
           {/* Similar Places */}
-          <button
-            onClick={() => {
-              const section = document.getElementById("similar-places");
-              if (section) section.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
-                      hover:bg-[#115173]/5 transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
-              <Compass className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
-            </div>
-            <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">أماكن مشابهة</span>
-          </button>
+<div className="mt-8">
+  <button
+    onClick={handleToggleSimilarPlaces}
+    className="group flex items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300"
+  >
+    <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">
+      {isSimilarPlacesOpen ? "إخفاء الأماكن المشابهة" : "عرض الأماكن المشابهة"}
+    </span>
+  </button>
+
+  {isSimilarPlacesOpen && (
+    <div className="mt-6">
+      <SimilarPlaces category={place?.categories?.[0]} />
+    </div>
+  )}
+</div>
+
+
+
+    
 
           {/* Save */}
           <button
@@ -783,9 +949,41 @@ const PlaceDetails = () => {
             </div>
             <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">حفظ</span>
           </button>
+
+
+
+
+
+
+
+
         </div>
       </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     {/* Contact/Important Info */}
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

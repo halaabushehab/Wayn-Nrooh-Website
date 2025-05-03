@@ -15,14 +15,14 @@ L.Icon.Default.mergeOptions({
 
 const touristSpots = [
   {
-    name: 'البتراء',
-    position: [30.3285, 35.4444],
-    description: 'المدينة الوردية المنحوتة في الصخور.',
+    name: 'أكاديمية آسيا للشطرنج',
+    position: [31.9718654, 31.9718654],
+    description: 'أكاديمية آسيا للشطرنج   .',
   },
   {
-    name: 'جرش',
-    position: [32.0668, 35.8510],
-    description: 'مدينة أثرية تضم آثارًا رومانية محفوظة.',
+    name: ' دكانة الحُب',
+    position: [31.9466855, 35.9299303],
+    description: 'مساحة فنية مميزة تجمع بين الحرف اليدوية، الفوتوغراف، والهدايا الفنية في جبل عمّان     .',
   },
   {
     name: 'أم قيس',
@@ -278,16 +278,18 @@ function MapSection() {
       
       <section className="py-16  relative">
         <div className="absolute top-10 right-10 rotate-12 opacity-80 hidden lg:block">
-          <RoadSign destination="جرش" distance="50 كم" />
+          <RoadSign destination="الاردن" distance="50 كم" />
         </div>
 
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-[#022C43]">خريطة الأردن السياحية</h2>
+            <h2 className="text-3xl font-bold text-[#022C43]"> خريطة كنوز الأردن الخفية </h2>
             <div className="h-1 bg-[#FFD700] flex-1 mr-4 rounded-full md:block hidden"></div>
             <p className="text-[#444444] max-w-md mt-4 md:mt-0">
-              استكشف التوزيع الجغرافي لأشهر المعالم السياحية في الأردن
-            </p>
+            استكشف واختر وجهتك التالية من بين وجهاتنا المخفية.
+
+</p>
+
           </div>
           <div className="bg-[#F5F5F5] rounded-xl h-[500px] flex items-center justify-center relative overflow-hidden">
             <div className="absolute top-5 left-5 rotate-12 opacity-50">
@@ -324,15 +326,7 @@ function MapSection() {
               ))}
             </MapContainer>
           </div>
-          
-          <div className="mt-4 text-center">
-            <button 
-              onClick={() => setShowAnimation(!showAnimation)}
-              className="px-4 py-2 bg-[#022C43] text-white rounded-lg hover:bg-[#FFD700] hover:text-[#022C43] transition-colors"
-            >
-              {showAnimation ? 'إخفاء الخلفية المتحركة' : 'عرض خلفية متحركة'}
-            </button>
-          </div>
+        
         </div>
       </section>
     </>

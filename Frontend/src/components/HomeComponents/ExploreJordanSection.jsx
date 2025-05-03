@@ -4,6 +4,40 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const AddPlaceForm = () => {
+
+  const extractCoordinatesFromMapLink = (mapLink) => {
+    if (!mapLink) return { latitude: null, longitude: null };
+  
+    try {
+      // إذا كان الرابط يحتوي على إحداثيات مباشرة (مثل ?q=lat,lng)
+      if (mapLink.includes('?q=')) {
+        const parts = mapLink.split('?q=')[1].split('&')[0];
+        const [latitude, longitude] = parts.split(',').map(Number);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          return { latitude, longitude };
+        }
+      }
+  
+      // إذا كان الرابط من مشاركة الموقع (مثل @lat,lng)
+      const atIndex = mapLink.indexOf('@');
+      if (atIndex !== -1) {
+        const coordsPart = mapLink.substring(atIndex + 1).split(',');
+        const latitude = parseFloat(coordsPart[0]);
+        const longitude = parseFloat(coordsPart[1]);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          return { latitude, longitude };
+        }
+      }
+  
+      // إذا لم يتم العثور على إحداثيات واضحة
+      return { latitude: null, longitude: null };
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return { latitude: null, longitude: null };
+    }
+  };
+
+
   const [formData, setFormData] = useState({
     name: "",
     short_description: "",
@@ -19,6 +53,10 @@ const AddPlaceForm = () => {
     suitable_for: "",
     phone: "",
     website: "",
+    location: {
+      latitude: "",
+      longitude: ""
+    }
   });
 
   const [images, setImages] = useState([]);
@@ -80,67 +118,60 @@ const AddPlaceForm = () => {
     setImagePreviews(newPreviews);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('🚀 handleSubmit triggered');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log('🚀 handleSubmit triggered');
+
+  // استخراج الإحداثيات من رابط الخريطة
+  const { latitude, longitude } = extractCoordinatesFromMapLink(formData.map_link);
   
-    const allCookies = Cookies.get();
-    console.log('All cookies:', allCookies);  // طباعة جميع الكوكيز للتأكد من التوكن
-  
-    const userCookie = Cookies.get('user');  // احصل على الكوكيز 'user'
-    console.log('Extracted user cookie:', userCookie);
-  
-    if (!userCookie) {
-      console.error('❗ No user found in cookies');
-      return;
-    }
-  
-    const parsedUser = JSON.parse(userCookie);
-    const token = parsedUser.token;  // استخراج التوكن
-    console.log('🔑 Extracted token from user cookie:', token);
-  
-    if (!token) {
-      console.error('❗ No token found in user cookie');
-      return;
-    }
-  
-    if (!formData) {
-      console.error('❗ formData is undefined');
-      return;
-    }
-  
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-      withCredentials: true,
-    };
-  
-  // بدلاً من إرسال النصوص، أرسل المصفوفات
-const formDataToSend = new FormData();
-for (const key in formData) {
-  if (key === "categories" || key === "suitable_for") {
-    // تأكد من أن هذه الحقول يتم تحويلها بشكل صحيح
-    formDataToSend.append(key, JSON.stringify(formData[key]));
-  } else {
-    formDataToSend.append(key, formData[key]);
+  const userCookie = Cookies.get('user');
+  if (!userCookie) {
+    console.error('❗ No user found in cookies');
+    return;
   }
-}
 
-images.forEach(image => {
-  formDataToSend.append('images', image);
-});
+  const parsedUser = JSON.parse(userCookie);
+  const token = parsedUser.token;
 
-  
-    try {
-      const response = await axios.post('http://localhost:9527/api/places/', formDataToSend, config);
-      console.log('✅ Place created successfully:', response.data);
-    } catch (error) {
-      console.error('❌ Error creating place:', error.response?.data || error.message);
-    }
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    },
+    withCredentials: true,
   };
+
+  const formDataToSend = new FormData();
   
+  // إضافة جميع حقول النموذج
+  for (const key in formData) {
+    if (key === 'location') continue; // نتخطى location لأننا سنضيفه يدوياً
+    if (key === "categories" || key === "suitable_for") {
+      formDataToSend.append(key, JSON.stringify(formData[key].split(',').map(item => item.trim())));
+    } else {
+      formDataToSend.append(key, formData[key]);
+    }
+  }
+
+  // إضافة الإحداثيات
+  formDataToSend.append('location[latitude]', latitude || '');
+  formDataToSend.append('location[longitude]', longitude || '');
+
+  // إضافة الصور
+  images.forEach(image => {
+    formDataToSend.append('images', image);
+  });
+
+  try {
+    const response = await axios.post('http://localhost:9527/api/places/', formDataToSend, config);
+    console.log('✅ Place created successfully:', response.data);
+    setSubmitStatus("success");
+  } catch (error) {
+    console.error('❌ Error creating place:', error.response?.data || error.message);
+    setSubmitStatus("error");
+  }
+};
   
   
   
