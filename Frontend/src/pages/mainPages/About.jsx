@@ -3,6 +3,7 @@ import { Plane, Pin, MapPin } from 'lucide-react';
 import { motion } from "framer-motion"
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Helmet } from "react-helmet";
 
 
 
@@ -50,6 +51,13 @@ useEffect(() => {
 
   
   return (
+
+    <>
+      <Helmet>
+        <title>من نحن | وين نروح</title>
+        <meta name="description" content="تعرف على فريق عمل وين نروح ورؤيتنا لمساعدة الزوار في استكشاف الأماكن الفريدة بالأردن." />
+        <meta name="keywords" content="من نحن, فريق, وين نروح, عن الموقع" />
+      </Helmet>
     <div className="font-sans text-gray-800">
       {/* "url('https://static.vecteezy.com/system/resources/previews/012/658/075/non_2x/outline-amman-jordan-skyline-with-blue-buildings-vector.jpg')" */}
       {/* Hero Section */}
@@ -684,5 +692,6 @@ useEffect(() => {
       
  
     </div>
+    </>
   );
 }

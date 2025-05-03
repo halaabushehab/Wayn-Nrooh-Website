@@ -41,5 +41,6 @@ router.post('/create-payment', paymentController.createPayment);  // تأكد م
 router.get("/stats/total-tickets", getTotalTickets);
 router.get("/stats/place-tickets/:placeId", getTicketsByPlace);
 
+router.get("/stats/top-booked", paymentController.getTopBookedPlaces);
 
 module.exports = router;

@@ -49,7 +49,8 @@ const getArticleById = async (req, res) => {
 // دالة لإحضار جميع المقالات
 const getAllArticles = async (req, res) => {
   try {
-    const articles = await Article.find();  // استخدم Mongoose لجلب كل المقالات
+    // جلب فقط المقالات التي لم تُحذف (isDeleted: false)
+    const articles = await Article.find({ isDeleted: false });
 
     if (articles.length === 0) {
       return res.status(404).json({ message: "لا توجد مقالات" });
@@ -61,5 +62,6 @@ const getAllArticles = async (req, res) => {
     res.status(500).json({ message: "حدث خطأ أثناء جلب المقالات", error });
   }
 };
+
 
 module.exports = { createArticle, getArticleById, getAllArticles };

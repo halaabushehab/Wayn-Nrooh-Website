@@ -2,7 +2,7 @@ const Place = require("../models/places");
 const User = require("../models/User"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
-
+const Suggestion = require('../models/Suggestion');
 
 
 
@@ -20,16 +20,27 @@ exports.getPlaceCount = async (req, res) => {
 exports.getPlaceById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // التحقق من صلاحية الـ ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "❌ المعرف غير صالح." });
     }
+
+    // البحث عن المكان باستخدام id
     const place = await Place.findById(id);
+    
+    // إذا لم يتم العثور على المكان
     if (!place) {
       return res.status(404).json({ message: "❌ المكان غير موجود." });
     }
-    res.status(200).json(place);
+
+    // إرسال البيانات عند العثور على المكان
+    return res.status(200).json(place);
+
   } catch (error) {
-    res.status(500).json({ message: "❌ حدث خطأ أثناء جلب تفاصيل المكان.", error: error.message });
+    // التعامل مع الأخطاء في حال حدوثها
+    console.error("Error fetching place details:", error); // لطباعة الأخطاء في الكونسول (للـ Debugging)
+    return res.status(500).json({ message: "❌ حدث خطأ أثناء جلب تفاصيل المكان.", error: error.message });
   }
 };
 
@@ -122,7 +133,7 @@ exports.createPlace = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;  // Get the userId from the token
+    const userId = decoded.userId;
 
     const {
       name,
@@ -139,6 +150,7 @@ exports.createPlace = async (req, res) => {
       suitable_for,
       phone,
       website,
+      location // إضافة هذا الحقل الجديد
     } = req.body;
 
     // Parse categories and suitable_for if they are strings
@@ -149,7 +161,7 @@ exports.createPlace = async (req, res) => {
     const images = req.files ? req.files.map(file => `http://localhost:9527/uploads/${file.filename}`) : [];
 
     const newPlace = new Place({
-      createdBy: userId,  // Set the createdBy field to the current user's ID
+      createdBy: userId,
       name,
       short_description,
       detailed_description,
@@ -165,6 +177,10 @@ exports.createPlace = async (req, res) => {
       phone,
       website,
       images,
+      location: { // إضافة كائن location
+        latitude: location?.latitude || null,
+        longitude: location?.longitude || null
+      }
     });
 
     const savedPlace = await newPlace.save();
@@ -174,7 +190,6 @@ exports.createPlace = async (req, res) => {
     res.status(400).json({ message: "Failed to create place", error: error.message });
   }
 };
-
 
 
 
@@ -197,12 +212,10 @@ exports.getAllPlaces = async (req, res) => {
     };
 
     // طباعة الخيارات للتحقق من استعلام الصفحة
-    console.log("Query options: ", options);
 
     const places = await Place.paginate(query, options);
 
     // طباعة النتيجة قبل إرسالها
-    console.log("Fetched places: ", places);
 
     res.status(200).json({
       success: true,
@@ -219,3 +232,76 @@ exports.getAllPlaces = async (req, res) => {
 };
 
 
+// دالة لحساب المسافة بين نقطتين جغرافياً
+exports.getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // نصف قطر الأرض بالكيلومتر
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// متحكم: جلب الأماكن القريبة
+exports.getNearbyPlaces = async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+
+    // تأكد من أن lat و lng موجودين
+    if (!lat || !lng) {
+      return res.status(400).json({ message: '❌ يجب توفير إحداثيات الموقع.' });
+    }
+
+    // تحويل lat, lng إلى كائن GeoJSON
+    const location = {
+      type: 'Point',
+      coordinates: [parseFloat(lng), parseFloat(lat)],
+    };
+
+    // العثور على الأماكن القريبة باستخدام GeoJSON
+    const places = await Place.find({
+      location: {
+        $near: {
+          $geometry: location,
+          $maxDistance: 5000,  // مسافة أقصاها 5 كيلومترات (تعديل حسب الحاجة)
+        },
+      },
+    });
+
+    if (!places.length) {
+      return res.status(404).json({ message: '❌ لم يتم العثور على أماكن قريبة.' });
+    }
+
+    res.status(200).json(places);  // إرسال الأماكن القريبة في الاستجابة بتنسيق JSON
+  } catch (error) {
+    res.status(500).json({ message: '❌ فشل في جلب الأماكن القريبة', error: error.message });
+  }
+};
+
+
+exports.getPlacesByUser = async (req, res) => {
+  try {
+    const userId = req.params.userId; // نستخدم req.params للحصول على الـ userId من الـ URL
+
+    // التحقق من وجود الـ userId
+    if (!userId) {
+      return res.status(400).json({ message: "مفقود الـ userId في الرابط" });
+    }
+
+    const userPlaces = await Place.find({ createdBy: userId, isDeleted: false });
+
+    if (!userPlaces || userPlaces.length === 0) {
+      return res.status(404).json({ message: "لا توجد أماكن لهذا المستخدم." });
+    }
+
+    res.status(200).json(userPlaces);
+  } catch (error) {
+    console.error("Error fetching places by user:", error); // طباعة الخطأ
+    res.status(500).json({ message: "حدث خطأ أثناء جلب الأماكن", error });
+  }
+};

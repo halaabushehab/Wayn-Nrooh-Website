@@ -365,16 +365,7 @@ const Navbar = () => {
                       <FaUser className="ml-2 text-[#115173]" />
                       {user.isAdmin ? "لوحة التحكم" : "الملف الشخصي"}
                     </Link>
-                    {user.isAdmin && (
-                      <Link
-                        to="/add-article"
-                        className="flex items-center px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <FaPlus className="ml-2 text-[#115173]" />
-                        إضافة مقال جديد
-                      </Link>
-                    )}
+               
                     <button>
                     <Link
   to="/favorite"

@@ -10,6 +10,7 @@ const passport = require("passport");
 const Payment = require("../models/Payment");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const axios = require("axios");
+const Article = require("../models/Article"); // تأكد من وجود هذا الموديل
 
 
 // جلب جميع الأماكن
@@ -263,5 +264,121 @@ const getDashboardOverview = async (req, res) => {
   }
 };
 
+// Plog ==========================
 
-module.exports = { getAllPlaces,getDashboardOverview ,getPlaceById,updatePlaceStatus, updatePlace, deletePlace,addAdmin ,getPaymentsByPlaceId ,getAllPayments };
+// جلب جميع المقالات
+const getAllArticles = async (req, res) => {
+  try {
+    // جلب المقالات التي لم يتم حذفها فقط
+    const articles = await Article.find({ isDeleted: false });
+
+    if (!articles || articles.length === 0) {
+      return res.status(200).json([]); // إرجاع مصفوفة فارغة إذا لا توجد مقالات
+    }
+
+    res.status(200).json(articles); // إرجاع المقالات غير المحذوفة
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    res.status(500).json({ message: "حدث خطأ أثناء جلب المقالات", error });
+  }
+};
+
+
+
+
+
+// إنشاء مقال جديد
+const createArticle = async (req, res) => {
+  try {
+    const { title, content, content_1, tags, imageSrc } = req.body;
+    
+    const newArticle = new Article({
+      title,
+      content,
+      content_1,
+      tags,
+      imageSrc,
+      views: 0,
+      likeCount: 0,
+      isDeleted: false
+    });
+
+    await newArticle.save();
+
+    res.status(201).json({
+      message: "Article created successfully",
+      article: newArticle
+    });
+  } catch (error) {
+    console.error("Error creating article:", error);
+    res.status(500).json({ message: "Error creating article", error: error.message });
+  }
+};
+
+
+
+// تحديث المقال
+const updateArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, content_1, tags, imageSrc } = req.body;
+
+    const updatedArticle = await Article.findByIdAndUpdate(
+      id,
+      {
+        title,
+        content,
+        content_1,
+        tags: tags.split(',').map(tag => tag.trim()),
+        imageSrc
+      },
+      { new: true }
+    );
+
+    if (!updatedArticle) {
+      return res.status(404).json({ message: "المقال غير موجود" });
+    }
+
+    res.status(200).json({
+      message: "تم تحديث المقال بنجاح",
+      article: updatedArticle
+    });
+  } catch (error) {
+    console.error("Error updating article:", error);
+    res.status(500).json({ message: "حدث خطأ أثناء تحديث المقال", error: error.message });
+  }
+};
+
+// Soft Delete للمقال
+const softDeleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isDeleted } = req.body;
+
+
+    const updatedArticle = await Article.findByIdAndUpdate(
+      id,
+      { isDeleted: isDeleted ?? true }, // استخدم ما أرسله الفرونت أو true كافتراضي
+      { new: true }
+    );
+
+    if (!updatedArticle) {
+   
+      return res.status(404).json({ message: "المقال غير موجود" });
+    }
+
+    res.status(200).json({
+      message: "تم حذف المقال بنجاح (soft delete)",
+      article: updatedArticle
+    });
+  } catch (error) {
+    console.error("خطأ أثناء عملية الحذف:", error);
+    res.status(500).json({ message: "حدث خطأ أثناء حذف المقال", error: error.message });
+  }
+};
+
+
+
+
+
+module.exports = { getAllPlaces,getDashboardOverview ,createArticle,getAllArticles,softDeleteArticle,getPlaceById,updatePlaceStatus, updatePlace, deletePlace,addAdmin ,getPaymentsByPlaceId ,getAllPayments,updateArticle };

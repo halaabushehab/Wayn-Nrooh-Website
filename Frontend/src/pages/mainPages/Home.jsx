@@ -11,11 +11,31 @@ import AboutSection from "../../components/HomeComponents/AboutSection ";
 import JordanDestinations from "../../components/HomeComponents/JordanDestinations";
 import MapSection from '../../components/HomeComponents/Map'
 import SuggestedPlacesSection  from '../../components/HomeComponents/SuggestedPlacesSection '
+import SeasonalPopup from '../../components/HomeComponents/SeasonalPopup'; // تأكد من المسار الصحيح
+import { Helmet } from "react-helmet";
+
+
+import Offer from '../../components/HomeComponents/Offer'; // تأكد من المسار الصحيح
+
 const Home = () => {
-  
+  const [showPopup, setShowPopup] = useState(false);
+  useEffect(() => {
+    const hasVisited = sessionStorage.getItem("hasVisited");
+    if (!hasVisited) {
+      setShowPopup(true);
+      sessionStorage.setItem("hasVisited", "true");
+    }
+  }, []);;
   return (
     <>
-     
+
+<Helmet>
+    <title>الرئيسية | وين نروح</title>
+    <meta name="description" content="اكتشف أماكن سياحية رائعة ومميزة في الأردن مع وين نروح." />
+  </Helmet>
+  
+      {showPopup && <SeasonalPopup setShowPopup={setShowPopup} />}
+
       {/* ***** HERO Section ***** */}
       <HeroSection />
       {/* ***** Categories Section ***** */}
@@ -44,6 +64,7 @@ const Home = () => {
 
           {/* <ExploreJordanSection /> */}
           <SuggestedPlacesSection  />
+          <Offer />
     </>
   );
 };

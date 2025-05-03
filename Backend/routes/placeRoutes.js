@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const placeController = require("../controllers/placeController");
 const upload = require("../middleware/uploadMiddleware");
-const authMiddleware = require("../middleware/authMiddleware");
+// const authMiddleware = require("../middleware/authenticateToken");
 const { createPlace } = require("../controllers/placeController");
 const { cloudinary } = require('../config/cloudinaryConfig');
+const authMiddleware = require("../middleware/authenticateToken");  // أو:
 
 // ✅ جلب جميع الأماكن
 router.get("/", placeController.getAllPlaces);
@@ -14,6 +15,9 @@ router.get("/count", placeController.getPlaceCount);
 
 // POST route to create a place
 router.post('/', upload.array('images'), placeController.createPlace);
+
+// routes/placeRoutes.js
+router.get('/nearby', placeController.getNearbyPlaces);
 
 // ✅ جلب مكان حسب الـ ID
 router.get("/:id", placeController.getPlaceById);
@@ -29,6 +33,10 @@ router.get("/season/:season", placeController.getPlacesBySeason);
 
 // ✅ فلترة + بحث
 router.get("/filtered/search", placeController.getFilteredPlaces);
+
+
+// routes/placeRoutes.js
+router.get("/user-places/:userId", placeController.getPlacesByUser);
 
 
 module.exports = router;

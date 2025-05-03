@@ -92,7 +92,7 @@ const AboutSection = () => {
             >
               <div className="relative h-[400px] w-full rounded-2xl overflow-hidden shadow-xl">
               <img
-  src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTHgF0D8GIA2ESn3D80FVtsUtSec2cyF3tMCRSEJtFVocmJ8-xX"
+  src="https://www.hospitalitynewsmag.com/wp-content/uploads/2023/07/jordan-country-1200x630.jpg"
   alt="مدينة عمان"
   className="object-cover w-full h-full"
   style={{ objectFit: "cover" }}

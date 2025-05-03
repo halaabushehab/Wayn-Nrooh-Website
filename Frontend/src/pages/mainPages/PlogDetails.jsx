@@ -302,7 +302,7 @@ const PlogDetails = () => {
             )}
 
             <div className="space-y-6">
-              <p className="text-xl leading-relaxed">{article.content}</p>
+              {/* <p className="text-xl leading-relaxed">{article.content}</p> */}
               
               {/* Additional content sections can be added here */}
               <div className="grid md:grid-cols-2 gap-6 my-8">
