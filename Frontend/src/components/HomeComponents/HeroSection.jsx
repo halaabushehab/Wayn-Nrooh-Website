@@ -4,17 +4,18 @@ import photo3 from '../../components/img/WhatsApp Image 2025-04-29 at 1.06.30 AM
 import photo2 from '../../components/img/img5.jpg';
 import photo1 from '../../components/img/resize.webp';
 import { nextTick } from 'process';
+import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // const slides = [
-  //   "https://i.pinimg.com/736x/fb/65/c4/fb65c45d0e7274a7d18b8079dca7bf33.jpg",
-  //   "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Z_Amman_Hejaz_Railway_Station_4.jpg/1024px-Z_Amman_Hejaz_Railway_Station_4.jpg",
-  //   "https://images.pexels.com/photos/2673300/pexels-photo-2673300.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-  // ];
+  const slides = [
+    "https://autonationrentacar.com/assets/uploads/King_abdullah_mosque.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Z_Amman_Hejaz_Railway_Station_4.jpg/1024px-Z_Amman_Hejaz_Railway_Station_4.jpg",
+    "https://iresizer.devops.arabiaweather.com/resize?url=https://adminassets.devops.arabiaweather.com/sites/default/files/field/image/p1fdn9uioa1u9ujuq1b4p108mjk24.jpg&size=800x450&force_webp=1"
+  ];
 
-  const slides = [photo1, photo2, photo3];
+  // const slides = [photo1, photo2, photo3];
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -79,12 +80,18 @@ export default function HeroSection() {
   </p>
 
   <div className="flex gap-4 justify-center">
-    <button className="bg-[#FFD700]    hover:bg-[#e0b200] text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
-      يلاّ نكتشف
-    </button>
-    <button className="bg-white hover:bg-gray-200 text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
-      اقترح مكان 
-    </button>
+ 
+<Link to="/places?city=عمان">
+  <button className="bg-[#FFD700] hover:bg-[#e0b200] text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
+    يلاّ نكتشف
+  </button>
+</Link>
+
+<Link to="/suggest">
+  <button className="bg-white hover:bg-gray-200 text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
+    اقترح مكان 
+  </button>
+</Link>
   </div>
 </div>
 

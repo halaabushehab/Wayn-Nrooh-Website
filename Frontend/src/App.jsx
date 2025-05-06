@@ -1,10 +1,15 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 // Components
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
-
+import PageNotFound from "./components/PageNotFound.jsx";
 // Pages - Main
 import Home from "./pages/mainPages/Home.jsx";
 import Blog from "./pages/mainPages/Blog.jsx";
@@ -14,20 +19,21 @@ import Contact from "./pages/mainPages/Contact.jsx";
 import SeasonalDestinations from "./components/HomeComponents/SeasonalDestinations.jsx";
 import SeasonPage from "./pages/places/seasonPage.jsx";
 import Payments from "./pages/mainPages/Payments.jsx";
-import PaymentSuccess from './pages/mainPages/payment-success.jsx';
+import PaymentSuccess from "./pages/mainPages/payment-success.jsx";
 
 // Pages - Places
 import CityPage from "./pages/places/palces.jsx";
 import PlaceDetails from "./pages/places/PlaceDetails.jsx";
 import ExploreJordanSection from "././components/HomeComponents/ExploreJordanSection.jsx";
-import UpdatePlace from './components/AdminDash/UpdatePlace.jsx';
-import FavoritesPage from './pages/places/FavoritesPage.jsx'
+import UpdatePlace from "./components/AdminDash/UpdatePlace.jsx";
+import FavoritesPage from "./pages/places/FavoritesPage.jsx";
+import SearchResultsPage from "./pages/mainPages/SearchResults .jsx";
+
 // Pages - User
 import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
 import ProfilePage from "./pages/user/ProfilePage.jsx";
 import AdminDash from "./components/AdminDash/AdminDash.jsx";
-
 const AppContent = () => {
   // استخدام useLocation لتحديد الصفحة الحالية
   const location = useLocation();
@@ -36,7 +42,7 @@ const AppContent = () => {
 
   return (
     <>
-      { !hideLayout && <Navbar /> }
+      {!hideLayout && <Navbar />}
       <div style={{ minHeight: "100vh", paddingBottom: "80px" }}>
         <Routes>
           {/* Main Routes */}
@@ -46,17 +52,24 @@ const AppContent = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seasonPage/:season" element={<SeasonPage />} />
-          <Route path="/SeasonalDestinations" element={<SeasonalDestinations />} />
-          <Route path="/pay/:id" element={<Payments />}/>
+          <Route
+            path="/SeasonalDestinations"
+            element={<SeasonalDestinations />}
+          />
+          <Route path="/pay/:id" element={<Payments />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
 
           {/* Places Routes */}
           <Route path="/places" element={<CityPage />} />
           <Route path="/place-details/:id" element={<PlaceDetails />} />
           <Route path="/suggest" element={<ExploreJordanSection />} />
-          <Route path="/dashboard/places/update/:id" element={<UpdatePlace />} />
+          <Route
+            path="/dashboard/places/update/:id"
+            element={<UpdatePlace />}
+          />
           <Route path="/favorite" element={<FavoritesPage />} />
-
+          <Route path="/search" element={<SearchResultsPage />} />
+          <Route path="*" element={<PageNotFound />} />
           {/* User Routes */}
           <Route path="/ProfilePage/:id" element={<ProfilePage />} />
           <Route path="/Register" element={<Register />} />
@@ -64,7 +77,7 @@ const AppContent = () => {
           <Route path="/AdminDash" element={<AdminDash />} />
         </Routes>
       </div>
-      { !hideLayout && <Footer /> }
+      {!hideLayout && <Footer />}
     </>
   );
 };

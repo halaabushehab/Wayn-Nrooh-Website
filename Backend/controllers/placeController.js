@@ -3,6 +3,9 @@ const User = require("../models/User"); // تأكد من وجود هذا الم�
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const Suggestion = require('../models/Suggestion');
+const haversine = require('haversine-distance'); // تأكد من تثبيت الحزمة أولاً
+const axios = require('axios');
+const Article = require('../models/Article');
 
 
 
@@ -111,16 +114,17 @@ exports.getFilteredPlaces = async (req, res) => {
     const filter = { status: "approved" };
 
     if (city) filter.city = city;
-    if (category) filter.categories = category;
+    if (category) filter.categories = { $in: [category] }; // ✅ لو categories مصفوفة
     if (season) filter.best_season = season;
     if (freeOnly === "true") filter.is_free = true;
 
     const places = await Place.find(filter);
     res.status(200).json(places);
   } catch (error) {
-    res.status(500).json({ message: "خطأ في الفلترة والبحث", error: error.message });
+    res.status(500).json({ message: "❌ خطأ في الفلترة والبحث", error: error.message });
   }
 };
+
 
 
 
@@ -150,15 +154,14 @@ exports.createPlace = async (req, res) => {
       suitable_for,
       phone,
       website,
-      location // إضافة هذا الحقل الجديد
+      location
     } = req.body;
 
-    // Parse categories and suitable_for if they are strings
     const parsedCategories = typeof categories === 'string' ? JSON.parse(categories) : categories;
     const parsedSuitableFor = typeof suitable_for === 'string' ? JSON.parse(suitable_for) : suitable_for;
 
-    // Handle images
-    const images = req.files ? req.files.map(file => `http://localhost:9527/uploads/${file.filename}`) : [];
+    // الصور من Cloudinary URLs
+    const images = req.files.map(file => file.path);
 
     const newPlace = new Place({
       createdBy: userId,
@@ -177,7 +180,7 @@ exports.createPlace = async (req, res) => {
       phone,
       website,
       images,
-      location: { // إضافة كائن location
+      location: {
         latitude: location?.latitude || null,
         longitude: location?.longitude || null
       }
@@ -190,6 +193,7 @@ exports.createPlace = async (req, res) => {
     res.status(400).json({ message: "Failed to create place", error: error.message });
   }
 };
+
 
 
 
@@ -248,40 +252,147 @@ exports.getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
 };
 
 // متحكم: جلب الأماكن القريبة
-exports.getNearbyPlaces = async (req, res) => {
+
+// exports.getNearbyPlaces = async (req, res) => {
+//   try {
+//     const lat = parseFloat(req.query.lat);
+//     const lng = parseFloat(req.query.lng);
+//     const maxDistance = 5000; // المسافة بالـ متر (5 كم)
+
+//     // التحقق من الإحداثيات
+//     if (isNaN(lat) || isNaN(lng)) {
+//       return res.status(400).json({ 
+//         success: false,
+//         message: 'إحداثيات غير صالحة',
+//         data: null
+//       });
+//     }
+
+//     // جلب جميع الأماكن من قاعدة البيانات
+//     const places = await Place.find();
+
+//     // موقع المستخدم
+//     const userLocation = { latitude: lat, longitude: lng };
+
+//     // فلترة الأماكن بناءً على المسافة باستخدام Haversine
+//     const nearbyPlaces = places.filter(place => {
+//       const placeLocation = {
+//         latitude: place.location.latitude,
+//         longitude: place.location.longitude
+//       };
+
+//       // حساب المسافة بين مكان المستخدم والمكان باستخدام Haversine
+//       const distance = haversine(userLocation, placeLocation, { unit: 'meter' });
+
+//       return distance <= maxDistance; // إذا كانت المسافة ضمن الحد الأقصى (5 كم)
+//     });
+
+//     // التحقق إذا كانت هناك أماكن قريبة
+//     if (nearbyPlaces.length === 0) {
+//       return res.status(200).json({ 
+//         success: true,
+//         message: 'لا توجد أماكن قريبة',
+//         data: []
+//       });
+//     }
+
+//     // إعادة الأماكن القريبة
+//     res.status(200).json({
+//       success: true,
+//       message: 'تم جلب الأماكن القريبة بنجاح',
+//       data: nearbyPlaces
+//     });
+//   } catch (error) {
+//     console.error('Error in getNearbyPlaces:', error);
+//     res.status(500).json({ 
+//       success: false,
+//       message: 'فشل في جلب الأماكن القريبة',
+//       error: error.message,
+//       data: null
+//     });
+//   }
+// };
+
+const getDrivingDistance = async (userLat, userLng, placeLat, placeLng) => {
   try {
-    const { lat, lng } = req.query;
-
-    // تأكد من أن lat و lng موجودين
-    if (!lat || !lng) {
-      return res.status(400).json({ message: '❌ يجب توفير إحداثيات الموقع.' });
-    }
-
-    // تحويل lat, lng إلى كائن GeoJSON
-    const location = {
-      type: 'Point',
-      coordinates: [parseFloat(lng), parseFloat(lat)],
+    const url = process.env.API_URL;  // تأكد من أن الرابط هنا صحيح
+    const params = {
+      origins: `${userLat},${userLng}`,
+      destinations: `${placeLat},${placeLng}`,
+      key: process.env.YOUR_GOOGLE_API_KEY,
     };
 
-    // العثور على الأماكن القريبة باستخدام GeoJSON
-    const places = await Place.find({
-      location: {
-        $near: {
-          $geometry: location,
-          $maxDistance: 5000,  // مسافة أقصاها 5 كيلومترات (تعديل حسب الحاجة)
-        },
-      },
-    });
+    const response = await axios.get(url, { params });
 
-    if (!places.length) {
-      return res.status(404).json({ message: '❌ لم يتم العثور على أماكن قريبة.' });
+    console.log("📦 Google API Full Response:", JSON.stringify(response.data, null, 2));
+
+    if (
+      response.data &&
+      response.data.rows &&
+      response.data.rows.length > 0 &&
+      response.data.rows[0].elements &&
+      response.data.rows[0].elements.length > 0 &&
+      response.data.rows[0].elements[0].status === "OK"
+    ) {
+      return response.data.rows[0].elements[0].distance.value;
+    } else {
+      console.warn("📭 Distance Matrix returned incomplete data:", response.data);
+      return null;
     }
-
-    res.status(200).json(places);  // إرسال الأماكن القريبة في الاستجابة بتنسيق JSON
   } catch (error) {
-    res.status(500).json({ message: '❌ فشل في جلب الأماكن القريبة', error: error.message });
+    console.error("Error in getDrivingDistance:", error);
+    return null;
   }
 };
+
+exports.getNearbyPlaces = async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat);
+    const lng = parseFloat(req.query.lng);
+    const maxDistance = 10000; // 10 كم
+
+    if (isNaN(lat) || isNaN(lng)) {
+      return res.status(400).json({
+        success: false,
+        message: "إحداثيات غير صالحة",
+        data: null,
+      });
+    }
+
+    const places = await Place.find();
+    const nearbyPlaces = [];
+
+    for (const place of places) {
+      const placeLat = place.location.latitude;
+      const placeLng = place.location.longitude;
+
+      const distance = await getDrivingDistance(lat, lng, placeLat, placeLng);
+
+      if (distance !== null && distance <= maxDistance) {
+        nearbyPlaces.push({ ...place.toObject(), distance });
+      }
+    }
+
+    nearbyPlaces.sort((a, b) => a.distance - b.distance);
+
+    return res.status(200).json({
+      success: true,
+      message: "تم جلب الأماكن القريبة بنجاح",
+      data: nearbyPlaces.slice(0, 2),
+    });
+  } catch (error) {
+    console.error("Error in getNearbyPlaces:", error);
+    res.status(500).json({
+      success: false,
+      message: "فشل في جلب الأماكن القريبة",
+      error: error.message,
+      data: null,
+    });
+  }
+};
+
+
+
 
 
 exports.getPlacesByUser = async (req, res) => {
@@ -303,5 +414,165 @@ exports.getPlacesByUser = async (req, res) => {
   } catch (error) {
     console.error("Error fetching places by user:", error); // طباعة الخطأ
     res.status(500).json({ message: "حدث خطأ أثناء جلب الأماكن", error });
+  }
+};
+
+
+exports.globalSearch = async (req, res) => {
+  try {
+    const { query, page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    if (!query || query.trim().length < 2) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'يجب أن تكون كلمة البحث مكونة من حرفين على الأقل'
+      });
+    }
+    
+    // البحث في الأماكن
+    const placesPromise = Place.find({
+      status: 'approved',
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } },
+        { city: { $regex: query, $options: 'i' } } // البحث باسم المدينة كحقل نصي
+      ]
+    })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+    
+    // البحث في المقالات
+    const articlesPromise = Article.find({
+      status: 'published',
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { content: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } }
+      ]
+    })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+    
+    // جلب العدد الكلي للأماكن المطابقة
+    const countPlacesPromise = Place.countDocuments({
+      status: 'approved',
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } },
+        { city: { $regex: query, $options: 'i' } }
+      ]
+    });
+    
+    const [places, articles, totalPlaces] = await Promise.all([
+      placesPromise,
+      articlesPromise,
+      countPlacesPromise
+    ]);
+    
+    // استخراج المدن الفريدة من نتائج الأماكن
+    const uniqueCities = [];
+    const cityMap = new Map();
+    
+    places.forEach(place => {
+      if (place.city && !cityMap.has(place.city)) {
+        cityMap.set(place.city, true);
+        uniqueCities.push({
+          name: place.city,
+          placesCount: places.filter(p => p.city === place.city).length
+        });
+      }
+    });
+    
+    res.json({
+      success: true,
+      results: {
+        places,
+        articles,
+        cities: uniqueCities.slice(0, 10) // الحد الأقصى للمدن المعروضة
+      },
+      total: totalPlaces,
+      page: parseInt(page),
+      limit: parseInt(limit)
+    });
+    
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'حدث خطأ أثناء البحث',
+      error: err.message
+    });
+  }
+};
+
+// الاقتراحات التلقائية
+exports.searchSuggestions = async (req, res) => {
+  try {
+    const { term } = req.query;
+    
+    if (!term || term.trim().length < 2) {
+      return res.json([]);
+    }
+    
+    const [places, articles] = await Promise.all([
+      Place.find({
+        status: 'approved',
+        $or: [
+          { name: { $regex: term, $options: 'i' } },
+          { city: { $regex: term, $options: 'i' } }
+        ]
+      })
+      .limit(5)
+      .select('name city')
+      .lean(),
+      
+      Article.find({
+        status: 'published',
+        title: { $regex: term, $options: 'i' }
+      })
+      .limit(5)
+      .select('title')
+      .lean()
+    ]);
+    
+    const suggestions = [
+      ...places.map(p => ({ 
+        name: p.name, 
+        type: 'مكان',
+        city: p.city ? `(${p.city})` : ''
+      })),
+      ...places.filter(p => p.city && p.city.toLowerCase().includes(term.toLowerCase()))
+               .map(p => ({
+                 name: p.city,
+                 type: 'مدينة'
+               })),
+      ...articles.map(a => ({ 
+        name: a.title, 
+        type: 'مقال' 
+      }))
+    ].slice(0, 8); // الحد الأقصى للاقتراحات
+    
+    // إزالة التكرارات
+    const uniqueSuggestions = [];
+    const seen = new Set();
+    
+    suggestions.forEach(item => {
+      const key = `${item.name}-${item.type}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueSuggestions.push(item);
+      }
+    });
+    
+    res.json(uniqueSuggestions);
+    
+  } catch (err) {
+    console.error('Suggestions error:', err);
+    res.status(500).json([]);
   }
 };

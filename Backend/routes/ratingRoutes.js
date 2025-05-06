@@ -6,8 +6,9 @@ const ratingController = require('../controllers/ratingController');
 router.post('/', ratingController.addRating);
 
 // 📌 جلب جميع التقييمات لمكان معين مع حساب المتوسط
-router.get('/:placeId', ratingController.getRatingsForPlace);
+router.get('/place/:id', ratingController.getRatingsForPlace);
 
+// router.get('/place/:placeId', ratingController.getRatingsForPlace);
 
 
 // 📌 جلب المكان الأعلى تقييماً من قبل المستخدمين

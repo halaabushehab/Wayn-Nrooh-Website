@@ -4,22 +4,12 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  MapPinIcon, StarIcon,  HeartIcon, Clock,Ticket,  Map,CameraIcon, Share2, ChevronRight, ChevronLeft, MessageCircle,  Calendar, Info,  Compass,  ChevronUp,  MapPin ,  Zap , ExternalLink , AlertCircle , Bookmark , User ,} from "lucide-react"
+import {MapPinIcon, StarIcon, Globe , HeartIcon, Clock,Ticket,  Map,CameraIcon, Share2, ChevronRight, ChevronLeft, MessageCircle,  Calendar, Info,  Compass,  ChevronUp,  MapPin ,  Zap , ExternalLink , AlertCircle , Bookmark , User ,} from "lucide-react"
 import { toast } from "sonner"
 import Cookies from "js-cookie"
 import NearbyPlacesMap from './detailsplaces/NearbyPlacesMap';
 import SimilarPlaces from "./detailsplaces/SimilarPlaces";
-
-const categoryImages = {
-  متاحف: "https://i.pinimg.com/736x/97/1c/12/971c12d6c4e11ce77db2c039e73bb0b5.jpg",
-  تسوق: "https://i.pinimg.com/736x/bb/16/5e/bb165e49947484ef6a8fa1849eae53e0.jpg",
-  اثري: "https://i.pinimg.com/736x/df/51/0b/df510b0f6a90123515b2e77d1ef45416.jpg",
-  مطاعم: "https://i.pinimg.com/736x/ab/8a/56/ab8a56a21f7caa5db083ff5b0f5b63f3.jpg",
-  تعليمي: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2NA1I289e4ZIaBhycEYZ3Iq1KVD307uTzkg&s",
-  ترفيه: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2NA1I289e4ZIaBhycEYZ3Iq1KVD307uTzkg&s",
-  منتزهات: "https://www.7iber.com/wp-content/uploads/2015/05/Daheyet-Al-Hussein-Park-001.jpg",
-}
+import LocationMap from './detailsplaces/LocationMap';     
 
 const PlaceDetails = () => {
   const [place, setPlace] = useState(null)
@@ -27,9 +17,8 @@ const PlaceDetails = () => {
   const [error, setError] = useState(null)
   const [userCoords, setUserCoords] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]); 
-   const [activeImageIndex, setActiveImageIndex] = useState(0)
- 
-   const [isSimilarPlacesOpen, setIsSimilarPlacesOpen] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [isSimilarPlacesOpen, setIsSimilarPlacesOpen] = useState(false);
   const [relatedPlaces, setRelatedPlaces] = useState([])
   const [showGalleryModal, setShowGalleryModal] = useState(false)
   const [userId, setUserId] = useState(null)
@@ -37,6 +26,8 @@ const PlaceDetails = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [showMap, setShowMap] = useState(false);
+
+
 
   // Rating states
   const [rating, setRating] = useState(null)
@@ -80,23 +71,17 @@ const PlaceDetails = () => {
   useEffect(() => {
     const fetchPlaceDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:9527/api/places/${id}`)
-        setPlace(response.data)
-
-        // Fetch ratings for this place
-        const ratingsResponse = await axios.get(`http://localhost:9527/api/ratings/${id}`)
-        setRatings(ratingsResponse.data.ratings || [])
-        setAverageRating(ratingsResponse.data.average || 0)
+        const response = await axios.get(`http://localhost:9527/api/places/${id}`);
+        setPlace(response.data);
       } catch (err) {
-        console.error("Error fetching place details:", err)
-        setError("حدث خطأ أثناء جلب البيانات.")
+        setError("حدث خطأ أثناء جلب البيانات.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchPlaceDetails()
-  }, [id])
+    fetchPlaceDetails();
+  }, [id]);
 
   useEffect(() => {
     if (!place || !place.categories || place.categories.length === 0) return;
@@ -123,22 +108,17 @@ const PlaceDetails = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = {
+          setUserCoords({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          };
-          setUserCoords(coords);
-          console.log("Current Location:", coords);
+          });
         },
         (error) => {
           console.error("Error getting location:", error);
         }
       );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
     }
   }, []);
-  
  
 
   const handleRating = (star) => {
@@ -215,78 +195,67 @@ const PlaceDetails = () => {
 
   const handleNearbyPlaces = async () => {
     if (showMap) {
-      setShowMap(false);
+      setShowMap(false); // إغلاق الـ Popup عند الضغط إذا كانت مفتوحة
       return;
     }
-  
+
     setLoading(true);
     setError(null);
-  
+
     try {
-      // الحصول على الموقع الحالي
+      if (!navigator.geolocation) {
+        throw new Error("المتصفح لا يدعم الموقع الجغرافي");
+      }
+
       const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          (err) => reject(new Error("فشل في تحديد الموقع: " + err.message))
+        );
       });
-  
+
       const coords = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
+
       setUserCoords(coords);
-  
-      // جلب الأماكن القريبة من قاعدة البيانات
-      const response = await fetch(`/api/places/nearby?lat=${coords.lat}&lng=${coords.lng}`);
-      
-      if (!response.ok) {
-        throw new Error('فشل في جلب الأماكن القريبة');
-      }
-  
-      const data = await response.json();
-      setNearbyPlaces(data);
-      setShowMap(true);
+      setShowMap(true);  // عرض الـ Popup بعد تحديد الموقع
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching nearby places:', err);
     } finally {
       setLoading(false);
     }
   };
   
+
   const handleToggleSimilarPlaces = () => {
     setIsSimilarPlacesOpen((prev) => !prev);
   };
 
-
-  
-  const getCategoryImage = (category) => {
-    return categoryImages[category] || categoryImages["متاحف"]
-  }
-
-  const scrollGallery = (direction) => {
-    if (galleryRef.current) {
-      const scrollAmount = direction === "left" ? -300 : 300
-      galleryRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
-    }
-  }
-
-  const sharePlace = () => {
+  const sharePlace = async () => {
     if (navigator.share) {
-      navigator
-        .share({
-          title: place.name,
-          text: place.short_description,
-          url: window.location.href,
-        })
-        .then(() => toast.success("تم مشاركة المكان بنجاح!"))
-        .catch((error) => console.error("Error sharing:", error))
+      try {
+        await navigator.share({
+          title: 'اسم المكان',
+          text: 'تفاصيل المكان أو الوصف',
+          url: window.location.href,  // مشاركة رابط الصفحة الحالية
+        });
+        console.log('تمت المشاركة بنجاح');
+      } catch (err) {
+        console.error('خطأ في المشاركة:', err);
+      }
     } else {
-      // Fallback
-      navigator.clipboard
-        .writeText(window.location.href)
-        .then(() => toast.success("تم نسخ الرابط إلى الحافظة"))
-        .catch(() => toast.error("فشل نسخ الرابط"))
+      // إذا كانت API المشاركة غير مدعومة (مثلاً في بعض المتصفحات أو على أجهزة الكمبيوتر)
+      alert('مشاركة غير مدعومة في متصفحك.');
     }
-  }
+  };
+
+
+
+  if (loading) return <div>جاري التحميل...</div>;
+  if (error) return <div>{error}</div>;
+  if (!place) return <div>لم يتم العثور على المكان</div>;
 
   if (loading)
     return (
@@ -342,6 +311,7 @@ const PlaceDetails = () => {
         </div>
       </div>
     )
+
 
   return (
     <>
@@ -412,77 +382,10 @@ const PlaceDetails = () => {
         {place.short_description}
       </p>
 
-      {/* CTA Button */}
-      <button
-        onClick={handleClick}
-        className="mt-8 bg-[#115173] hover:bg-[#022C43] 
-                  text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition duration-300 
-                  transform hover:translate-y-[-2px] animate-fadeIn opacity-0 flex items-center justify-end"
-        style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}
-        dir="rtl"
-      >
-        <Ticket className="w-5 h-5 ml-2" />
-        {place.is_free ? "استكشف المكان" : "احجز تذكرتك الآن"}
-      </button>
+
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {/* Main Content */}
 <div className="bg-white">
 <div className="max-w-[1400px] mx-auto px-4 py-12">
@@ -782,27 +685,45 @@ const PlaceDetails = () => {
           </div>
         </div>
 
-        {/* Location */}
-        <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
-          <div className="bg-yellow-400 p-2 rounded-lg mr-3">
-            <MapPin className="w-5 h-5 text-gray-800" />
-          </div>
-          <div>
-            <h4 className="text-gray-600 text-sm mb-1">الموقع</h4>
-            <p className="font-semibold">{place.city || "الأردن"}</p>
-            {place.location && (
-              <a
-                href={`https://www.google.com/maps?q=${place.location.latitude},${place.location.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-yellow-500 text-xs mt-1 flex items-center hover:underline"
-              >
-                عرض على الخريطة
-                <ExternalLink className="w-3 h-3 mr-1" />
-              </a>
-            )}
-          </div>
-        </div>
+      {/* Location */}
+
+      <div className="flex flex-col sm:flex-row items-start bg-white p-3 rounded-lg border border-gray-200">
+  {/* Icon */}
+  <div className="bg-yellow-400 p-2 rounded-lg mr-0 sm:mr-3 mb-3 sm:mb-0 sm:w-12 sm:h-12">
+    <MapPin className="w-6 h-6 text-gray-800" />
+  </div>
+
+  {/* Content */}
+  <div className="w-full">
+    {/* Title */}
+    <h4 className="text-gray-600 text-sm mb-1">الموقع</h4>
+
+    {/* City */}
+    <p className="font-semibold">{place.city || "الأردن"}</p>
+
+    {/* Map and Location */}
+    {place.location && (
+      <>
+        {/* Map Component */}
+        <LocationMap
+          latitude={place.location.latitude}
+          longitude={place.location.longitude}
+        />
+
+        {/* Google Maps Link */}
+        <a
+          href={`https://www.google.com/maps?q=${place.location.latitude},${place.location.longitude}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-yellow-500 text-xs mt-2 inline-flex items-center hover:underline"
+        >
+          عرض على Google Maps
+          <ExternalLink className="w-4 h-4 ml-1" />
+        </a>
+      </>
+    )}
+  </div>
+</div>
 
         {/* Season */}
         <div className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
@@ -828,16 +749,6 @@ const PlaceDetails = () => {
       </button>
     </div>
 
- 
-
-
-
-
-
-
-
-
-
     {/* Quick Actions Card */}
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-6">
@@ -849,115 +760,118 @@ const PlaceDetails = () => {
         <div className="grid grid-cols-2 gap-3">
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          {/* Nearby Places */}
-
-          <button
-  onClick={handleNearbyPlaces}
-  className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
-            hover:bg-[#115173]/5 transition-all duration-300"
->
-  <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
-    <MapPin className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
-  </div>
-  <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">
-    أماكن قريبة
-  </span>
-</button>
-
-{/* {userCoords && (
-  <NearbyPlacesMap userCoords={userCoords} places={places} />
-)} */}
-{/* Nearby Places Map */}
-{loading && userCoords && (
-  <div className="p-4 text-center">جاري تحميل الخريطة...</div>
-)}
-
-{error && (
-  <div className="p-4 text-red-500 text-center">{error}</div>
-)}
-
-{showMap && userCoords && (
-  <NearbyPlacesMap userCoords={userCoords} places={nearbyPlaces} />
-)}
-   
-
-          {/* Share */}
-          <button
-            onClick={sharePlace}
-            className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
-                      hover:bg-[#115173]/5 transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
-              <Share2 className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
-            </div>
-            <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">مشاركة</span>
-          </button>
-
-          {/* Similar Places */}
-<div className="mt-8">
+ {/* Nearby Places */}
+<div className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300">
   <button
-    onClick={handleToggleSimilarPlaces}
-    className="group flex items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300"
+    onClick={handleNearbyPlaces}
+    className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]"
+    disabled={loading}
   >
-    <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">
-      {isSimilarPlacesOpen ? "إخفاء الأماكن المشابهة" : "عرض الأماكن المشابهة"}
-    </span>
+    {loading ? "جاري التحميل..." : showMap ? "إخفاء الأماكن" : "عرض الأماكن القريبة"}
   </button>
 
-  {isSimilarPlacesOpen && (
-    <div className="mt-6">
-      <SimilarPlaces category={place?.categories?.[0]} />
+  {error && <p className="text-red-500 mt-2">{error}</p>}
+</div>
+
+{/* الخريطة داخل نافذة منبثقة */}
+{showMap && userCoords && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
+    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[70vh] flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex justify-between items-center bg-[#022C43]/100 p-4 text-white">
+        <h3 className="text-lg font-semibold">الأماكن القريبة منك</h3>
+        <button
+          onClick={() => setShowMap(false)}
+          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+          aria-label="إغلاق"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Map Container */}
+      <div className="flex-1 min-h-[400px] relative">
+        <NearbyPlacesMap lat={userCoords.lat} lng={userCoords.lng} />
+      </div>
+
+      {/* Footer */}
+      <div className="bg-gray-50 p-3 border-t flex justify-end">
+        <button
+          onClick={() => setShowMap(false)}
+          className="px-4 py-2 bg-[#115173] text-white rounded-lg hover:bg-[#0a3a52] transition-colors"
+        >
+          تم
+        </button>
+      </div>
     </div>
+  </div>
+)}
+
+{/* Share - Responsive */}
+<div className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300 w-full sm:w-auto">
+  <button onClick={sharePlace} className="flex flex-col items-center justify-center">
+    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
+      <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#115173] group-hover:text-[#022C43]" />
+    </div>
+    <span className="text-sm sm:text-base font-medium text-[#022C43] group-hover:text-[#115173]">مشاركة</span>
+  </button>
+</div>
+
+
+  {/* Similar Places */}
+  <div className="relative group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300">
+    <button onClick={handleToggleSimilarPlaces} className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">
+      {isSimilarPlacesOpen ? "إخفاء الأماكن المشابهة" : "عرض الأماكن المشابهة"}
+    </button>
+
+    {isSimilarPlacesOpen && (
+      <div className="fixed inset-0 z-[1500] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleToggleSimilarPlaces}></div>
+
+        <div className="relative max-w-150 bg-white rounded-lg shadow-xl z-[1001] max-h-[75vh] overflow-y-auto">
+          <button
+            onClick={handleToggleSimilarPlaces}
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-xl font-bold"
+          >
+            &times;
+          </button>
+          <div className="p-6">
+            <SimilarPlaces category={place?.categories?.[0]} currentPlaceId={place._id} />
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+
+ {/* Contact Place */}
+ <div className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300">
+  {place?.contact?.website && (
+    <button
+      onClick={() => window.open(place.contact.website, "_blank")}
+      className="flex flex-col items-center justify-center"
+    >
+      <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
+        <Globe  className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
+      </div>
+      <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">زيارة الموقع الإلكتروني</span>
+    </button>
+  )}
+
+  {/* في حال لم يكن هناك أي بيانات للتواصل */}
+  {!place?.contact?.website && (
+    <span className="text-sm font-medium text-[#022C43]">لا توجد معلومات تواصل متاحة.</span>
   )}
 </div>
 
 
 
-    
-
-          {/* Save */}
-          <button
-            onClick={() => {}}
-            className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 
-                      hover:bg-[#115173]/5 transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
-              <Bookmark className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
-            </div>
-            <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">حفظ</span>
-          </button>
 
 
+</div>
 
 
-
-
-
-
-        </div>
       </div>
     </div>
 
