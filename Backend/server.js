@@ -88,6 +88,19 @@ app.post('/api/auth/register', (req, res) => {
     res.status(201).json({ message: "User registered" });
 });
 
+
+app.get('/api/places/nearby', async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    const places = await getNearbyPlaces(lat, lng);
+    res.json({ success: true, data: places });
+  } catch (err) {
+    console.error("Error fetching nearby places:", err);
+    res.status(500).json({ success: false, message: 'فشل في جلب الأماكن القريبة' });
+  }
+});
+
+
 // ✅ لوج لكل طلب
 app.use((req, res, next) => {
   console.log(`🔹 Received request: ${req.method} ${req.url}`);
@@ -100,13 +113,13 @@ app.get('/', (req, res) => {
 });
 
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
-  });
+// mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => {
+//     console.log('Connected to MongoDB');
+//   })
+//   .catch((error) => {
+//     console.error('MongoDB connection error:', error);
+//   });
 
 // ✅ تشغيل السيرفر
 app.listen(PORT, () => {

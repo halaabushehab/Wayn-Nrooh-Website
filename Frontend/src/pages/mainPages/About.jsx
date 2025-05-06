@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Helmet } from "react-helmet";
-
+import SuggestedPlacesSection from '../../components/HomeComponents/SuggestedPlacesSection '
 
 
 
@@ -623,7 +623,8 @@ useEffect(() => {
     </div>
   </div>
 </section>
-
+   
+ 
       
       {/* contact Us */}
       <section dir="rtl" class="relative py-20 px-4 sm:px-6 md:px-16 lg:px-32 bg-white overflow-hidden">
@@ -688,7 +689,8 @@ useEffect(() => {
   </div>
 </section>
 
-
+    {/* <ExploreJordanSection /> */}
+    <SuggestedPlacesSection  />
       
  
     </div>

@@ -4,6 +4,7 @@ import OverviewTabComponent from "../AdminDash/Overview"
 import PlacesTabComponent from "../AdminDash/places"
 import MessagesTabComponent from "../AdminDash/messages"
 import BookingsTabComponent from "../AdminDash/bookings"
+// import AbusiveCommentsTabComponent  from "../AdminDash/AbusiveCommentsTabComponent "
 import UsersTab from "../AdminDash/Users"
 import PlogAdd from "../AdminDash/PlogAdd"
 import SettingsTab from "../AdminDash/settings"
@@ -84,7 +85,14 @@ export default function Dashboard() {
   hovered={hoveredItem === "articles"}
   onHover={() => setHoveredItem("articles")}
 />
-
+{/* <SidebarItem
+  icon={<MessageSquare className="transition-transform duration-300 group-hover:scale-110" />}
+  text="التعليقات المسيئة"
+  active={activeTab === "abusive-comments"}
+  onClick={() => setActiveTab("abusive-comments")}
+  hovered={hoveredItem === "abusive-comments"}
+  onHover={() => setHoveredItem("abusive-comments")}
+/> */}
 
           <SidebarItem
             icon={<Calendar className="transition-transform duration-300 group-hover:scale-110" />}
@@ -138,6 +146,7 @@ export default function Dashboard() {
             {activeTab === "messages" && <MessagesTabComponent />}
             {activeTab === "bookings" && <BookingsTabComponent />}
             {activeTab === "articles" && <PlogAdd  />}
+            {/* {activeTab === "abusive-comments" && <AbusiveCommentsTabComponent />} */}
 
             {activeTab === "users" && <UsersTab />}
             {activeTab === "settings" && <SettingsTab />}

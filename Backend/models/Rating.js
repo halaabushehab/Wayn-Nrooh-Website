@@ -23,7 +23,10 @@ const ratingSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  status: { type: String, enum: ['approved', 'pending', 'rejected'], default: 'pending' },
+  reported: { type: Boolean, default: false },  
+  reportReason: { type: String, default: '' }  
 });
 
 module.exports = mongoose.model('Rating', ratingSchema);

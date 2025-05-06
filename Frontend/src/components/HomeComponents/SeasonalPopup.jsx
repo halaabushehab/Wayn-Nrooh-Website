@@ -96,8 +96,7 @@ const SeasonalPopup = ({ setShowPopup }) => {
           <DetailItem icon={<FaMoneyBillWave />} label="السعر" value={place.ticket_price ? `${place.ticket_price} د.أ` : "مجاني"} />
           <DetailItem icon={<FaStar />} label="التقييم" value={place.rating ? `${place.rating}` : "جديد"} />
           <DetailItem icon={<FaClock />} label="ساعات العمل" value={place.working_hours} />
-          <DetailItem icon={<FaTicketAlt />} label="التذاكر المباعة" value={place.totalTickets} />
-          <DetailItem icon={<FaCalendarAlt />} label="الموسم المفضل" value={place.best_season || "طوال السنة"} />
+
         </div>
       </div>
     </div>

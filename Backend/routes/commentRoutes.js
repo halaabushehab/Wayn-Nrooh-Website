@@ -9,4 +9,8 @@ router.post('/', commentController.addComment);
 // جلب التعليقات لمقال معين (لا يتطلب تسجيل دخول)
 router.get('/:articleId', commentController.getCommentsForArticle);
 
+
+
+
+
 module.exports = router;

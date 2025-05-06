@@ -291,9 +291,9 @@ const Pay = () => {
   const [placeId, setPlaceId] = useState(""); // لتخزين placeId
   const [selectedPlaceId, setSelectedPlaceId] = useState(null);
 
-  const tax = 1;
+
   const subtotal = place ? place.ticket_price * ticketCount : 0;
-  const total = subtotal + tax;
+  const total = subtotal;
 
   const handleTicketChange = (e) => {
     const value = Math.max(1, parseInt(e.target.value) || 1);
@@ -542,12 +542,12 @@ const Pay = () => {
                     <span className="text-gray-600">
                       {ticketCount} × تذكرة ({place.ticket_price} دينار)
                     </span>
-                    <span className="font-medium">{subtotal} دينار</span>
+                    {/* <span className="font-medium">{subtotal} دينار</span> */}
                   </div>
-                  <div className="flex justify-between text-sm">
+                  {/* <div className="flex justify-between text-sm">
                     <span className="text-gray-600">الضريبة</span>
                     <span className="font-medium">{tax} دينار</span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="border-t border-gray-200 pt-4 flex justify-between">
                   <span className="font-bold text-[#022C43]">الإجمالي</span>
@@ -584,7 +584,7 @@ const Pay = () => {
                       </p>
                     </div>
                   </div>
-                  <div
+                  {/* <div
                     onClick={() => setPaymentMethod("card")}
                     className={`border rounded-lg p-4 flex items-center cursor-pointer transition-all ${
                       paymentMethod === "card"
@@ -608,7 +608,7 @@ const Pay = () => {
                         الدفع باستخدام البطاقة البنكية
                       </p>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <button

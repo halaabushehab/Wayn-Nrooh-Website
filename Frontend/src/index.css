@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
 body {
   direction: rtl;
   /* background-image: url('../../Frontend/src/components/img/b0e8fd73569972f1119b18bf89a8fb15.png'); استخدم مسار نسبي من مجلد public */

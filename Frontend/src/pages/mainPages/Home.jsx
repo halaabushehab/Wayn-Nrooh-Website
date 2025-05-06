@@ -62,8 +62,8 @@ const Home = () => {
       <MapSection />
 
 
-          {/* <ExploreJordanSection /> */}
-          <SuggestedPlacesSection  />
+          {/* <ExploreJordanSection />
+          <SuggestedPlacesSection  /> */}
           <Offer />
     </>
   );
