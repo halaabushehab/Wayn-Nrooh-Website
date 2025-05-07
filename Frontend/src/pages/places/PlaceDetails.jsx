@@ -79,9 +79,10 @@ const PlaceDetails = () => {
         setLoading(false);
       }
     };
-
+  
     fetchPlaceDetails();
   }, [id]);
+  
 
   useEffect(() => {
     if (!place || !place.categories || place.categories.length === 0) return;
@@ -120,6 +121,44 @@ const PlaceDetails = () => {
     }
   }, []);
  
+// rating
+useEffect(() => {
+  const fetchRatings = async () => {
+    try {
+      const res = await fetch(`http://localhost:9527/api/ratings/${id}`);
+      const data = await res.json();
+      setRatings(data);
+
+      // احسب المتوسط
+      if (data.length > 0) {
+        const total = data.reduce((acc, r) => acc + r.rating, 0);
+        setAverageRating((total / data.length).toFixed(1));
+    //  console.log(averageRating)
+     
+      } else {
+        setAverageRating(0);
+      }
+
+      // تحديث التقييمات بإضافة تفاصيل المستخدم
+      const updatedRatings = data.map((rating) => ({
+        ...rating,
+        user: {
+          username: rating.userId?.username || "مجهول",
+          photo: rating.userId?.photo || "http://localhost:9527/uploads/placeholder.jpg",
+        },
+        createdAt: new Date(rating.createdAt),
+      }));
+      
+      setRatings(updatedRatings);  // تحديث الحالة بالتقييمات المعدلة
+      console.log(ratings)
+    } catch (error) {
+    }
+    
+  };
+
+  fetchRatings();
+}, [id]);
+
 
   const handleRating = (star) => {
     setRating(star)
@@ -186,47 +225,57 @@ const PlaceDetails = () => {
   }
 
   const handleClick = () => {
-    if (place.is_free) {
-      toast.warning("لا يوجد حاجة لحجز تذاكر لهذا الموقع، يمكنك الذهاب مباشرة!")
+    if (place.is_free || place.ticket_price === 0 || place.ticket_price === "0") {
+      toast.warning("لا يوجد حاجة لحجز تذاكر لهذا الموقع، يمكنك الذهاب مباشرة!");
     } else {
-      navigate(`/pay/${place._id}`)
+      navigate(`/pay/${place._id}`);
     }
-  }
-
+  };
+  
   const handleNearbyPlaces = async () => {
     if (showMap) {
-      setShowMap(false); // إغلاق الـ Popup عند الضغط إذا كانت مفتوحة
+      setShowMap(false);
       return;
     }
-
+  
     setLoading(true);
     setError(null);
-
+  
     try {
       if (!navigator.geolocation) {
         throw new Error("المتصفح لا يدعم الموقع الجغرافي");
       }
-
+  
       const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          resolve,
-          (err) => reject(new Error("فشل في تحديد الموقع: " + err.message))
+        navigator.geolocation.getCurrentPosition(resolve, (err) =>
+          reject(new Error("فشل في تحديد الموقع: " + err.message))
         );
       });
-
+  
       const coords = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
-
+  
       setUserCoords(coords);
-      setShowMap(true);  // عرض الـ Popup بعد تحديد الموقع
+  
+      const response = await axios.get("http://localhost:9527/api/places/nearby", {
+        params: { lat: coords.lat, lng: coords.lng },
+      });
+  
+      if (response.data.success) {
+        setNearbyPlaces(response.data.data); // ← الأماكن القريبة من الـ API
+        setShowMap(true);
+      } else {
+        setError("لم يتم العثور على أماكن قريبة.");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   const handleToggleSimilarPlaces = () => {
@@ -268,49 +317,7 @@ const PlaceDetails = () => {
       </div>
     )
 
-  if (error)
-    return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-red-50 to-orange-50">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border-r-4 border-red-500 max-w-md w-full">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <Info className="w-8 h-8 text-red-500" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">عذراً</h2>
-          <p className="text-lg text-center text-red-600 mb-6">{error}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
-          >
-            <ChevronRight className="w-5 h-5 ml-2" />
-            العودة للخلف
-          </button>
-        </div>
-      </div>
-    )
 
-  if (!place)
-    return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <Info className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">لم يتم العثور على المكان</h2>
-          <p className="text-gray-600 text-center mb-6">يبدو أن المكان الذي تبحث عنه غير موجود أو تم حذفه.</p>
-          <button
-            onClick={() => navigate("/")}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
-          >
-            <ChevronRight className="w-5 h-5 ml-2" />
-            العودة للرئيسية
-          </button>
-        </div>
-      </div>
-    )
 
 
   return (
@@ -534,8 +541,12 @@ const PlaceDetails = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full bg-[#115173] flex items-center justify-center text-white font-bold">
-                          {review.user?.username?.charAt(0) || "?"}
-                        </div>
+                        <img
+      src={review.user.photo}
+      alt={review.user.username}
+      className="w-10 h-10 rounded-full"
+    />               
+                 </div>
                         <div className="mr-3">
                           <h4 className="font-medium text-[#022C43]">{review.user?.username || "مستخدم"}</h4>
                           <div className="flex items-center">

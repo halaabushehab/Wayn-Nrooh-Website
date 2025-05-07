@@ -28,50 +28,25 @@ exports.addRating = async (req, res) => {
 
 
 // 📌 جلب جميع التقييمات لمكان معين مع حساب المتوسط
-exports.getRatingsForPlace = async (req, res) => {
+// في الـ controller الخاص بالتقييمات
+exports.getRatingsByPlace = async (req, res) => {
   try {
-    let { placeId } = req.params;
+    const { placeId } = req.params;  // استخراج placeId من المعاملات
 
-    // 🔥 تنظيف `placeId` من أي فراغات أو سطور جديدة
-    placeId = placeId.trim();
+    // جلب التقييمات المتعلقة بالمكان مع بيانات المستخدم
+    const ratings = await Rating.find({ placeId })
+      .populate("userId", "username photo")  // إضافة username و profilePicture
+    
+      .sort({ createdAt: -1 });  // ترتيب التقييمات حسب التاريخ (الأحدث أولاً)
 
-    console.log("📌 placeId بعد التنظيف:", placeId);
-
-    // 🔥 تحقق من صحة `ObjectId`
-    if (!placeId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ error: "❌ placeId غير صالح" });
-    }
-
-    // جلب التقييمات مع بيانات المستخدم
-    const ratings = await Rating.find({ placeId }).populate('userId', 'username profilePicture'); // تأكد من أن لديك علاقة بين التقييمات والمستخدمين
-
-    console.log("✅ التقييمات:", ratings);
-
-    if (!ratings.length) {
-      return res.json({ average: 0, ratings: [] });
-    }
-
-    const total = ratings.reduce((sum, r) => sum + r.rating, 0);
-    const average = (total / ratings.length).toFixed(1);
-
-    // تحويل التقييمات لتشمل بيانات المستخدم
-    const ratingsWithUser  = ratings.map(rating => ({
-      rating: rating.rating,
-      comment: rating.comment,
-      createdAt: rating.createdAt,
-      user: {
-        username: rating.userId.username,
-        profilePicture: rating.userId.profilePicture
-      }
-    }));
-
-    res.json({ average, ratings: ratingsWithUser  });
+    // إرسال التقييمات
+    res.status(200).json(ratings);
   } catch (error) {
-    console.error("❌ خطأ أثناء جلب التقييمات:", error);
+    // التعامل مع الأخطاء عند فشل جلب التقييمات
+    console.error("❌ خطأ أثناء جلب التقييمات:", error.message);
     res.status(500).json({ error: "❌ حدث خطأ أثناء جلب التقييمات" });
   }
 };
-
 
 
 // 📌 جلب المكان الأعلى تقييماً من قبل المستخدمين
@@ -131,30 +106,30 @@ exports.getTotalRatingsCount = async (req, res) => {
 
 
 // 📌 جلب جميع التقييمات لمكان معين مع حساب المتوسط
-exports.getRatings = async (req, res) => {
-  try {
-    const { placeId } = req.params;
+// exports.getRatings = async (req, res) => {
+//   try {
+//     const { placeId } = req.params;
 
-    // ✅ التحقق من وجود المكان
-    if (!placeId) {
-      return res.status(400).json({ error: "❌ يجب توفير placeId" });
-    }
+//     // ✅ التحقق من وجود المكان
+//     if (!placeId) {
+//       return res.status(400).json({ error: "❌ يجب توفير placeId" });
+//     }
 
-    // ✅ جلب التقييمات المتعلقة بالمكان
-    const ratings = await Rating.find({ placeId }).populate("userId", "username");
+//     // ✅ جلب التقييمات المتعلقة بالمكان
+//     const ratings = await Rating.find({ placeId }).populate("userId", "username");
 
-    // ✅ حساب المتوسط
-    const averageRating = ratings.reduce((acc, r) => acc + r.rating, 0) / (ratings.length || 1);
+//     // ✅ حساب المتوسط
+//     const averageRating = ratings.reduce((acc, r) => acc + r.rating, 0) / (ratings.length || 1);
 
-    res.json({
-      ratings,
-      averageRating: averageRating.toFixed(1),
-    });
-  } catch (error) {
-    console.error("❌ خطأ أثناء جلب التقييمات:", error.message);
-    res.status(500).json({ error: `❌ حدث خطأ أثناء جلب التقييمات: ${error.message}` });
-  }
-};
+//     res.json({
+//       ratings,
+//       averageRating: averageRating.toFixed(1),
+//     });
+//   } catch (error) {
+//     console.error("❌ خطأ أثناء جلب التقييمات:", error.message);
+//     res.status(500).json({ error: `❌ حدث خطأ أثناء جلب التقييمات: ${error.message}` });
+//   }
+// };
 
 
 
