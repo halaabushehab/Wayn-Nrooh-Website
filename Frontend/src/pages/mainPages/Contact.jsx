@@ -55,7 +55,7 @@ const ContactSection = () => {
         className="relative h-120 w-full flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{ backgroundImage: "url('https://i.pinimg.com/736x/7a/39/c9/7a39c98897363a0625c40c57d8522bc7.jpg')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#022C43]/70 to-[#115173]/80 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#022C43]/20 to-[#115173]/20 backdrop-blur-sm"></div>
         <div className="relative z-10 text-center text-white p-6 max-w-2xl">
           <div className="mb-4 transform -rotate-2">
             <h3 className="text-5xl font-extrabold mb-2 drop-shadow-lg">تواصل معنا</h3>
@@ -118,7 +118,7 @@ const ContactSection = () => {
                 alt="Map"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#115173]/70 to-transparent flex items-end">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#115173]/50 to-transparent flex items-end">
                 <div className="p-8 text-white">
                   <h3 className="text-2xl font-bold mb-2">استكشف</h3>
                   <p className="text-gray-100">مغامرات جديدة بانتظارك</p>

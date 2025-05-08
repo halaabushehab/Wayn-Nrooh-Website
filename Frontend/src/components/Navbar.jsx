@@ -30,11 +30,13 @@ const Navbar = () => {
         try {
           const parsedUser = JSON.parse(userCookie);
           if (parsedUser.token) {
-            setUser({
-              username: parsedUser.username,
-              userId: parsedUser.userId,
-              isAdmin: parsedUser.isAdmin || false,
-            });
+        setUser({
+  username: parsedUser.username,
+  userId: parsedUser.userId,
+  isAdmin: parsedUser.isAdmin || false,
+  photo: parsedUser.photo || "", // أضف هذا السطر
+});
+
             axios.defaults.headers.common["Authorization"] = `Bearer ${parsedUser.token}`;
           }
         } catch (error) {
@@ -329,7 +331,7 @@ const Navbar = () => {
               <button
   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
   className={`
-    flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 border
+    flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 
     ${
       isScrolled
         ? "bg-transparent text-white border-white hover:bg-white/10"
