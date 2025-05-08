@@ -34,6 +34,18 @@ import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
 import ProfilePage from "./pages/user/ProfilePage.jsx";
 import AdminDash from "./components/AdminDash/AdminDash.jsx";
+
+
+
+// footer - Page
+import OnlineInquiry from './components/Footer/OnlineInquiry.jsx';
+import GeneralQuestions from './components/Footer/GeneralQuestions.jsx';
+import BookingTerms from './components/Footer/BookingTerms.jsx';
+import PrivacyPolicy from './components/Footer/PrivacyPolicy.jsx';
+
+
+
+
 const AppContent = () => {
   // استخدام useLocation لتحديد الصفحة الحالية
   const location = useLocation();
@@ -75,6 +87,14 @@ const AppContent = () => {
           <Route path="/Register" element={<Register />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/AdminDash" element={<AdminDash />} />
+       
+           {/* Footer Routes */}
+           <Route path="/online-inquiry" element={<OnlineInquiry />} />
+      <Route path="/general-questions" element={<GeneralQuestions />} />
+      <Route path="/booking-terms" element={<BookingTerms />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+       
+       
         </Routes>
       </div>
       {!hideLayout && <Footer />}

@@ -26,47 +26,37 @@ const Home = () => {
       sessionStorage.setItem("hasVisited", "true");
     }
   }, []);;
-  return (
-    <>
+return (
+  <>
+    <Helmet>
+      <title>الرئيسية | وين نروح</title>
+      <meta name="description" content="اكتشف أماكن سياحية رائعة ومميزة في الأردن مع وين نروح." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </Helmet>
 
-<Helmet>
-    <title>الرئيسية | وين نروح</title>
-    <meta name="description" content="اكتشف أماكن سياحية رائعة ومميزة في الأردن مع وين نروح." />
-  </Helmet>
-  
-      {showPopup && <SeasonalPopup setShowPopup={setShowPopup} />}
+    {showPopup && <SeasonalPopup setShowPopup={setShowPopup} />}
 
-      {/* ***** HERO Section ***** */}
-      <HeroSection />
-      {/* ***** Categories Section ***** */}
-      <div className="my-40">
+    {/* ***** HERO Section ***** */}
+    <HeroSection />
+    {/* ***** Categories Section ***** */}
+    <div className="my-40 mx-4 sm:mx-8 md:mx-12 lg:mx-16">
       <CategorySection />
-      </div>
-    
+    </div>
 
-      {/* ***** About Section ***** */}
-      <AboutSection />
-      
-      {/* ***** Explore Jordan Section ***** */}
-      {/* <div className="my-50">
-  
-         </div> */}
-      
-      {/* ***** Jordan Destinations Section ***** */}
-      <JordanDestinations />
-      
-      {/* ***** Seasonal Destinations Section ***** */}
-      {/* <SeasonalDestinations /> */}
-      
-      {/* ***** Map Section ***** */}
-      <MapSection />
+    {/* ***** About Section ***** */}
+    <AboutSection />
 
+    {/* ***** Jordan Destinations Section ***** */}
+    <JordanDestinations />
 
-          {/* <ExploreJordanSection />
-          <SuggestedPlacesSection  /> */}
-          <Offer />
-    </>
-  );
+    {/* ***** Map Section ***** */}
+    <MapSection />
+
+    {/* ***** Offer Section ***** */}
+    <Offer />
+  </>
+);
+
 };
 
 export default Home;
