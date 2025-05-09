@@ -41,7 +41,7 @@ const SeasonalSection = () => {
       name: "الصيف",
       icon: <SunIcon className="w-8 h-5" />,
       color: "from-amber-400 to-orange-500",
-      bgColor: "bg-gradient-to-br from-amber-50 to-orange-50",
+      bgColor: "bg-gradient-to-br from-amber-50 to-orange-50 ",
       seasonImage:
         "https://i.pinimg.com/736x/ad/2c/c5/ad2cc5b5fef198950de4dfb3c79768b1.jpg",
     },
@@ -127,17 +127,17 @@ const SeasonalSection = () => {
   };
 
   return (
-<>
+<div className={`${activeSeasonObj.bgColor}`}>
         {/* Hero Section for Seasonal Destinations */}
         <div
-  className="relative h-110 w-full flex items-center justify-center bg-cover bg-center overflow-hidden"
-  style={{ backgroundImage: "url('https://i.pinimg.com/736x/c2/eb/cf/c2ebcfed023edb4c96f9dd3e1a6e93a2.jpg')" }}
+  className="relative h-110 w-full flex items-center justify-center bg-cover  overflow-hidden"
+  style={{ backgroundImage: "url('https://media.istockphoto.com/id/502419865/photo/four-season-tree.jpg?s=2048x2048&w=is&k=20&c=_ljRCc6Pte_7lQyMPljaK7ca3YcV83JuDhbnyBaIT3U=')" }}
 >
   {/* طبقة التدرج والتأثير البصري مع بلر أخف */}
   <div className="absolute inset-0  bg-black/20"></div>
 
   {/* المحتوى */}
-  <div className="relative z-10 text-center text-white p-6 max-w-2xl bg-black/30 rounded-xl shadow-md">
+  <div className="relative z-10 text-center text-white  max-w-2xl bg-black/30 rounded-xl shadow-md">
     <div className="mb-4 transform -rotate-2">
       <h3 className="text-5xl font-extrabold mb-2 drop-shadow-xl text-white">الوجهات الموسمية</h3>
       <div className="h-1 w-20 bg-amber-400 mx-auto rounded-full"></div>
@@ -148,11 +148,11 @@ const SeasonalSection = () => {
   </div>
 
   {/* تدرج في الأسفل */}
-  <div className="absolute  bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent"></div>
+  <div className="absolute  bottom-0 left-0 right-0 h-16 bg-gradient-to-t  from-black/40 to-transparent"></div>
 </div>
 
    <section
-  className={`${activeSeasonObj.bgColor}  transition-colors duration-500 `}
+  className={`${activeSeasonObj.bgColor}  transition-colors duration-500  `}
 >
   <div className="container mx-auto px-4 mb-12">
         {/* Header Section */}
@@ -254,11 +254,11 @@ const SeasonalSection = () => {
     {activePlaces.map((place) => (
       <div
         key={place._id}
-        className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
+        className="bg-white   w-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
       >
         <div className="relative">
           {/* Image with overlay gradient */}
-          <div className="h-52 overflow-hidden">
+          <div className="h-52  overflow-hidden">
             <img
               src={place.images?.[0] || 'https://via.placeholder.com/500'}
               alt={place.name}
@@ -337,7 +337,7 @@ const SeasonalSection = () => {
 
       </div>
     </section>
-    </>
+    </div>
   );
 };
 

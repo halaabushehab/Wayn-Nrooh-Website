@@ -285,7 +285,6 @@ function MapSection() {
 
   return (
     <>
-      {showAnimation && <TravelAnimation />}
       
       <section className="py-16  relative">
         <div className="absolute top-10 right-10 rotate-12 opacity-80 hidden lg:block">
@@ -294,7 +293,7 @@ function MapSection() {
 
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-[#022C43]"> خريطة كنوز الأردن الخفية </h2>
+            <h2 className="text-2xl font-bold text-[#022C43]"> خريطة كنوز الأردن الخفية </h2>
             <div className="h-1 bg-[#FFD700] flex-1 mr-4 rounded-full md:block hidden"></div>
             <p className="text-[#444444] max-w-md mt-4 md:mt-0">
             استكشف واختر وجهتك التالية من بين وجهاتنا المخفية.

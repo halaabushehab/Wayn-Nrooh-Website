@@ -694,6 +694,7 @@ const styles = {
     padding: '2rem',
     backgroundColor: '#FFFFFF',
     minHeight: '100vh',
+    marginTop:"80px",
   },
   header: {
     color: '#022C43',

@@ -392,10 +392,6 @@ exports.getNearbyPlaces = async (req, res) => {
 };
 
 
-
-
-
-
 exports.getPlacesByUser = async (req, res) => {
   try {
     const userId = req.params.userId; // نستخدم req.params للحصول على الـ userId من الـ URL

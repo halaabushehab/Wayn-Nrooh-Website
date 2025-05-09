@@ -59,6 +59,7 @@ function JordanGallery() {
     setActiveIndex((prev) => (prev - 1 + destinations.length) % destinations.length);
   };
 
+
   return (
     <section className="py-16 ">
       <div className="container mx-auto px-4">

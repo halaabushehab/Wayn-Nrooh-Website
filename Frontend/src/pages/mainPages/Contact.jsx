@@ -79,16 +79,16 @@ const ContactSection = () => {
     icon={<MapPin className="w-10 h-10 text-[#115173]" />}
     title="اقتراح مكان جديد"
     description="دلنا على مكان جديد اكتشفته"
-    className="text-blue-600 bg-gradient-to-br  from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700] cursor-pointer"
+    className="text-black bg-gradient-to-br  from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700] cursor-pointer"
   />
 </Link>
 
             <ContactCard
-              icon={<Phone className="w-10 h-10 text-[#115173]" />}
+              icon={<Phone className="w-10 h-10 text-[#115173] " />}
               title="تواصل معنا"
-              description="+962 79 0000 000"
+              description="+962 78 796 7253"
               link="tel://962790000000"
-              className="bg-gradient-to-br from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105 transition-transform border-b-4 border-[#FFD700]"
+              className="bg-gradient-to-br  from-white to-[#f5f5f5] shadow-lg p-6 rounded-2xl hover:scale-105  transition-transform border-b-4 border-[#FFD700]"
             />
             <ContactCard
               icon={<Mail className="w-10 h-10 text-[#115173]" />}
