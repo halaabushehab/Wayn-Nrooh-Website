@@ -43,7 +43,7 @@ const PlaceCard = ({ place }) => {
         {/* Image with overlay gradient */}
         <div className="h-52 overflow-hidden">
           <img
-            src={place.gallery?.[0] || "/api/placeholder/400/300"}
+            src={place.images?.[0] || "/api/placeholder/400/300"}
             alt={place.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
@@ -176,10 +176,11 @@ const CategorySection = () => {
       }
     }
   };
+  // <div dir="rtl" className="relative h-[70vh] min-h-[500px] w-full overflow-hidden">
 
   return (
 <section
-  className="py-16 relative overflow-hidden bg-cover bg-center"
+  className=" relative overflow-hidden bg-cover bg-center"
   // style={{ backgroundImage: "url('https://i.pinimg.com/736x/cb/e4/eb/cbe4ebd704ad2c76868baa2407020fbb.jpg')" }}
 >      {/* Decorative elements */}
      
@@ -203,37 +204,40 @@ const CategorySection = () => {
 
         <div className="relative mb-12">
       
-          <div 
-            ref={categoriesRef}
-            className="flex overflow-x-auto py-2 px-4 scrollbar-hide scroll-smooth"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            <div className="flex space-x-4 space-x-reverse mx-auto">
-              {categories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center px-5 py-3 rounded-full whitespace-nowrap transition-all shadow-sm ${
-                    activeCategory === category.id
-                      ? 'text-white shadow-lg'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                  }`}
-                  style={{
-                    backgroundColor: activeCategory === category.id ? '#115173' : '',
-                    borderBottom: activeCategory === category.id ? '3px solid #FFD700' : ''
-                  }}
-                >
-                  <span className="mr-2">{category.icon}</span>
-                  {category.name}
-                </motion.button>
-              ))}
-            </div>
-          </div>
+      <div className="relative mb-6">
+  <div 
+    ref={categoriesRef}
+    className="flex overflow-x-auto py-1 px-2 scrollbar-hide scroll-smooth"
+    style={{
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    }}
+  >
+    <div className="flex space-x-2 space-x-reverse mx-auto">
+      {categories.map((category) => (
+        <motion.button
+          key={category.id}
+          onClick={() => setActiveCategory(category.id)}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          className={`flex items-center px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all shadow-sm ${
+            activeCategory === category.id
+              ? 'text-white shadow-md'
+              : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+          }`}
+          style={{
+            backgroundColor: activeCategory === category.id ? '#115173' : '',
+            borderBottom: activeCategory === category.id ? '2px solid #FFD700' : '',
+          }}
+        >
+          <span className="mr-1 text-base">{category.icon}</span>
+          {category.name}
+        </motion.button>
+      ))}
+    </div>
+  </div>
+</div>
+
 
       
         </div>

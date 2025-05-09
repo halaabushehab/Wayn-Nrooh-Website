@@ -248,7 +248,7 @@ const categories = [
       {/*Hero section end */}
       
       {/* Section Title */}
-      <h1 className="text-center text-3xl font-bold text-[#022C43] ">
+      <h1 className="text-center text-2xl font-bold text-[#022C43] ">
         <span className="relative">
           الأماكن في {city}
           <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-[#FFD700]"></span>
@@ -257,7 +257,7 @@ const categories = [
 
       <div className="container mx-auto px-4">
         {/* تصنيفات الأماكن */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <div className="flex flex-wrap justify-center gap-3 my-20">
             {categories.map((category) => (
               <button
@@ -277,7 +277,7 @@ const categories = [
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
           {/* Favorites Toggle Button */}
@@ -329,6 +329,8 @@ const categories = [
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#115173]"></div>
             </div>
           ) : (
+
+            
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {getPaginatedPlaces().length > 0 ? (

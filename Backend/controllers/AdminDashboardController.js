@@ -213,9 +213,6 @@ const addAdmin = async (req, res) => {
 
 
   // Payment ==========================
-
-
-  // الحصول على جميع المدفوعات
   const getAllPayments = async (req, res) => {
     try {
       const payments = await Payment.find();
@@ -283,10 +280,6 @@ const getAllArticles = async (req, res) => {
   }
 };
 
-
-
-
-
 // إنشاء مقال جديد
 const createArticle = async (req, res) => {
   try {
@@ -315,21 +308,24 @@ const createArticle = async (req, res) => {
   }
 };
 
-
-
 // تحديث المقال
 const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, content_1, tags, imageSrc } = req.body;
 
+    if (!title || !content || !tags || !imageSrc) {
+      return res.status(400).json({ message: "جميع الحقول مطلوبة" });
+    }
+
+    // تحديث المقال في قاعدة البيانات
     const updatedArticle = await Article.findByIdAndUpdate(
       id,
       {
         title,
         content,
         content_1,
-        tags: tags.split(',').map(tag => tag.trim()),
+        tags: Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim()),
         imageSrc
       },
       { new: true }
@@ -345,9 +341,15 @@ const updateArticle = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating article:", error);
-    res.status(500).json({ message: "حدث خطأ أثناء تحديث المقال", error: error.message });
+    res.status(500).json({
+      message: "حدث خطأ أثناء تحديث المقال",
+      error: error.message
+    });
   }
 };
+
+
+
 
 // Soft Delete للمقال
 const softDeleteArticle = async (req, res) => {

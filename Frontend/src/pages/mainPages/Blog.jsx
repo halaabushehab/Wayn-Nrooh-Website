@@ -87,9 +87,9 @@ const Blog = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative h-[400px] flex items-center justify-center bg-cover bg-center rounded-lg shadow-lg"
+        className="relative h-[400px] flex items-center justify-center bg-cover bg-center rounded-lg "
         style={{
-          backgroundImage: "url('https://images.pexels.com/photos/15374319/pexels-photo-15374319/free-photo-of-bus-on-road-on-hill.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+          backgroundImage: "url('https://i.pinimg.com/736x/4b/90/1d/4b901dac104e0545c54504f98c7c3f57.jpg')",
           // backgroundImage: "url('https://i.pinimg.com/736x/91/46/f5/9146f53b7a5bd095a1530dd3ff3670ac.jpg')",
 
         }}
@@ -164,7 +164,7 @@ const Blog = () => {
               </ul>
             </motion.div>
 
-            {/* Tags Cloud */}
+            {/* Tags Cloud
             <motion.div 
               variants={fadeIn}
               initial="hidden"
@@ -192,7 +192,7 @@ const Blog = () => {
                   )
                 )}
               </div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Instagram Gallery */}
             <motion.div 
@@ -244,23 +244,24 @@ const Blog = () => {
               <p className="text-gray-600 text-sm mb-4 text-right">
                 احصل على أحدث المقالات والعروض مباشرة إلى بريدك الإلكتروني
               </p>
-              <form className="space-y-3">
-                <div>
-                  <input 
-                    type="email" 
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
-                    placeholder="أدخل بريدك الإلكتروني" 
-                    required 
-                  />
-                </div>
-            <button 
-  type="submit" 
-  className="w-full py-2 px-4 bg-gradient-to-r from-[#022C43] to-[#115173] text-[#FFD700] rounded-lg hover:opacity-90 transition duration-300 font-medium"
->
-  اشترك الآن
-</button>
+              <form action="https://formspree.io/f/xwpobapn" method="POST" className="space-y-3">
+  <div>
+    <input 
+      type="email" 
+      name="email"
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+      placeholder="أدخل بريدك الإلكتروني" 
+      required 
+    />
+  </div>
+  <button 
+    type="submit" 
+    className="w-full py-2 px-4 bg-gradient-to-r from-[#022C43] to-[#115173] text-[#FFD700] rounded-lg hover:opacity-90 transition duration-300 font-medium"
+  >
+    اشترك الآن
+  </button>
+</form>
 
-              </form>
             </motion.div>
           </div>
 

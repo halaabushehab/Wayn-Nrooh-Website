@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { PlaceCard } from "../../components/HomeComponents/PlaceCard";
-// import { ArticleCard } from "../components/ArticleCard";
-// import { Pagination } from "../components/Pagination";
 
 const SearchResultsPage = () => {
   const location = useLocation();
@@ -25,27 +23,25 @@ const SearchResultsPage = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
+      console.log("كلمة البحث:", query); // ✅ تأكيد وصول الكلمة
+  
       if (!query) {
         setError("الرجاء إدخال كلمة البحث");
         setLoading(false);
         return;
       }
-
+  
       try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:9527/=/api/search/main-search`, {
+        const response = await axios.get("http://localhost:9527/=/api/search/main-search", {
           params: { 
             query: query,
             page: pagination.page,
             limit: pagination.limit
           }
         });
-
-        setResults(response.data.results);
-        setPagination({
-          ...pagination,
-          total: response.data.total
-        });
+  
+        console.log("نتائج البحث:", response.data); // ✅ للتأكد من البيانات الراجعة
+        setResults(response.data); // ✅ لازم تحدّثي النتائج هنا
       } catch (err) {
         setError("حدث خطأ أثناء جلب نتائج البحث");
         console.error("Error fetching search results:", err);
@@ -53,9 +49,10 @@ const SearchResultsPage = () => {
         setLoading(false);
       }
     };
-
+  
     fetchResults();
   }, [query, pagination.page]);
+  
 
   const handlePageChange = (newPage) => {
     setPagination({ ...pagination, page: newPage });
@@ -151,16 +148,6 @@ const SearchResultsPage = () => {
                   لا توجد مدن مطابقة للبحث
                 </p>
               )}
-            </div>
-          )}
-          
-          {pagination.total > pagination.limit && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={Math.ceil(pagination.total / pagination.limit)}
-                onPageChange={handlePageChange}
-              />
             </div>
           )}
         </>

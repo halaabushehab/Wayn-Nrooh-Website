@@ -174,7 +174,7 @@ const PlogDetails = () => {
      {/* Hero Section with Creative Design */}
     <div
      className="relative h-120  w-full flex items-center justify-center bg-cover bg-center  overflow-hidden  "
-     style={{ backgroundImage: "url('https://i.pinimg.com/736x/1a/f0/88/1af08855656916032def657d64930760.jpg')" }}
+     style={{ backgroundImage: "url('https://i.pinimg.com/736x/62/ec/81/62ec8118b71cecb4392af879aa82228c.jpg')" }}
    >
      <div className="absolute inset-0 bg-gradient-to-r "></div>
      <div className="relative z-10 text-center text-white p-5 max-w-5xl">
@@ -537,25 +537,7 @@ const PlogDetails = () => {
             </a> */}
           </div>
 
-          {/* Newsletter */}
-          <div className="bg-gradient-to-br  p-6 rounded-xl text-black">
-            <h4 className="text-xl font-bold mb-2">النشرة البريدية</h4>
-            <p className="mb-4 opacity-90">اشترك ليصلك كل جديد من مقالات وعروض حصرية</p>
-            <form className="space-y-3">
-              <input 
-                type="email" 
-                className="w-full px-4 py-3  bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFD700] placeholder-white/70" 
-                placeholder="بريدك الإلكتروني" 
-                required 
-              />
-                       <button 
-  type="submit" 
-  className="w-full py-2 px-4 my-4 bg-gradient-to-r from-[#022C43] to-[#115173] text-[#FFD700] rounded-lg hover:opacity-90 transition duration-300 font-medium"
->
-  اشترك الآن
-</button>
-            </form>
-          </div>
+   
           
         </div>
       </div>
