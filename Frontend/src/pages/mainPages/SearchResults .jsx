@@ -1,159 +1,148 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { PlaceCard } from "../../components/HomeComponents/PlaceCard";
+import { FaSearch, FaMapMarkerAlt, FaClock, FaStar } from "react-icons/fa";
+import { GiModernCity } from "react-icons/gi";
+import { Link } from "react-router-dom";
 
-const SearchResultsPage = () => {
+const SearchResults = () => {
   const location = useLocation();
-  const query = new URLSearchParams(location.search).get("query");
+  const navigate = useNavigate();
   const [results, setResults] = useState({
     places: [],
     articles: [],
-    cities: []
+    cities: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("places");
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0
-  });
-  const navigate = useNavigate();
+
+  // استخراج query من الـ URL
+  const searchParams = new URLSearchParams(location.search);
+  const query = searchParams.get("query");
 
   useEffect(() => {
-    const fetchResults = async () => {
-      console.log("كلمة البحث:", query); // ✅ تأكيد وصول الكلمة
-  
-      if (!query) {
-        setError("الرجاء إدخال كلمة البحث");
-        setLoading(false);
-        return;
-      }
-  
+    const fetchSearchResults = async () => {
       try {
-        const response = await axios.get("http://localhost:9527/=/api/search/main-search", {
-          params: { 
-            query: query,
-            page: pagination.page,
-            limit: pagination.limit
-          }
-        });
-  
-        console.log("نتائج البحث:", response.data); // ✅ للتأكد من البيانات الراجعة
-        setResults(response.data); // ✅ لازم تحدّثي النتائج هنا
+        setLoading(true);
+        const response = await axios.get(`http://localhost:9527/api/places/search?query=${query}`);
+        setResults(response.data.results);
+        setLoading(false);
       } catch (err) {
-        setError("حدث خطأ أثناء جلب نتائج البحث");
-        console.error("Error fetching search results:", err);
-      } finally {
+        setError(err.message);
         setLoading(false);
       }
     };
-  
-    fetchResults();
-  }, [query, pagination.page]);
-  
 
-  const handlePageChange = (newPage) => {
-    setPagination({ ...pagination, page: newPage });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+    if (query) {
+      fetchSearchResults();
+    }
+  }, [query]);
 
-  if (!query) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-[#022C43]">الرجاء إدخال كلمة البحث</h1>
-      </div>
-    );
-  }
+  if (loading) return <div className="text-center py-20">جاري البحث...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">حدث خطأ: {error}</div>;
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#022C43]">
-        نتائج البحث عن: <span className="text-[#FFD700]">{query}</span>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8">
+        نتائج البحث عن: "{query}"
       </h1>
-      
-      <div className="flex border-b border-gray-200 mb-6">
-        <button
-          className={`py-2 px-4 font-medium ${activeTab === "places" ? "text-[#FFD700] border-b-2 border-[#FFD700]" : "text-gray-500"}`}
-          onClick={() => setActiveTab("places")}
-        >
-          الأماكن ({results.places.length})
-        </button>
-        <button
-          className={`py-2 px-4 font-medium ${activeTab === "articles" ? "text-[#FFD700] border-b-2 border-[#FFD700]" : "text-gray-500"}`}
-          onClick={() => setActiveTab("articles")}
-        >
-          المقالات ({results.articles.length})
-        </button>
-        <button
-          className={`py-2 px-4 font-medium ${activeTab === "cities" ? "text-[#FFD700] border-b-2 border-[#FFD700]" : "text-gray-500"}`}
-          onClick={() => setActiveTab("cities")}
-        >
-          المدن ({results.cities.length})
-        </button>
-      </div>
-      
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFD700]"></div>
-        </div>
-      ) : error ? (
-        <div className="text-center text-red-500">{error}</div>
-      ) : (
-        <>
-          {activeTab === "places" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.places.length > 0 ? (
-                results.places.map((place) => (
-                  <PlaceCard key={place._id} place={place} />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">
-                  لا توجد أماكن مطابقة للبحث
-                </p>
-              )}
-            </div>
-          )}
-          
-          {activeTab === "articles" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {results.articles.length > 0 ? (
-                results.articles.map((article) => (
-                  <ArticleCard key={article._id} article={article} />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">
-                  لا توجد مقالات مطابقة للبحث
-                </p>
-              )}
-            </div>
-          )}
-          
-          {activeTab === "cities" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {results.cities.length > 0 ? (
-                results.cities.map((city, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(`/places?city=${encodeURIComponent(city.name)}`)}
-                  >
-                    <h3 className="font-semibold text-lg text-[#022C43]">{city.name}</h3>
-                    <p className="text-gray-600">{city.placesCount} أماكن</p>
+
+      {/* نتائج الأماكن */}
+      {results.places.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6 flex items-center">
+            <FaMapMarkerAlt className="ml-2" /> الأماكن
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {results.places.map((place) => (
+              <Link
+                to={`/place/${place._id}`}
+                key={place._id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <img
+                  src={place.images[0]}
+                  alt={place.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{place.name}</h3>
+                  <p className="text-gray-600 mb-2">{place.short_description}</p>
+                  <div className="flex items-center text-yellow-500">
+                    <FaStar className="ml-1" />
+                    <span>{place.rating}</span>
                   </div>
-                ))
-              ) : (
-                <p className="col-span-full text-center text-gray-500">
-                  لا توجد مدن مطابقة للبحث
-                </p>
-              )}
-            </div>
-          )}
-        </>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
+
+      {/* نتائج المقالات */}
+      {results.articles.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6 flex items-center">
+            <FaClock className="ml-2" /> المقالات
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {results.articles.map((article) => (
+              <Link
+                to={`/article/${article._id}`}
+                key={article._id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{article.title}</h3>
+                  <p className="text-gray-600 line-clamp-2">
+                    {article.summary}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* نتائج المدن */}
+      {results.cities.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6 flex items-center">
+            <GiModernCity className="ml-2" /> المدن
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {results.cities.map((city, index) => (
+              <button
+                key={index}
+                onClick={() => navigate(`/location?city=${city.name}`)}
+                className="bg-white rounded-lg shadow p-4 hover:bg-gray-50 transition-colors text-center"
+              >
+                <h3 className="font-medium">{city.name}</h3>
+                <p className="text-sm text-gray-500">
+                  {city.placesCount} مكان
+                </p>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {results.places.length === 0 &&
+        results.articles.length === 0 &&
+        results.cities.length === 0 && (
+          <div className="text-center py-12">
+            <FaSearch className="mx-auto text-4xl text-gray-400 mb-4" />
+            <p className="text-xl">لا توجد نتائج مطابقة للبحث</p>
+            <button
+              onClick={() => navigate("/")}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              العودة للصفحة الرئيسية
+            </button>
+          </div>
+        )}
     </div>
   );
 };
 
-export default SearchResultsPage;
+export default SearchResults;

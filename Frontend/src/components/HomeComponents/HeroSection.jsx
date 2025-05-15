@@ -1,115 +1,417 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import photo3 from '../../components/img/WhatsApp Image 2025-04-29 at 1.06.30 AM.jpeg';
-import photo2 from '../../components/img/img5.jpg';
-import photo1 from '../../components/img/resize.webp';
-import { nextTick } from 'process';
-import { Link } from 'react-router-dom';
+// import { useState, useEffect } from 'react';
+// import { ChevronLeft, ChevronRight } from 'lucide-react';
+// import photo3 from '../../components/img/WhatsApp Image 2025-04-29 at 1.06.30 AM.jpeg';
+// import photo2 from '../../components/img/img5.jpg';
+// import photo1 from '../../components/img/resize.webp';
+// import { nextTick } from 'process';
+// import { Link } from 'react-router-dom';
 
-export default function HeroSection() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+// export default function HeroSection() {
+//   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = [
-    "https://autonationrentacar.com/assets/uploads/King_abdullah_mosque.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Z_Amman_Hejaz_Railway_Station_4.jpg/1024px-Z_Amman_Hejaz_Railway_Station_4.jpg",
-    "https://iresizer.devops.arabiaweather.com/resize?url=https://adminassets.devops.arabiaweather.com/sites/default/files/field/image/p1fdn9uioa1u9ujuq1b4p108mjk24.jpg&size=800x450&force_webp=1"
-  ];
+//   const slides = [
+//     "https://autonationrentacar.com/assets/uploads/King_abdullah_mosque.jpg",
+//     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Z_Amman_Hejaz_Railway_Station_4.jpg/1024px-Z_Amman_Hejaz_Railway_Station_4.jpg",
+//     "https://iresizer.devops.arabiaweather.com/resize?url=https://adminassets.devops.arabiaweather.com/sites/default/files/field/image/p1fdn9uioa1u9ujuq1b4p108mjk24.jpg&size=800x450&force_webp=1"
+//   ];
 
-  // const slides = [photo1, photo2, photo3];
+//   // const slides = [photo1, photo2, photo3];
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+//   const nextSlide = () => {
+//     setCurrentSlide((prev) => (prev + 1) % slides.length);
+//   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+//   const prevSlide = () => {
+//     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+//   };
 
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//   nextSlide();
+//     }, 4000);
+
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   return (
+//    <div dir="rtl" className="relative h-screen w-full overflow-hidden">
+//   {/* Slides */}
+//   {slides.map((slide, index) => (
+//     <div
+//       key={index}
+//       className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+//         index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
+//       }`}
+//     >
+//       {/* Image */}
+//       <img
+//         src={slide} // تأكد من المسار الصحيح للصورة
+//         alt={`Slide ${index + 1}`}
+//         className="w-full h-full object-cover"
+//         style={{ objectFit: "cover" }}
+//         onError={(e) => {
+//           e.target.onerror = null;
+//           e.target.src = "https://via.placeholder.com/1600x900"; // صورة بديلة لو فشل التحميل
+//         }}
+//       />
+      
+//       {/* Optional: light black overlay */}
+//       <div className="absolute inset-0 bg-black bg-opacity-10 pointer-events-none" />
+//     </div>
+//   ))}
+
+//   {/* Content */}
+//   <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white z-10 px-4">
+//     <h1
+//       className="font-light mb-4 drop-shadow-lg text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+//       style={{
+//         fontFamily: "Tajawal, sans-serif",
+//         lineHeight: "1.2",
+//       }}
+//     >
+//       وين نروح
+//     </h1>
+
+//     <p className="text-lg sm:text-xl md:text-2xl mb-8 max-w-lg mx-auto drop-shadow-md">
+//       حاسس نفسك محتار؟ خلّينا نرشحلك أحلى أماكن بالأردن تناسب مزاجك!
+//     </p>
+
+//     <div className="flex gap-4 justify-center flex-wrap">
+//       <Link to="/places?city=عمان">
+//         <button className="bg-[#FFD700] hover:bg-[#e0b200] text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
+//           يلاّ نكتشف
+//         </button>
+//       </Link>
+
+//       <Link to="/suggest">
+//         <button className="bg-white hover:bg-gray-200 text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
+//           اقترح مكان
+//         </button>
+//       </Link>
+//     </div>
+//   </div>
+
+//   {/* Navigation Arrows */}
+//   <button
+//     onClick={prevSlide}
+//     className="absolute left-4 top-1/2 transform -translate-y-1/2 hover:bg-white/25 p-4 rounded-full z-20 transition"
+//   >
+//     <ChevronLeft size={40} className="text-white" />
+//   </button>
+
+//   <button
+//     onClick={nextSlide}
+//     className="absolute right-4 top-1/2 transform -translate-y-1/2 hover:bg-white/25 p-4 rounded-full z-20 transition"
+//   >
+//     <ChevronRight size={40} className="text-white" />
+//   </button>
+// </div>
+
+//   );
+// }
+
+
+// ========================================================================================================================================
+
+
+// import { motion } from "framer-motion";
+// import { useEffect, useRef, useState } from "react";
+
+// const ShuffleHero = () => {
+//   return (
+//     <section className="w-full px-8 py-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8 max-w-6xl mx-auto">
+//       <div>
+//         <span className="block mb-4 text-xs md:text-sm text-indigo-500 font-medium">
+//           Better every day
+//         </span>
+//         <h3 className="text-4xl md:text-6xl font-semibold">
+//           Let's change it up a bit
+//         </h3>
+//         <p className="text-base md:text-lg text-slate-700 my-4 md:my-6">
+//           Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nam nobis in
+//           error repellat voluptatibus ad.
+//         </p>
+//         <button className="bg-indigo-500 text-white font-medium py-2 px-4 rounded transition-all hover:bg-indigo-600 active:scale-95">
+//           Find a class
+//         </button>
+//       </div>
+//       <ShuffleGrid />
+//     </section>
+//   );
+// };
+
+// const shuffle = (array) => {
+//   let currentIndex = array.length,
+//     randomIndex;
+
+//   while (currentIndex != 0) {
+//     randomIndex = Math.floor(Math.random() * currentIndex);
+//     currentIndex--;
+
+//     [array[currentIndex], array[randomIndex]] = [
+//       array[randomIndex],
+//       array[currentIndex],
+//     ];
+//   }
+
+//   return array;
+// };
+
+// const squareData = [
+//   {
+//     id: 1,
+//     src: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+//   },
+//   {
+//     id: 2,
+//     src: "https://images.unsplash.com/photo-1510925758641-869d353cecc7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+//   },
+//   {
+//     id: 3,
+//     src: "https://images.unsplash.com/photo-1629901925121-8a141c2a42f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+//   },
+//   {
+//     id: 4,
+//     src: "https://images.unsplash.com/photo-1580238053495-b9720401fd45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+//   },
+//   {
+//     id: 5,
+//     src: "https://images.unsplash.com/photo-1569074187119-c87815b476da?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1325&q=80",
+//   },
+//   {
+//     id: 6,
+//     src: "https://images.unsplash.com/photo-1556817411-31ae72fa3ea0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+//   },
+//   {
+//     id: 7,
+//     src: "https://images.unsplash.com/photo-1599586120429-48281b6f0ece?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+//   },
+//   {
+//     id: 8,
+//     src: "https://plus.unsplash.com/premium_photo-1671436824833-91c0741e89c9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+//   },
+//   {
+//     id: 9,
+//     src: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+//   },
+//   {
+//     id: 10,
+//     src: "https://images.unsplash.com/photo-1610768764270-790fbec18178?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+//   },
+//   {
+//     id: 11,
+//     src: "https://images.unsplash.com/photo-1507034589631-9433cc6bc453?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=684&q=80",
+//   },
+//   {
+//     id: 12,
+//     src: "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=882&q=80",
+//   },
+//   {
+//     id: 13,
+//     src: "https://images.unsplash.com/photo-1560089000-7433a4ebbd64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
+//   },
+//   {
+//     id: 14,
+//     src: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=686&q=80",
+//   },
+//   {
+//     id: 15,
+//     src: "https://images.unsplash.com/photo-1606244864456-8bee63fce472?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=681&q=80",
+//   },
+//   {
+//     id: 16,
+//     src: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1820&q=80",
+//   },
+// ];
+
+// const generateSquares = () => {
+//   return shuffle(squareData).map((sq) => (
+//     <motion.div
+//       key={sq.id}
+//       layout
+//       transition={{ duration: 1.5, type: "spring" }}
+//       className="w-full h-full"
+//       style={{
+//         backgroundImage: `url(${sq.src})`,
+//         backgroundSize: "cover",
+//       }}
+//     ></motion.div>
+//   ));
+// };
+
+// const ShuffleGrid = () => {
+//   const timeoutRef = useRef(null);
+//   const [squares, setSquares] = useState(generateSquares());
+
+//   useEffect(() => {
+//     shuffleSquares();
+
+//     return () => clearTimeout(timeoutRef.current);
+//   }, []);
+
+//   const shuffleSquares = () => {
+//     setSquares(generateSquares());
+
+//     timeoutRef.current = setTimeout(shuffleSquares, 3000);
+//   };
+
+//   return (
+//     <div className="grid grid-cols-4 grid-rows-4 h-[450px] gap-1">
+//       {squares.map((sq) => sq)}
+//     </div>
+//   );
+// };
+
+// export default ShuffleHero;
+
+//========================================================================================================================================
+
+import { useEffect, useRef, useState } from 'react';
+ import ammanVideo from '../../components/img/AmmanNew.mp4'; // قم بتعديل المسار حسب مكان الفيديو في مشروعك
+import { Compass, Search, MapPin, Star, Menu, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+
+
+export default function WacoHeroSection() {
+  const featuresSectionRef = useRef(null);
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const navigate = useNavigate();
+
+  // Features section visibility with Intersection Observer
   useEffect(() => {
-    const interval = setInterval(() => {
-  nextSlide();
-    }, 4000);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setFeaturesVisible(true);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
 
-    return () => clearInterval(interval);
+    if (featuresSectionRef.current) {
+      observer.observe(featuresSectionRef.current);
+    }
+
+    return () => {
+      if (featuresSectionRef.current) {
+        observer.unobserve(featuresSectionRef.current);
+      }
+    };
   }, []);
 
-  return (
-   <div dir="rtl" className="relative h-screen w-full overflow-hidden">
-  {/* Slides */}
-  {slides.map((slide, index) => (
-    <div
-      key={index}
-      className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
-        index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
-    >
-      {/* Image */}
-      <img
-        src={slide} // تأكد من المسار الصحيح للصورة
-        alt={`Slide ${index + 1}`}
-        className="w-full h-full object-cover"
-        style={{ objectFit: "cover" }}
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src = "https://via.placeholder.com/1600x900"; // صورة بديلة لو فشل التحميل
-        }}
-      />
-      
-      {/* Optional: light black overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-10 pointer-events-none" />
-    </div>
-  ))}
+  // Scroll to section function
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
-  {/* Content */}
-  <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white z-10 px-4">
-    <h1
-      className="font-light mb-4 drop-shadow-lg text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
-      style={{
-        fontFamily: "Tajawal, sans-serif",
-        lineHeight: "1.2",
-      }}
-    >
-      وين نروح
-    </h1>
+ return (
+  <>
+    {/* Hero Section */}
+<section className="relative min-h-screen w-full flex flex-col items-start sm:items-center justify-start sm:justify-center overflow-hidden bg-[#022C43] text-white py-8 sm:py-16">
+      {/* Background Video */}
+       <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+      >
+        <source src={ammanVideo} type="video/mp4" />
+      </video> 
 
-    <p className="text-lg sm:text-xl md:text-2xl mb-8 max-w-lg mx-auto drop-shadow-md">
-      حاسس نفسك محتار؟ خلّينا نرشحلك أحلى أماكن بالأردن تناسب مزاجك!
-    </p>
+      {/* Dark Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#115173]/20 via-[#115173]/20 to-[#022C43]/20"></div>
 
-    <div className="flex gap-4 justify-center flex-wrap">
-      <Link to="/places?city=عمان">
-        <button className="bg-[#FFD700] hover:bg-[#e0b200] text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
-          يلاّ نكتشف
-        </button>
-      </Link>
+      {/* Hero Content */}
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-full sm:max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4 animate-fade-in">
+          <span className="text-4xl sm:text-6xl md:text-8xl inline-block transform transition hover:scale-105 duration-700 text-[#FFD700]">وين نروح؟</span>
+        </h1>
 
-      <Link to="/suggest">
-        <button className="bg-white hover:bg-gray-200 text-[#022C43] font-medium py-3 px-8 rounded-md transition-colors duration-300">
-          اقترح مكان
-        </button>
-      </Link>
-    </div>
-  </div>
+        <p className="mt-2 sm:mt-3 max-w-xs sm:max-w-lg md:max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed text-gray-200 animate-fade-in-delay">
+          اكتشف أماكن وأنشطة مميزة في الأردن، من الأماكن الطبيعية الخلابة إلى المواقع الفريدة التي لا يعرفها الكثيرون.
+          <span className="hidden md:inline"> استمتع بتجارب جديدة تمامًا واكتشف ما يخفيه لك هذا البلد الجميل.</span>
+        </p>
 
-  {/* Navigation Arrows */}
-  <button
-    onClick={prevSlide}
-    className="absolute left-4 top-1/2 transform -translate-y-1/2 hover:bg-white/25 p-4 rounded-full z-20 transition"
-  >
-    <ChevronLeft size={40} className="text-white" />
-  </button>
+<div className="flex flex-col xs:flex-row gap-2 sm:gap-3 justify-center  mt-4 sm:mt-6 animate-fade-in-delay-2 w-fit mx-auto">
+          <button
+            className="bg-[#022C43] hover:bg-[#115173]/80 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold text-xs sm:text-sm md:text-base"
+            onClick={() => navigate('/location')}
+          >
+            استكشاف وجهات جديدة 
+          </button>
+          <button
+            className="bg-transparent border-2 border-white hover:bg-white/10 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold text-xs sm:text-sm md:text-base mt-2 xs:mt-0"
+            onClick={() => navigate('/suggest')}
+          >
+            اقترح مكان 
+          </button>
+        </div>
 
-  <button
-    onClick={nextSlide}
-    className="absolute right-4 top-1/2 transform -translate-y-1/2 hover:bg-white/25 p-4 rounded-full z-20 transition"
-  >
-    <ChevronRight size={40} className="text-white" />
-  </button>
+        {/* Features Row */}
+        <div
+          ref={featuresSectionRef}
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-12 max-w-full sm:max-w-2xl md:max-w-4xl mx-auto transition-opacity duration-1000 ${
+            featuresVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {/* Feature 1: مغامرات في الطبيعة */}
+          <div className="group bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 transform transition-all duration-500 hover:scale-105 hover:bg-[#115173]/20 hover:shadow-lg hover:shadow-[#115173]/20">
+            <div className="bg-[#FFD700]/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-[#115173] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 className="text-xs sm:text-sm md:text-base font-semibold mb-0.5">المغامرات الخفية</h3>
+            <p className="text-gray-300 text-xs sm:text-sm">استكشف أماكن لم تكتشف بعد، مثل وادي برتا وسيل حسبان، حيث الطبيعة والشلالات الهادئة ومسارات المشي بين الجبال.</p>
+          </div>
+
+          {/* Feature 2: التراث الثقافي */}
+          <div className="group bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 transform transition-all duration-500 hover:scale-105 hover:bg-[#115173]/20 hover:shadow-lg hover:shadow-[#115173]/20">
+            <div className="bg-[#FFD700]/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-[#115173] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L6 21h12l-3.75-4M12 3v14" />
+              </svg>
+            </div>
+            <h3 className="text-xs sm:text-sm md:text-base font-semibold mb-0.5 sm:mb-1">المتاحف المميزة</h3>
+            <p className="text-gray-300 text-xs sm:text-sm">
+              استكشف المتاحف الفريدة في الأردن مثل متحف الشمع، ومعارض الصور الفنية، وجولات ليلية مبهرة تعطيك لمحة مختلفة عن التاريخ والثقافة بطريقة تفاعلية وجذابة.
+            </p>
+          </div>
+
+          {/* Feature 3: المأكولات المحلية */}
+          <div className="group bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 transform transition-all duration-500 hover:scale-105 hover:bg-[#115173]/20 hover:shadow-lg hover:shadow-[#115173]/20 sm:col-span-2 lg:col-span-1">
+            <div className="bg-[#FFD700]/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-[#115173] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </div>
+            <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-0.5 sm:mb-1">تجربة الطبخ الثقافي</h3>
+            <p className="text-gray-300 text-xs sm:text-sm">
+              عيش تجربة فريدة من نوعها في مطابخ تفاعلية حيث يمكنك تعلم تحضير أكلات بنفسك أومطابخ تذوق أطعمة من ثقافات متعددة، في أجواء غنية بالتنوع والتراث.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll Down Indicator */}
+  <div
+  className="hidden sm:flex absolute bottom-1 left-1/2 transform -translate-x-1/2 flex-col items-center animate-bounce cursor-pointer z-20"
+  onClick={() => scrollToSection('attractions')}
+>
+  <span className="text-xs sm:text-sm text-gray-300 mb-1 sm:mb-2">مرر للأسفل لاستكشاف المزيد</span>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
 </div>
 
-  );
+    </section>
+  </>
+);
 }
-
-
-
-

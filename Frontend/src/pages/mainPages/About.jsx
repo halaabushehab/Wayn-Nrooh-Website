@@ -270,7 +270,7 @@ useEffect(() => {
         </div>
         <div>
           <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="3">3</span>+
+            <span className="counter" data-target="3">12</span>+
           </h3>
           <p className="text-[#115173] font-medium">مدن رئيسية</p>
         </div>
@@ -377,7 +377,7 @@ useEffect(() => {
     </div>
 
     {/* <!-- النص الرئيسي مع تأثيرات مرئية --> */}
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-10 shadow-lg border border-[#FFD700]/20 mb-12 transform transition-all hover:shadow-xl hover:-translate-y-1">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 md:p-10 shadow-sm border border-[#FFD700]/20 mb-12 transform transition-all hover:shadow-xl hover:-translate-y-1">
       <p className="text-gray-700 leading-relaxed text-lg md:text-xl text-center max-w-3xl mx-auto font-medium">
         نطمح لأن يصبح موقع 
         <span className="font-bold text-[#FF6B6B] relative px-1">
@@ -480,7 +480,7 @@ useEffect(() => {
       <div className="relative transform -rotate-10 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://scontent.famm6-1.fna.fbcdn.net/v/t39.30808-6/490469666_1573207290278530_6930899566442259904_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aAcQWJf7KGYQ7kNvwFPm5SC&_nc_oc=AdklpkkhaZX0eDAAUcZR7Q2ShT0gIWr3LcDs89GLnEqpNjkwTvlQDw9cQj4ApvWAylQ&_nc_zt=23&_nc_ht=scontent.famm6-1.fna&_nc_gid=s67Kctb6de8KDD3H1Vu-Fg&oh=00_AfF1AIO-aOJvojUCHGESs0LvdXAcWf05n9FP65pLsqW3Fg&oe=681AC889"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjXTnSzfl9sAJIQdC04JyqAbtUPSeM7__P-Q&s"
             alt="العائلة في عمان"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
@@ -501,7 +501,7 @@ useEffect(() => {
       <div className="relative transform rotate-2 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://scontent.famm6-1.fna.fbcdn.net/v/t39.30808-6/482219606_1066285338637166_5215094800110831314_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=833d8c&_nc_ohc=u_Eic8UMC28Q7kNvwH5RMce&_nc_oc=AdkdX0Jlx3z5Ali0tWG8unGJBigQZa6e_A0_bAQuqOM_GFE7JtJOQ9w4hF6g90G3pdw&_nc_zt=23&_nc_ht=scontent.famm6-1.fna&_nc_gid=kOd0nihbDYlvTLAraSbs8A&oh=00_AfFtKfixV9ZSxo0gQUdEiLdOp3UbYWyY7nAoH0pmd34G-Q&oe=681AB56B"
+            src="https://scontent.famm11-1.fna.fbcdn.net/v/t39.30808-6/481330689_1067330908532609_2988636775833769659_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2wutcEacT1cQ7kNvwFWEbac&_nc_oc=Adkn3Tkw0k3beJqaZ-SkP5dXVg2my4zSC2k7zN3hYaFRCV2ilgg0mW_HAMuS5DfAuqI&_nc_zt=23&_nc_ht=scontent.famm11-1.fna&_nc_gid=XxKJN3z0x34aIRUXStmYTg&oh=00_AfIyHfKh0ENsXDTFw6TJd-sI-jbt9BKXmKId3DK56dHgIg&oe=682ADBFC"
             alt="العائلة في الزرقاء"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 

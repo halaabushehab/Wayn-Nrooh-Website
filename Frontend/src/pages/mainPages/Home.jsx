@@ -25,7 +25,7 @@ const Home = () => {
       setShowPopup(true);
       sessionStorage.setItem("hasVisited", "true");
     }
-  }, []);;
+  }, []);
 return (
   <>
     <Helmet>
@@ -60,15 +60,6 @@ return (
 };
 
 export default Home;
-
-
-
-
-
-
-
-
-
 
 
 

@@ -14,10 +14,8 @@ const Navbar = () => {
   const [isFormOpen, setFormOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isCitiesOpen, setIsCitiesOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const citiesDropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -76,19 +74,6 @@ const Navbar = () => {
     });
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (citiesDropdownRef.current && !citiesDropdownRef.current.contains(event.target)) {
-        setIsCitiesOpen(false);
-      }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
-        setIsUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleLogout = () => {
     Swal.fire({
@@ -174,57 +159,16 @@ const Navbar = () => {
               <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
             </Link>
 
-            <div className="relative" ref={citiesDropdownRef}>
-              <button
-                onClick={() => setIsCitiesOpen(!isCitiesOpen)}
-                className="flex items-center py-2 px-1 text-white hover:text-[#FFD700] transition-colors group"
-              >
-                <GiModernCity className="ml-1 text-[#FFD700]" />
-                المدن
-                <ChevronDown
-                  className={`ml-1 transition-transform ${isCitiesOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-              <div
-                className={`absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300 origin-top ${
-                  isCitiesOpen ? "scale-y-100 opacity-100" : "scale-y-95 opacity-0 pointer-events-none"
-                }`}
-              >
-                <Link
-                  className="block px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors flex items-center"
-                  to="/places?city=عمان"
-                  onClick={() => {
-                    setIsCitiesOpen(false);
-                    setMenuOpen(false);
-                  }}
-                >
-                  <MdTravelExplore className="ml-2 text-[#FFD700]" />
-                  عمان
-                </Link>
-                <Link
-                  className="block px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors flex items-center"
-                  to="/places?city=الزرقاء"
-                  onClick={() => {
-                    setIsCitiesOpen(false);
-                    setMenuOpen(false);
-                  }}
-                >
-                  <MdTravelExplore className="ml-2 text-[#FFD700]" />
-                  الزرقاء
-                </Link>
-                <Link
-                  className="block px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors flex items-center"
-                  to="/places?city=إربد"
-                  onClick={() => {
-                    setIsCitiesOpen(false);
-                    setMenuOpen(false);
-                  }}
-                >
-                  <MdTravelExplore className="ml-2 text-[#FFD700]" />
-                  إربد
-                </Link>
-              </div>
-            </div>
+      <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/location"
+              onClick={() => setMenuOpen(false)}
+            >
+              الوجهات
+              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+    
+
 
             <Link
               className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"

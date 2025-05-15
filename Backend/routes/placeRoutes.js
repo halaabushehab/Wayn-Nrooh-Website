@@ -13,7 +13,11 @@ router.get("/", placeController.getAllPlaces);
 
 // ✅ جلب عدد الأماكن
 router.get("/count", placeController.getPlaceCount);
+// ======================================================
+// 🔁 جلب الأماكن مصنفة حسب المدينة والتصنيفات والمناسب لهم
+router.get('/grouped', placeController.getPlacesGrouped);
 
+// ======================================================
 // POST route to create a place
 router.post('/', upload.array('images', 10), placeController.createPlace);
 
@@ -40,10 +44,10 @@ router.get("/filtered/search", placeController.getFilteredPlaces);
 router.get("/user-places/:userId", placeController.getPlacesByUser);
 
 // البحث الأساسي
-router.get('/main-search', placeController.globalSearch);
+router.get('/search', placeController.globalSearch);
 
 // اقتراحات البحث التلقائية
-router.get('/auto-suggest', placeController.searchSuggestions);
+router.get('/main-search', placeController.searchSuggestions);
 
 module.exports = router;
 

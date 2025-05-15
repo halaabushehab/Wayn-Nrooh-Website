@@ -4,11 +4,13 @@
 body {
   direction: rtl;
   /* background-image: url('../../Frontend/src/components/img/b0e8fd73569972f1119b18bf89a8fb15.png'); استخدم مسار نسبي من مجلد public */
-   /* background-image: url('https://i.pinimg.com/736x/13/ca/93/13ca93ee26b9842275d6b9ff95a92bd7.jpg');  */
+   /* background-image: url('https://i.pinimg.com/736x/49/fb/60/49fb60ed7641d048897ba49ea9d1fb2b.jpg');  */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  min-height: 100vh;
+
+
+  
 }
 
 
@@ -17,3 +19,6 @@ body {
     color: white;
   }
   
+
+
+

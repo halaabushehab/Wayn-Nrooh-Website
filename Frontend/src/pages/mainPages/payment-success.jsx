@@ -6,167 +6,124 @@ import axios from "axios";
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const [paymentInfo, setPaymentInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null); // لعرض رسالة النجاح
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // Load user from cookies
   useEffect(() => {
-    const loadUserFromCookies = () => {
-      const userCookie = Cookies.get("user");
-      if (userCookie) {
-        try {
-          const parsedUser = JSON.parse(userCookie);
-          console.log("Loading user from cookies:", parsedUser);
-    
-          if (parsedUser.token) {
-            setUser({
-              username: parsedUser.username,
-              userId: parsedUser.userId,
-              email: parsedUser.email,
-              isAdmin: parsedUser.isAdmin || false,
-            });
-    
-            axios.defaults.headers.common["Authorization"] = `Bearer ${parsedUser.token}`;
-          }
-        } catch (error) {
-          console.error("Error parsing user cookie:", error);
-          Cookies.remove("user");
+    const userCookie = Cookies.get("user");
+    if (userCookie) {
+      try {
+        const parsedUser = JSON.parse(userCookie);
+        if (parsedUser.token) {
+          setUser(parsedUser);
+          axios.defaults.headers.common["Authorization"] = `Bearer ${parsedUser.token}`;
         }
+      } catch (error) {
+        Cookies.remove("user");
       }
-    };
-
-    loadUserFromCookies();
+    }
   }, []);
 
-  // Verify payment and send data to backend
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
-
-    if (!sessionId) {
-      setError("Session ID not found in URL");
-      setLoading(false);
-      return;
-    }
+    if (!sessionId) return;
 
     const verifyAndProcessPayment = async () => {
       try {
-        // Step 1: Verify payment with Stripe
-        const verifyResponse = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:9527/api/payments/verify?session_id=${sessionId}`
         );
-        const paymentData = verifyResponse.data;
-    
-        console.log("Payment verification successful:", paymentData);
-        setPaymentInfo(paymentData);
-    
-        // استخراج stripePaymentId و stripeChargeId من بيانات الدفع
-        const stripePaymentId = paymentData.stripePaymentId;
-        const stripeChargeId = paymentData.stripeChargeId;
-    
-        // Step 2: Send payment data to our database
+        setPaymentInfo(data);
+        
         if (user) {
-          const paymentRecord = {
-            stripePaymentId: stripePaymentId || 'defaultPaymentId', // استخدم قيمة افتراضية في حال عدم وجودها
-            stripeChargeId: stripeChargeId || 'defaultChargeId',
+          await axios.post("http://localhost:9527/api/payments/create-payment", {
+            ...data,
             userEmail: user.email,
             userName: user.username,
-            userId: user.userId,
-            amountUSD: paymentData.amountUSD, // مثال
-            cardBrand: paymentData.cardBrand || 'Unknown',
-            cardLast4: paymentData.cardLast4 || '0000',
-            country: paymentData.country || 'Unknown',
-            currency: paymentData.currency,
-            paymentStatus: paymentData.paymentStatus,
-            placeId: paymentData.placeId,
-            ticketCount: paymentData.ticketCount,
-          };
-    
-          console.log(paymentRecord);  // تحقق من البيانات المرسلة
-    
-          const createResponse = await axios.post(
-            "http://localhost:9527/api/payments/create-payment",
-            paymentRecord
-          );
-          if (createResponse.status === 201) {
-            console.log("Payment record created:", createResponse.data);
-            setSuccessMessage("تم حفظ معلومات الدفع بنجاح!");
-          } else {
-            setError("حدث خطأ أثناء تخزين البيانات.");
-          }
+            userId: user.userId
+          });
+          setSuccessMessage("تم الدفع بنجاح!");
         }
       } catch (err) {
-        console.error("Payment processing error:", err);
-        setError(err.response?.data?.message || "Payment processing failed");
-      } finally {
-        setLoading(false);
+        console.error("Payment error:", err);
       }
     };
-    
 
     verifyAndProcessPayment();
   }, [searchParams, user]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white">
-      <div className="bg-[#f8fafc] border border-[#022C43]/20 text-[#022C43] p-8 rounded-lg shadow-lg max-w-md w-full">
-        <div className="text-center mb-6">
-          <svg 
-            className="w-16 h-16 text-[#FFD700] mx-auto mb-4" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
-          <h2 className="text-2xl font-bold mb-2">تم الدفع بنجاح!</h2>
-          <p className="text-[#115173]">شكرًا لاستخدامك موقعنا</p>
-        </div>
-
-        <div className="bg-white p-4 rounded-md border border-[#022C43]/10 mb-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-[#115173] font-medium">قيمة الدفع:</p>
-              <p>{paymentInfo?.amountUSD} {paymentInfo?.currency}</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#f5f7fa] relative overflow-hidden">
+      {/* Decorative Circles */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FFD700]/10"></div>
+      <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#115173]/10"></div>
+      <div className="absolute top-1/3 left-1/4 w-32 h-32 rounded-full bg-[#022C43]/5"></div>
+      
+      {/* Small Payment Card */}
+      <div className="relative bg-white rounded-lg shadow-md w-full max-w-xs overflow-hidden border border-[#eee] z-10">
+        {/* Gold Header */}
+        <div className="h-2 bg-[#FFD700]"></div>
+        
+        <div className="p-5">
+          {/* Check Icon */}
+          <div className="mx-auto mb-3 w-14 h-14 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-[#FFD700]" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+          </div>
+          
+          {/* Title */}
+          <h2 className="text-xl font-bold text-center text-[#022C43] mb-1">تمت العملية</h2>
+          <p className="text-center text-[#115173] text-sm mb-4">شكراً لك</p>
+          
+          {/* Payment Details */}
+          <div className="space-y-2 text-sm mb-4">
+            <div className="flex justify-between py-1 border-b border-[#eee]">
+              <span className="text-[#115173]">المبلغ:</span>
+              <span className="font-medium text-[#022C43]">
+                {paymentInfo?.amountUSD} {paymentInfo?.currency}
+              </span>
             </div>
-            <div>
-              <p className="text-[#115173] font-medium">عدد التذاكر:</p>
-              <p>{paymentInfo?.ticketCount}</p>
-            </div>
-            <div>
-              <p className="text-[#115173] font-medium">طريقة الدفع:</p>
-              <p>{paymentInfo?.cardBrand} •••• {paymentInfo?.cardLast4}</p>
-            </div>
-            <div>
-              <p className="text-[#115173] font-medium">حالة الدفع:</p>
-              <p className="text-green-600 font-medium">{paymentInfo?.paymentStatus}</p>
+            
+                 <div className="flex justify-between">
+                <span className="text-[#115173]">عدد التذاكر:</span>
+                <span className="font-bold text-[#022C43]">{paymentInfo?.ticketCount}</span>
+              </div>
+              
+            <div className="flex justify-between py-1">
+              <span className="text-[#115173]">الحالة:</span>
+              <span className="font-medium text-green-600">ناجحة</span>
             </div>
           </div>
+          
+          {/* Buttons */}
+          <div className="flex space-x-2">
+            <button
+              className="flex-1 bg-[#022C43] text-white py-2 text-sm rounded hover:bg-[#115173] transition"
+              onClick={() => window.location.href = '/'}
+            >
+              الرئيسية
+            </button>
+            <button
+              className="flex-1 border border-[#022C43] text-[#022C43] py-2 text-sm rounded hover:bg-[#022C43]/10 transition"
+              onClick={() => window.print()}
+            >
+              طباعة
+            </button>
+          </div>
         </div>
+        
+        {/* Footer */}
+   <div className="px-5 py-2 text-center text-xs text-[#115173] bg-[#f9f9f9] border-t border-[#eee]">
 
-        <button
-          className="w-full bg-[#022C43] text-white py-2 px-4 rounded-md hover:bg-[#115173] transition duration-200"
-          onClick={() => window.location.href = '/'}
-        >
-          العودة إلى الصفحة الرئيسية
-        </button>
+  <div className="mt-1 text-[#0a7b50]">تمت عملية الدفع بنجاح. شكرًا لاستخدامك منصتنا.</div>
+</div>
       </div>
     </div>
   );
 };
 
 export default PaymentSuccess;
-
-
-
-
 
 // axios.post('http://localhost:9527/api/payments/create-payment', paymentData)
 //   .then(response => {

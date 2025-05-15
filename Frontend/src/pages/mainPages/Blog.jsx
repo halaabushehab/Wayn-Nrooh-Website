@@ -244,7 +244,7 @@ const Blog = () => {
               <p className="text-gray-600 text-sm mb-4 text-right">
                 احصل على أحدث المقالات والعروض مباشرة إلى بريدك الإلكتروني
               </p>
-              <form action="https://formspree.io/f/xwpobapn" method="POST" className="space-y-3">
+              <form action="https://formspree.io" method="POST" className="space-y-3">
   <div>
     <input 
       type="email" 

@@ -10,7 +10,7 @@ export const PlaceCard = ({ place }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
+    <div className=" rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
       <div className="relative">
         <img
           src={place.images}

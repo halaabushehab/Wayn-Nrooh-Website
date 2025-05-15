@@ -21,7 +21,7 @@ export function Offer() {
   }, []);
 
   return (
-    <div className="bg-gray-50 flex items-center justify-center my-20">
+    <div className=" flex items-center justify-center my-20">
       <div className="w-full max-w-6xl h-200 md:h-[350px] rounded-lg overflow-hidden shadow-lg flex flex-col md:flex-row-reverse">
         {/* Right Section */}
         <div className="bg-[#0a2642] p-6 md:p-8 text-right md:w-1/2 flex flex-col justify-center relative">

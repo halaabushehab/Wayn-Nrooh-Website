@@ -21,7 +21,7 @@ function JordanGallery() {
     {
       title: "GAMENATION",
       description: "مركز ألعاب ترفيهية يحتوي على ألعاب فيديو وتحديات تفاعلية مميزة.",
-      image: "https://scontent.famm6-1.fna.fbcdn.net/v/t39.30808-6/475207778_540893809001659_6627218436564345549_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=HBuvSUNZnsAQ7kNvwEJuSBu&_nc_oc=AdknFRBtVrKu4YusLlOHrdomR4-HTl-0ORgFtaqNpx6o2OoPxwgTf9KmUq_SL8Fh9O8&_nc_zt=23&_nc_ht=scontent.famm6-1.fna&_nc_gid=hHzJC6i000K7M3fzVacu-w&oh=00_AfGSc_hqQ8uY7J6qIxoiHJ4WtxXhO137NwEVt-IcDb6yMQ&oe=681ACA0E",  // استبدل بالصورة المناسبة
+      image: "https://scontent.famm10-1.fna.fbcdn.net/v/t39.30808-6/475308661_540893789001661_2320922547613782719_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=127cfc&_nc_ohc=vNtiqnJjYwoQ7kNvwH93R3O&_nc_oc=Admn92wTnq2vH_qA7hOBQog7Q9G0l2tkcapD_lWCsC0VUJGhA_1TgGj2LANzcuYWrP8&_nc_zt=23&_nc_ht=scontent.famm10-1.fna&_nc_gid=bMQ4afJLCtg6JfW-9W1Ydg&oh=00_AfKvVUU4De-Pm6hzrxsFYoL6gR8jZ5EKsoUxNrD2lH_odQ&oe=6824364F",  // استبدل بالصورة المناسبة
       location: "عمان"
     },
     {

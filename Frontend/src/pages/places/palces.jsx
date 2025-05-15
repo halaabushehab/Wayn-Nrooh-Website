@@ -460,3 +460,259 @@ const categories = [
 };
 
 export default CityPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// const CityPage = () => {
+//   const [filters, setFilters] = useState({
+//     city: "",
+//     category_id: "",
+//     suitable_for: ""
+//   });
+
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [places, setPlaces] = useState([]);
+//   const [totalPages, setTotalPages] = useState(1);
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   // fetch places from the backend
+//   const fetchPlaces = async () => {
+//     setIsLoading(true);
+//     try {
+//       const params = {
+//         ...filters,
+//         search: searchTerm,
+//         page: currentPage,
+//         limit: 8
+//       };
+
+//       const response = await axios.get("http://localhost:9527/api/places", {
+//         params
+//       });
+
+//       setPlaces(response.data.places);
+//       setTotalPages(response.data.totalPages || 1);
+//     } catch (error) {
+//       console.error("❌ Error fetching places:", error);
+//       toast.error("حدث خطأ أثناء تحميل الأماكن.");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchPlaces();
+//   }, [filters, searchTerm, currentPage]);
+
+//   const handleFilterChange = (key, value) => {
+//     setFilters((prev) => ({ ...prev, [key]: value }));
+//     setCurrentPage(1); // reset page when filters change
+//   };
+
+//   return (
+//     <div className="p-6 max-w-screen-xl mx-auto">
+//       <h2 className="text-3xl font-bold mb-6 text-center">اكتشف الأماكن</h2>
+
+//       {/* Filters Section */}
+//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("city", e.target.value)}
+//         >
+//           <option value="">كل المدن</option>
+//       <option value="عمان">عمان</option>
+//   <option value="الزرقاء">الزرقاء</option>
+//   <option value="إربد">إربد</option>
+//   <option value="السلط">السلط</option>
+//   <option value="مأدبا">مأدبا</option>
+//   <option value="الطفيلة">الطفيلة</option>
+//   <option value="الكرك">الكرك</option>
+//   <option value="العقبة">العقبة</option>
+//   <option value="المفرق">المفرق</option>
+//   <option value="جرش">جرش</option>
+//   <option value="عجلون">عجلون</option>
+//   <option value="معان">معان</option>
+//         </select>
+
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("category_id", e.target.value)}
+//         >
+//           <option value="">كل التصنيفات</option>
+//           <option value="1">حدائق</option>
+//           <option value="2">مطاعم</option>
+//           <option value="3">ترفيه </option>
+//           <option value="4">رياضة</option>
+//            <option value="5">اكل بيتي</option>
+//             <option value="6">تصوير</option>
+//             <option value="7">متاحف</option>
+//              <option value="8">مغامرة</option>
+//                <option value="9">فن</option>
+//            <option value="10"> اسواق</option>
+//             <option value="11">تعليم</option>
+//             <option value="12">منتزهات</option>
+//              <option value="13">مقاهي</option>
+//                <option value="14">اماكن تاريخية</option>
+//         </select>
+
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("suitable_for", e.target.value)}
+//         >
+//         <option value="">كل الفئات</option>
+//   <option value="family">العائلات</option>
+//   <option value="friends">الأصدقاء</option>
+//   <option value="kids">الأطفال</option>
+//   <option value="culture_lovers">محبو استكشاف الثقافات</option>
+//   <option value="animal_lovers">محبو الحيوانات</option>
+//   <option value="school_trips">الرحلات المدرسية</option>
+//   <option value="car_enthusiasts">محبو السيارات</option>
+//   <option value="history_lovers">محبو التاريخ</option>
+//   <option value="sports_fans">محبو الرياضة</option>
+//   <option value="photography_lovers">محبو التصوير</option>
+//   <option value="quiet_places">محبو الأماكن الهادئة</option>
+//   <option value="university_students">طلاب جامعات</option>
+//   <option value="art_lovers">محبو الفن</option>
+//         </select>
+
+//         <input
+//           type="text"
+//           placeholder="ابحث عن مكان..."
+//           className="p-2 border rounded"
+//           value={searchTerm}
+//           onChange={(e) => {
+//             setSearchTerm(e.target.value);
+//             setCurrentPage(1);
+//           }}
+//         />
+//       </div>
+
+//       {/* Loading Spinner */}
+//       {isLoading && <p className="text-center my-10">جاري التحميل...</p>}
+
+//       {/* Places Grid */}
+//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+//         {!isLoading &&
+//           Array.isArray(places) && places.map((place) => (
+//             <div
+//               key={place._id}
+//               className="bg-white border shadow-sm rounded p-4 hover:shadow-md cursor-pointer"
+//             >
+//               <img
+//                 src={place.image || "https://via.placeholder.com/300x200"}
+//                 alt={place.name}
+//                 className="h-40 w-full object-cover rounded mb-2"
+//               />
+//               <h3 className="text-lg font-semibold">{place.name}</h3>
+//               <p className="text-sm text-gray-600">{place.description?.slice(0, 60)}...</p>
+//             </div>
+//           ))}
+//       </div>
+
+//       {/* Pagination */}
+//       <div className="flex justify-center gap-2 mt-8">
+//         {Array.from({ length: totalPages }, (_, i) => (
+//           <button
+//             key={i + 1}
+//             onClick={() => setCurrentPage(i + 1)}
+//             className={`px-3 py-1 border rounded ${
+//               currentPage === i + 1
+//                 ? "bg-blue-600 text-white"
+//                 : "bg-gray-200 text-black"
+//             }`}
+//           >
+//             {i + 1}
+//           </button>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default CityPage;
+
+
+
+
+
+//  {/* Filters Section */}
+//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("city", e.target.value)}
+//         >
+//           <option value="">كل المدن</option>
+//       <option value="عمان">عمان</option>
+//   <option value="الزرقاء">الزرقاء</option>
+//   <option value="إربد">إربد</option>
+//   <option value="السلط">السلط</option>
+//   <option value="مأدبا">مأدبا</option>
+//   <option value="الطفيلة">الطفيلة</option>
+//   <option value="الكرك">الكرك</option>
+//   <option value="العقبة">العقبة</option>
+//   <option value="المفرق">المفرق</option>
+//   <option value="جرش">جرش</option>
+//   <option value="عجلون">عجلون</option>
+//   <option value="معان">معان</option>
+//         </select>
+
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("category_id", e.target.value)}
+//         >
+//           <option value="">كل التصنيفات</option>
+//           <option value="1">حدائق</option>
+//           <option value="2">مطاعم</option>
+//           <option value="3">ترفيه </option>
+//           <option value="4">رياضة</option>
+//            <option value="5">اكل بيتي</option>
+//             <option value="6">تصوير</option>
+//             <option value="7">متاحف</option>
+//              <option value="8">مغامرة</option>
+//                <option value="9">فن</option>
+//            <option value="10"> اسواق</option>
+//             <option value="11">تعليم</option>
+//             <option value="12">منتزهات</option>
+//              <option value="13">مقاهي</option>
+//                <option value="14">اماكن تاريخية</option>
+//         </select>
+
+//         <select
+//           className="p-2 border rounded"
+//           onChange={(e) => handleFilterChange("suitable_for", e.target.value)}
+//         >
+//         <option value="">كل الفئات</option>
+//   <option value="family">العائلات</option>
+//   <option value="friends">الأصدقاء</option>
+//   <option value="kids">الأطفال</option>
+//   <option value="culture_lovers">محبو استكشاف الثقافات</option>
+//   <option value="animal_lovers">محبو الحيوانات</option>
+//   <option value="school_trips">الرحلات المدرسية</option>
+//   <option value="car_enthusiasts">محبو السيارات</option>
+//   <option value="history_lovers">محبو التاريخ</option>
+//   <option value="sports_fans">محبو الرياضة</option>
+//   <option value="photography_lovers">محبو التصوير</option>
+//   <option value="quiet_places">محبو الأماكن الهادئة</option>
+//   <option value="university_students">طلاب جامعات</option>
+//   <option value="art_lovers">محبو الفن</option>
+//         </select>
