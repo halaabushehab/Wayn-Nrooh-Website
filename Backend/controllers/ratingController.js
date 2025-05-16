@@ -34,7 +34,7 @@ exports.getRatingsByPlace = async (req, res) => {
     const { placeId } = req.params;  // استخراج placeId من المعاملات
 
     // جلب التقييمات المتعلقة بالمكان مع بيانات المستخدم
-    const ratings = await Rating.find({ placeId })
+    const ratings = await Rating.find({ placeId, isHidden: false })
       .populate("userId", "username photo")  // إضافة username و profilePicture
     
       .sort({ createdAt: -1 });  // ترتيب التقييمات حسب التاريخ (الأحدث أولاً)

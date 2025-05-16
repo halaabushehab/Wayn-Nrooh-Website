@@ -199,13 +199,7 @@ const Navbar = () => {
 
             {/* Mobile User Actions */}
             <div className="lg:hidden mt-4 flex flex-col gap-3 w-full">
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="w-full px-4 py-2.5 bg-[#115173] text-white rounded-lg hover:bg-[#115173]/90 transition-colors flex items-center justify-center"
-              >
-                <FaSearch className="ml-2" />
-                بحث
-              </button>
+         
 
               {user ? (
                 <div className="flex flex-col gap-2">
@@ -251,22 +245,7 @@ const Navbar = () => {
 
           {/* Desktop User Actions */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* Search Button with modern style */}
-            <button
-  onClick={() => setIsSearchOpen(true)}
-  className={`
-    flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 border
-    ${
-      isScrolled
-        ? "bg-transparent text-white border-[#022C43] hover:bg-[#022C4320]"
-        : "bg-transparent text-white  border-[#115173] hover:bg-[#11517320]"
-    }
-  `}
-  aria-label="Search"
->
-  <FaSearch />
-  <span>بحث</span>
-</button>
+
 
 
             {user ? (
@@ -346,81 +325,6 @@ const Navbar = () => {
         </div>
       </header>
 
-      {/* Modern Search Modal */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsSearchOpen(false)}
-          />
-          <div className="relative flex items-center justify-center min-h-screen p-4">
-            <div 
-              className="bg-white rounded-xl w-full max-w-2xl z-50 p-6 shadow-2xl transform transition-all duration-300"
-              style={{
-                background: "linear-gradient(135deg, #FFFFFF 0%, #F0F0F0 100%)"
-              }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#022C43]">ابحث عن وجهاتك المفضلة</h2>
-                <button
-                  onClick={() => setIsSearchOpen(false)}
-                  className="text-gray-500 hover:text-[#022C43] transition-colors p-1 rounded-full"
-                >
-                  <FaTimes size={20} />
-                </button>
-              </div>
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="ابحث عن مدينة، مقال، أو وجهة..."
-                    className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700] text-right text-lg"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-[#FFD700] p-2 rounded-lg hover:bg-[#FFD700]/90 transition-colors"
-                  >
-                    <FaSearch className="text-[#022C43]" />
-                  </button>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("عمان")}
-                    className="px-3 py-1.5 bg-[#F0F0F0] text-[#022C43] rounded-full text-sm hover:bg-[#115173] hover:text-white transition-colors"
-                  >
-                    عمان
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("الزرقاء")}
-                    className="px-3 py-1.5 bg-[#F0F0F0] text-[#022C43] rounded-full text-sm hover:bg-[#115173] hover:text-white transition-colors"
-                  >
-                    الزرقاء
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("إربد")}
-                    className="px-3 py-1.5 bg-[#F0F0F0] text-[#022C43] rounded-full text-sm hover:bg-[#115173] hover:text-white transition-colors"
-                  >
-                    إربد
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("مقالات")}
-                    className="px-3 py-1.5 bg-[#F0F0F0] text-[#022C43] rounded-full text-sm hover:bg-[#115173] hover:text-white transition-colors"
-                  >
-                    مقالات
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modern Login Form Modal */}
   {isFormOpen && (

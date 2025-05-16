@@ -10,6 +10,7 @@ import PlogAdd from "../AdminDash/PlogAdd"
 import SettingsTab from "../AdminDash/settings"
 import NavBarComponent from "../AdminDash/nav"
 import { useNavigate } from "react-router-dom";
+import AdminReports from "../AdminDash/AdminReports";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -77,6 +78,15 @@ export default function Dashboard() {
             hovered={hoveredItem === "messages"}
             onHover={() => setHoveredItem("messages")}
           />
+          <SidebarItem
+  icon={<Calendar className="transition-transform duration-300 group-hover:scale-110" />}
+  text="التقارير"
+  active={activeTab === "reports"}
+  onClick={() => setActiveTab("reports")}
+  hovered={hoveredItem === "reports"}
+  onHover={() => setHoveredItem("reports")}
+/>
+
 <SidebarItem
   icon={<CreditCard className="transition-transform duration-300 group-hover:scale-110" />}
   text="المقالات"
@@ -146,6 +156,8 @@ export default function Dashboard() {
             {activeTab === "messages" && <MessagesTabComponent />}
             {activeTab === "bookings" && <BookingsTabComponent />}
             {activeTab === "articles" && <PlogAdd  />}
+           {activeTab === "reports" && <AdminReports />}
+
             {/* {activeTab === "abusive-comments" && <AbusiveCommentsTabComponent />} */}
 
             {activeTab === "users" && <UsersTab />}

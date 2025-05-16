@@ -12,7 +12,7 @@ const suggestionsRoutes = require('./routes/suggestionsRoutes');
 // const subscribeRoutes   = require('./routes/subscribe');
 const favoriteRoutes = require('./routes/favoritesRoutes');
 const adminDashboardRoutes = require('./routes/AdminDashboardRoutes');
-
+const reportRoutes = require('./routes/reportRoutes');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
@@ -79,7 +79,7 @@ app.use('/articles', articleRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/dashboard', adminDashboardRoutes);
-
+app.use('/api/reports', reportRoutes);
 // app.use("/api/subscribe", subscribeRoutes);
 
 // ✅ مسار تجريبي للتسجيل
