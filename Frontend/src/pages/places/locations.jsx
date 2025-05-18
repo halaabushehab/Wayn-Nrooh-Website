@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import bgVideo from "../../components/img/amman-vedio.mp4";
+import bgVideo from "../../components/img/AmmanHero.mp4";
 
 const Location = () => {
   const [places, setPlaces] = useState([]);
@@ -172,20 +172,6 @@ const Location = () => {
     navigate(`/place-details/${place._id}`);
   };
 
-  // const handleFilterChange = (filterName, value) => {
-  //   setFilters(prev => ({
-  //     ...prev,
-  //     [filterName]: value
-  //   }));
-  //   setPagination(prev => ({
-  //     ...prev,
-  //     currentPage: 1
-  //   }));
-  // };
-
-  // const handleSearchChange = (e) => {
-  //   handleFilterChange('search', e.target.value);
-  // };
 
   const handlePageChange = (pageNumber) => {
     setPagination(prev => ({

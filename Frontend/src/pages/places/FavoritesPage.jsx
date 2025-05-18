@@ -125,7 +125,7 @@ const FavoritesPage = () => {
           </p>
           <div className="flex justify-center">
             <button
-              onClick={() => navigate('/places')}
+              onClick={() => navigate('/location')}
               className="bg-gradient-to-r from-[#115173] to-[#022C43] text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all"
             >
               استكشف الأماكن

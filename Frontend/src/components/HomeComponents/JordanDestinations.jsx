@@ -87,15 +87,7 @@ function JordanGallery() {
             <ChevronRight className="h-6 w-6 text-[#022C43]" />
           </button>
 
-          {/* Like Button */}
-          <button 
-            onClick={() => toggleLike(activeIndex)}
-            className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full shadow-md hover:bg-white transition-all"
-          >
-            <Heart 
-              className={`h-6 w-6 ${likedImages[activeIndex] ? 'text-red-500 fill-red-500' : 'text-[#022C43]'}`} 
-            />
-          </button>
+        
 
           {/* Current Image */}
           <motion.div
@@ -113,12 +105,7 @@ function JordanGallery() {
             
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
               <h3 className="text-2xl font-bold mb-2">{destinations[activeIndex].title}</h3>
-              <div className="flex items-center gap-2 mb-3">
-                <MapPin className="h-5 w-5" />
-                <span>{destinations[activeIndex].location}</span>
-                <Star className="h-5 w-5 ml-4 text-yellow-400" />
-                <span>4.8</span>
-              </div>
+            
               <p>{destinations[activeIndex].description}</p>
             </div>
           </motion.div>

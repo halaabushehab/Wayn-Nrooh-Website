@@ -10,31 +10,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "@react-oauth/google": "^0.12.1",
-    "@stripe/react-stripe-js": "^3.6.0",
-    "@stripe/stripe-js": "^7.2.0",
-    "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
-    "chart.js": "^4.4.9",
     "cloudinary": "^1.30.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
-    "framer-motion": "^12.6.2",
-    "fuse.js": "^7.1.0",
-    "google-auth-library": "^9.15.1",
-    "googleapis": "^148.0.0",
-    "haversine-distance": "^1.2.3",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^3.1.2",
-    "leaflet": "^1.9.4",
-    "lodash": "^4.17.21",
-    "lucide-react": "^0.485.0",
-    "mapbox-gl": "^3.11.1",
     "mongoose": "^8.12.2",
     "mongoose-paginate-v2": "^1.9.0",
     "multer": "^1.4.5-lts.2",
@@ -42,13 +26,7 @@
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.9",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "react-chartjs-2": "^5.3.0",
-    "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.5.1",
-    "stripe": "^18.0.0"
-  },
-  "devDependencies": {
-    "dotenv-webpack": "^8.1.0"
+    "passport-google-oauth20": "^2.0.0"
+   
   }
 }

@@ -1,39 +1,36 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaStar, FaTicketAlt, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaCalendarAlt } from "react-icons/fa";
+import { FaStar, FaMapMarkerAlt, FaClock, FaMoneyBillWave } from "react-icons/fa";
 
 const SeasonalPopup = ({ setShowPopup }) => {
-  const [topBookedPlaces, setTopBookedPlaces] = useState([]);
+  const [topPlace, setTopPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTopBookedPlaces = async () => {
+    const fetchTopBookedPlace = async () => {
       try {
         setLoading(true);
         const res = await axios.get("http://localhost:9527/api/payments/stats/top-booked");
-        
-        const placesWithDetails = await Promise.all(
-          res.data.topPlaces.map(async (place) => {
-            try {
-              const placeDetails = await axios.get(`http://localhost:9527/api/places/${place.placeId}`);
-              return {
-                ...place,
-                ...placeDetails.data,
-                placeImage: placeDetails.data.images?.[0] || getDefaultImage(place.placeId)
-              };
-            } catch (err) {
-              console.error(`Error fetching details for place ${place.placeId}:`, err);
-              return {
-                ...place,
-                placeImage: getDefaultImage(place.placeId),
-                error: true
-              };
-            }
-          })
-        );
-        
-        setTopBookedPlaces(placesWithDetails);
+        const top = res.data.topPlaces?.[0];
+
+        if (top) {
+          try {
+            const placeDetails = await axios.get(`http://localhost:9527/api/places/${top.placeId}`);
+            setTopPlace({
+              ...top,
+              ...placeDetails.data,
+              placeImage: placeDetails.data.images?.[0] || getDefaultImage()
+            });
+          } catch (err) {
+            console.error("Error fetching place details:", err);
+            setTopPlace({
+              ...top,
+              placeImage: getDefaultImage(),
+              error: true
+            });
+          }
+        }
         setError(null);
       } catch (err) {
         console.error("Error fetching top booked places:", err);
@@ -42,118 +39,275 @@ const SeasonalPopup = ({ setShowPopup }) => {
         setLoading(false);
       }
     };
-    fetchTopBookedPlaces();
+
+    fetchTopBookedPlace();
   }, []);
 
-  const getDefaultImage = (placeId) => {
+  const getDefaultImage = () => {
     const defaultImages = [
-      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      "https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
     ];
-    return defaultImages[placeId % defaultImages.length];
+    return defaultImages[Math.floor(Math.random() * defaultImages.length)];
   };
 
-  const getColorByIndex = (index) => {
-    const colors = ["bg-[#FF6B6B]", "bg-[#4ECDC4]", "bg-[#45B7D1]", "bg-[#FFA07A]", "bg-[#98D8C8]"];
-    return colors[index % colors.length];
-  };
-
-  const DetailItem = ({ icon, label, value }) => (
-    <div className="flex items-center gap-2">
-      <div className="text-[#FF6B6B] text-base">{icon}</div>
-      <div className="flex flex-col">
-        <span className="text-[#7F8C8D] text-xs">{label}</span>
-        <span className="text-[#2C3E50] text-sm font-semibold">{value || "غير متوفر"}</span>
-      </div>
-    </div>
-  );
-  const renderPlaceCard = (place, index) => (
-    <div
-      key={place.placeId}
-      className="flex flex-col rounded-xl overflow-hidden shadow-lg transition-all duration-300 bg-white hover:-translate-y-1 hover:shadow-xl"
-    >
-      <div className="w-full h-36 overflow-hidden relative bg-gray-100">
-        <img
-          src={place.placeImage}
-          alt={place.name}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-          onError={(e) => {
-            e.target.src = getDefaultImage(place.placeId);
-          }}
-        />
-        <div className={`absolute top-3 left-3 text-white px-2.5 py-1 rounded-full text-sm font-semibold shadow ${getColorByIndex(index)}`}>
-          #{index + 1} الأكثر حجزاً
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="text-lg text-[#2C3E50] font-bold mb-1">{place.name}</h3>
-        <p className="text-[#7F8C8D] text-sm mb-2 leading-relaxed min-h-[30px]">{place.short_description}</p>
-        
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          <DetailItem icon={<FaMapMarkerAlt />} label="المدينة" value={place.city} />
-          <DetailItem icon={<FaMoneyBillWave />} label="السعر" value={place.ticket_price ? `${place.ticket_price} د.أ` : "مجاني"} />
-          <DetailItem icon={<FaStar />} label="التقييم" value={place.rating ? `${place.rating}` : "جديد"} />
-          <DetailItem icon={<FaClock />} label="ساعات العمل" value={place.working_hours} />
-
-        </div>
-      </div>
-    </div>
-  );
+  const handleBackgroundClick = () => setShowPopup(false);
+  const handleContentClick = (e) => e.stopPropagation();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 backdrop-blur-sm p-5">
-      <div className="bg-white p-8 rounded-2xl w-full max-w-6xl max-h-[90vh] border-4 border-[#FF6B6B] bg-gradient-to-b from-white to-gray-50 relative shadow-2xl">
-        <button
-          onClick={() => setShowPopup(false)}
-          className="absolute top-4 left-4 bg-transparent border-none text-2xl cursor-pointer text-[#FF6B6B] font-bold p-1 rounded-full hover:bg-gray-100 transition-all"
-          aria-label="إغلاق النافذة"
-        >
-          &times;
-        </button>
+ <div
+  className="fixed inset-0 backdrop-blur-sm bg-opacity-30 z-50 flex justify-center items-center"
+  onClick={handleBackgroundClick}
+>
+      <div
+        onClick={handleContentClick}
+        className="relative w-full max-w-4xl h-[40vh] bg-cover bg-center rounded-2xl overflow-hidden shadow-2xl border-4 border-[#FFD700]"
+        style={{ backgroundImage: `url(${topPlace?.images[0]})` }}
+      >
+        <div className="absolute inset-0 bg-opacity-60  p-8 flex flex-col justify-center items-center text-white text-center">
+          <button
+            aria-label="إغلاق النافذة"
+            onClick={() => setShowPopup(false)}
+            className="absolute top-4 left-4 text-white text-3xl font-bold hover:text-[#FFD700]-500  transition"
+          >
+            &times;
+          </button>
 
-        <h2 className="text-2xl text-[#2C3E50] font-bold text-center mb-2">الأماكن الأكثر حجزاً هذا الموسم</h2>
-        <p className="text-[#7F8C8D] text-center text-base mb-8">اكتشف الوجهات المفضلة لدى زوارنا واحصل على عروض حصرية</p>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-12 h-12 border-4 border-white border-l-[#FFD700] rounded-full animate-spin mb-4"></div>
+              <p className="text-white">جاري تحميل البيانات...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-100 text-red-700 p-5 rounded-xl max-w-md">
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-3 bg-[#FFD700] text-white px-4 py-2 rounded hover:bg-red-500"
+              >
+                حاول مرة أخرى
+              </button>
+            </div>
+          ) : topPlace ? (
+            <>
+              <h2 className="text-3xl font-bold mb-3">#1 الأكثر حجزاً هذا الموسم</h2>
+              <h3 className="text-2xl font-semibold mb-2">{topPlace.name}</h3>
+              <p className="max-w-xl text-sm mb-6">{topPlace.short_description}</p>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-10">
-            <div className="w-12 h-12 border-4 border-gray-200 border-l-[#FF6B6B] rounded-full animate-spin mb-5"></div>
-            <p>جاري تحميل البيانات...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center p-10 bg-red-50 rounded-xl">
-            <p className="text-[#FF6B6B] text-lg mb-5">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-[#FF6B6B] text-white border-none px-5 py-2.5 rounded font-semibold hover:bg-[#e05b5b] transition-colors"
-            >
-              حاول مرة أخرى
-            </button>
-          </div>
-        ) : topBookedPlaces.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {topBookedPlaces.map((place, index) => renderPlaceCard(place, index))}
-          </div>
-        ) : (
-          <div className="text-center p-10 bg-gray-50 rounded-xl">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png"
-              alt="لا توجد بيانات"
-              className="w-20 h-20 opacity-60 mx-auto mb-4"
-            />
-            <p className="text-[#7F8C8D] text-lg">لا توجد عروض موسمية حالياً</p>
-          </div>
-        )}
-
-        {/* <div className="bg-gray-50 px-5 py-4 rounded-lg text-center mt-5 border-l-4 border-[#4ECDC4]">
-          <p className="text-[#2C3E50] font-semibold text-base m-0">
-            🎁 احصل على خصم 15% عند حجزك لأكثر من مكان هذا الموسم!
-          </p>
-        </div> */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm font-semibold">
+               
+  
+            </div>
+              <div className="mt-6 bg-white text-[#2C3E50] px-5 py-3 rounded-xl shadow">
+                🎁 احصل على خصم 15% عند حجزك لأكثر من مكان هذا الموسم!
+              </div>
+            </>
+          ) : (
+            <p className="text-white text-lg">لا توجد عروض حالياً</p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default SeasonalPopup;
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { FaStar, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaGift, FaFire, FaCalendarAlt } from "react-icons/fa";
+
+// const SeasonalPopup = ({ setShowPopup }) => {
+//   const [topPlace, setTopPlace] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [confetti, setConfetti] = useState(true);
+
+//   useEffect(() => {
+//     const fetchTopBookedPlace = async () => {
+//       try {
+//         setLoading(true);
+//         // Simulate API call
+//         setTimeout(() => {
+//           setTopPlace({
+//             name: "منتجع الشاطئ الذهبي",
+//             short_description: "استمتع بإقامة فاخرة على شاطئ البحر مع مناظر خلابة وخدمات استثنائية. يوفر المنتجع تجربة لا تُنسى للعائلات والأزواج.",
+//             rating: 4.9,
+//             location: "الساحل الشمالي",
+//             price: 750,
+//             duration: "3 أيام",
+//             bookings: 127,
+//             discount: 15,
+//             images: ["/api/placeholder/800/500"]
+//           });
+//           setLoading(false);
+//         }, 1000);
+//       } catch (err) {
+//         console.error("Error fetching top booked places:", err);
+//         setError("فشل في تحميل البيانات. يرجى المحاولة مرة أخرى.");
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTopBookedPlace();
+    
+//     // Hide confetti after some time
+//     const timer = setTimeout(() => {
+//       setConfetti(false);
+//     }, 3000);
+    
+//     return () => clearTimeout(timer);
+//   }, []);
+
+//   const handleBackgroundClick = () => setShowPopup(false);
+//   const handleContentClick = (e) => e.stopPropagation();
+
+//   // Confetti particles
+//   const renderConfetti = () => {
+//     if (!confetti) return null;
+    
+//     const particles = [];
+//     const colors = ['#FFD700', '#FF6B6B', '#4ecdc4', '#ff8c42', '#a64ac9'];
+    
+//     for (let i = 0; i < 50; i++) {
+//       const style = {
+//         position: 'absolute',
+//         left: `${Math.random() * 100}%`,
+//         top: `${Math.random() * 100}%`,
+//         width: `${Math.random() * 10 + 5}px`,
+//         height: `${Math.random() * 10 + 5}px`,
+//         backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+//         borderRadius: '50%',
+//         animation: `fall ${Math.random() * 3 + 2}s linear infinite`,
+//         animationDelay: `${Math.random() * 2}s`,
+//         opacity: Math.random() * 0.7 + 0.3,
+//       };
+      
+//       particles.push(<div key={i} style={style} />);
+//     }
+    
+//     return particles;
+//   };
+
+//   return (
+//     <div
+//       className="fixed inset-0 backdrop-blur-md bg-black bg-opacity-50 z-50 flex justify-center items-center"
+//       onClick={handleBackgroundClick}
+//     >
+//       <div
+//         onClick={handleContentClick}
+//         className="relative w-full max-w-4xl h-[60vh] bg-cover bg-center rounded-2xl overflow-hidden shadow-2xl border-4 border-[#FFD700] transform transition-all duration-500 hover:scale-[1.01]"
+//         style={{ backgroundImage: `url(${topPlace?.images[0]})` }}
+//       >
+//         {/* Glowing border animation */}
+//         <div className="absolute inset-0 rounded-2xl z-0 animate-pulse" style={{
+//           background: 'linear-gradient(45deg, #FFD700, #FF6B6B, #4ecdc4, #ff8c42, #a64ac9)',
+//           backgroundSize: '400% 400%',
+//           animation: 'gradient 3s ease infinite',
+//           filter: 'blur(3px)',
+//           opacity: 0.7,
+//         }}></div>
+        
+//         {/* Celebration ribbon */}
+//         <div className="absolute -top-2 -right-16 bg-[#FF6B6B] text-white py-1 px-12 transform rotate-45 shadow-lg z-10 font-bold">
+//           عرض خاص!
+//         </div>
+        
+//         {renderConfetti()}
+        
+//         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30 p-8 flex flex-col justify-center items-center text-white text-center z-10">
+//           <button
+//             aria-label="إغلاق النافذة"
+//             onClick={() => setShowPopup(false)}
+//             className="absolute top-4 left-4 text-white text-3xl font-bold hover:text-[#FFD700] transition-colors"
+//           >
+//             &times;
+//           </button>
+
+//           {loading ? (
+//             <div className="flex flex-col items-center justify-center">
+//               <div className="w-12 h-12 border-4 border-white border-l-[#FFD700] rounded-full animate-spin mb-4"></div>
+//               <p className="text-white">جاري تحميل العروض المميزة...</p>
+//             </div>
+//           ) : error ? (
+//             <div className="bg-red-100 text-red-700 p-5 rounded-xl max-w-md">
+//               <p>{error}</p>
+//               <button
+//                 onClick={() => window.location.reload()}
+//                 className="mt-3 bg-[#FFD700] text-white px-4 py-2 rounded hover:bg-red-500"
+//               >
+//                 حاول مرة أخرى
+//               </button>
+//             </div>
+//           ) : topPlace ? (
+//             <>
+//               <div className="animate-bounce mb-4">
+//                 <span className="inline-block bg-[#FFD700] text-black font-extrabold px-4 py-2 rounded-full">
+//                   عرض موسمي حصري!
+//                 </span>
+//               </div>
+            
+//               <h2 className="text-4xl font-bold mb-3 text-[#FFD700] drop-shadow-lg">
+//                 <FaFire className="inline-block mr-2" />
+//                 الأكثر حجزاً هذا الموسم
+//               </h2>
+              
+//               <h3 className="text-3xl font-semibold mb-2">{topPlace.name}</h3>
+//               <p className="max-w-xl text-lg mb-6">{topPlace.short_description}</p>
+
+//               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-base font-semibold mb-6">
+//                 <div className="bg-black/50 p-3 rounded-lg backdrop-blur-sm border border-[#FFD700]/30">
+//                   <FaStar className="inline-block text-[#FFD700] mr-2" />
+//                   <span>{topPlace.rating}/5</span>
+//                 </div>
+//                 <div className="bg-black/50 p-3 rounded-lg backdrop-blur-sm border border-[#FFD700]/30">
+//                   <FaMapMarkerAlt className="inline-block text-[#FF6B6B] mr-2" />
+//                   <span>{topPlace.location}</span>
+//                 </div>
+//                 <div className="bg-black/50 p-3 rounded-lg backdrop-blur-sm border border-[#FFD700]/30">
+//                   <FaClock className="inline-block text-[#4ecdc4] mr-2" />
+//                   <span>{topPlace.duration}</span>
+//                 </div>
+//                 <div className="bg-black/50 p-3 rounded-lg backdrop-blur-sm border border-[#FFD700]/30">
+//                   <FaMoneyBillWave className="inline-block text-[#a64ac9] mr-2" />
+//                   <span>{topPlace.price} ر.س</span>
+//                 </div>
+//               </div>
+              
+//               <div className="relative mt-2 mb-6">
+//                 <div className="absolute -left-3 -top-3 bg-[#FF6B6B] text-white text-xl font-bold h-10 w-10 flex items-center justify-center rounded-full animate-pulse">
+//                   {topPlace.discount}%
+//                 </div>
+//                 <div className="bg-gradient-to-r from-[#FFD700] to-[#FF6B6B] text-black px-8 py-4 rounded-xl shadow-lg transform transition hover:scale-105">
+//                   <FaGift className="inline-block mr-2 text-xl" />
+//                   <span className="font-bold text-lg">
+//                     احصل على خصم {topPlace.discount}% عند حجزك لأكثر من مكان هذا الموسم!
+//                   </span>
+//                 </div>
+//               </div>
+              
+//               <div className="flex gap-4 mt-2">
+//                 <button className="bg-[#FFD700] hover:bg-[#e5c100] text-black font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105">
+//                   احجز الآن
+//                 </button>
+//                 <button className="bg-white/10 hover:bg-white/20 text-white border border-white font-bold py-3 px-6 rounded-full shadow-lg backdrop-blur-sm">
+//                   اكتشف المزيد
+//                 </button>
+//               </div>
+              
+//               <div className="mt-6 text-sm">
+//                 <FaCalendarAlt className="inline-block mr-1" /> العرض ساري حتى نهاية الموسم | تم حجزه {topPlace.bookings} مرة هذا الأسبوع
+//               </div>
+//             </>
+//           ) : (
+//             <p className="text-white text-lg">لا توجد عروض حالياً</p>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default SeasonalPopup;
+
+

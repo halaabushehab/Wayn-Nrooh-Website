@@ -5,7 +5,7 @@ const placeController = require("../controllers/placeController");
 // const authMiddleware = require("../middleware/authenticateToken");
 const { createPlace } = require("../controllers/placeController");
 // const { cloudinary } = require('../config/cloudinaryConfig');
-const authMiddleware = require("../middleware/authenticateToken");  // أو:
+const { requireAuth } = require("../middleware/authMiddleware");
 const { upload } = require('../config/cloudinary');
 
 // ✅ جلب جميع الأماكن

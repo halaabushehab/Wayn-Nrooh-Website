@@ -1,37 +1,50 @@
+import React, { useEffect, useState } from 'react';
+import { Home, ArrowLeft } from 'lucide-react';
 
-import { useState } from 'react';
+export function PageNotFound() {
+  const [isLoaded, setIsLoaded] = useState(false);
 
-export default function NotFoundPage() {
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
-      <div className="max-w-xl w-full text-center">
-        {/* Large 404 Number */}
-        <div className="relative">
-          <h1 className="text-yellow-400 font-bold text-9xl">404</h1>
-          
-          {/* Small painting figure on the right side */}
-          <div className="absolute bottom-0 right-0">
-            <div className="relative">
-              <div className="h-6 w-1 bg-gray-400 absolute right-2 bottom-0"></div>
-              <div className="h-4 w-4 rounded-full bg-gray-300 absolute right-0 bottom-6"></div>
-              <div className="h-8 w-4 bg-gray-300 absolute right-0 bottom-10 rounded-t-full"></div>
-              <div className="h-1 w-6 bg-gray-500 absolute right-4 bottom-12"></div>
-            </div>
-          </div>
-        </div>
+    <div className="bg-white min-h-screen w-full flex flex-col items-center justify-center p-4">
+      <div className={`text-center transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         
-        {/* Error messages */}
-        <div className="mt-4 space-y-2 text-gray-700">
-          <h2 className="text-2xl font-semibold">ERROR 404 - PAGE NOT FOUND</h2>
-          <p className="text-xl">The Page You Requested</p>
-          <p className="text-xl">Could Not Be Found</p>
+        <h1 className="text-yellow-400 font-extrabold text-8xl md:text-9xl mb-6">404</h1>
+
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-4">
+          عذراً! الصفحة غير موجودة
+        </h2>
+
+        <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg leading-relaxed">
+          الصفحة التي تبحث عنها غير متوفرة أو ربما تم نقلها إلى مكان آخر.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-800 transition-colors"
+          >
+            <ArrowLeft size={20} />
+            <span>رجوع</span>
+          </button>
+
+          <button
+            onClick={() => (window.location.href = '/')}
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-yellow-400 text-gray-800 hover:bg-yellow-500 transition-colors"
+          >
+            <Home size={20} />
+            <span>الصفحة الرئيسية</span>
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-
+export default PageNotFound;
 
 //======================================================================================================
 

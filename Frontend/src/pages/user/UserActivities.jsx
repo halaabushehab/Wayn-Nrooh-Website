@@ -71,31 +71,29 @@ export const UserActivities = () => {
     }
 
     const fetchUserPlaces = async () => {
-      try {
-        const response = await axios.get(`http://localhost:9527/api/places/user-places/${userId}`); // إرسال userId مع الطلب
-        
-        if (!response.data || !Array.isArray(response.data)) {
-          throw new Error('Invalid user places data format');
-        }
+try {
+  const response = await axios.get(`http://localhost:9527/api/places/user-places/${userId}`);
+  const formattedPlaces = response.data.map(place => ({
+    id: place._id,
+    name: place.name,
+    date: new Date(place.createdAt).toLocaleDateString('ar-EG', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
+    image: place.images?.[0] || 'https://via.placeholder.com/300x200?text=Place+Image',
+  }));
 
-        const formattedPlaces = response.data.map(place => ({
-          id: place._id,
-          name: place.name,
-          date: new Date(place.createdAt).toLocaleDateString('ar-EG', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          }),
-          image: place.images?.[0] || 'https://via.placeholder.com/300x200?text=Place+Image',
-        }));
-
-        setUserPlaces(formattedPlaces);
-      } catch (err) {
-        console.error('Failed to load user places:', { error: err });
-        setError("فشل تحميل الأماكن المضافة. الرجاء التأكد من اتصال الإنترنت والمحاولة لاحقاً");
-      } finally {
-        setLoading(false);
-      }
+  setUserPlaces(formattedPlaces);
+} catch (err) {
+  if (err.response && err.response.status === 404) {
+    setUserPlaces([]); // لا توجد أماكن، لكن لا تُظهر رسالة خطأ
+  } else {
+    setError("فشل تحميل الأماكن المضافة. الرجاء التأكد من اتصال الإنترنت والمحاولة لاحقاً");
+  }
+} finally {
+  setLoading(false);
+}
     };
 
     fetchUserPlaces();

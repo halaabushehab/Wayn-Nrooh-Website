@@ -1,5 +1,5 @@
 const express = require('express');
-const { authMiddleware, authenticateToken } = require('../middleware/authMiddleware');
+const { requireAuth } = require('../middleware/authMiddleware');
 const { 
     register,
     login,  
@@ -35,23 +35,23 @@ router.get("/all", getAllUsers);
 
 
 // ✅ جلب بروفايل المستخدم (يحتاج تسجيل دخول)
-router.get("/profile/me", authenticateToken, authMiddleware, getUserProfile);
+router.get("/profile/me", requireAuth , getUserProfile);
 
 // ✅ تعديل بيانات المستخدم
-router.put('/profile/me/:id', authenticateToken, authMiddleware, upload.single('image'), updateUserData);
+router.put('/profile/me/:id', requireAuth , upload.single('image'), updateUserData);
 
 
 // ✅ تغيير كلمة المرور
-router.put('/change-password', authenticateToken, authMiddleware, changePassword);
+router.put('/change-password', requireAuth , changePassword);
 
 // ✅ جلب مستخدم حسب الـ ID
 router.get("/:id", getUserById);
 
 //  مسارات الأدمن فقط
-router.get("/admin/users", authenticateToken, authMiddleware, isAdmin, getAllUsers);
+router.get("/admin/users", requireAuth , isAdmin, getAllUsers);
 
 // ✅ حذف المستخدم (Soft Delete)
-router.delete("/delete/:id", authenticateToken, authMiddleware, deleteUser);
+router.delete("/delete/:id", requireAuth , deleteUser);
 router.delete('/restore/:id', restoreUser); 
 
 module.exports = router;

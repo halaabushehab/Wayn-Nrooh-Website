@@ -497,23 +497,24 @@ const handleSubmit = async (e) => {
 
         {/* زر الإرسال */}
         <div className="md:col-span-2 mt-8">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-4 bg-gradient-to-r from-[#115173] to-[#0d3c57] text-white font-bold rounded-lg hover:from-[#0d3c57] hover:to-[#115173] transition shadow-md flex items-center justify-center"
-          >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                جاري الإرسال...
-              </>
-            ) : (
-              "إرسال المكان"
-            )}
-          </button>
+ <button
+  type="submit"
+  disabled={isSubmitting || !user}
+  className="w-full py-4 bg-gradient-to-r from-[#115173] to-[#0d3c57] text-white font-bold rounded-lg hover:from-[#0d3c57] hover:to-[#115173] transition shadow-md flex items-center justify-center"
+>
+  {isSubmitting ? (
+    <>
+      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      جاري الإرسال...
+    </>
+  ) : (
+    "إرسال المكان"
+  )}
+</button>
+
         </div>
       </form>
     </div>
@@ -523,236 +524,6 @@ const handleSubmit = async (e) => {
 export default AddPlaceForm;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState } from "react";
-
-// const AddPlaceForm = () => {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     short_description: "",
-//     detailed_description: "",
-//     city: "",
-//     working_hours: "",
-//     rating: "",
-//     ticket_price: "",
-//     best_season: "",
-//     is_free: false,
-//     map_link: "",
-//     categories: "",
-//     suitable_for: "",
-//     phone: "",
-//     website: "",
-//   });
-
-//   const [images, setImages] = useState([]);
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [submitStatus, setSubmitStatus] = useState(null);
-
-//   const handleInputChange = (e) => {
-//     const { name, value, type, checked } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: type === "checkbox" ? checked : value,
-//     }));
-//   };
-
-//   const handleFileChange = (e, setFileState) => {
-//     setFileState([...e.target.files]);
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setIsSubmitting(true);
-//     setSubmitStatus(null);
-  
-//     const data = new FormData();
-    
-//     // إضافة البيانات الأخرى من formData
-//     for (const key in formData) {
-//       data.append(key, formData[key]);
-//     }
-  
-//     // تحويل arrays من النصوص المنفصلة بفواصل إلى مصفوفات
-//     data.append("categories", JSON.stringify(formData.categories.split(",").map((c) => c.trim())));
-//     data.append("suitable_for", JSON.stringify(formData.suitable_for.split(",").map((s) => s.trim())));
-  
-//     data.append("contact", JSON.stringify({
-//       phone: formData.phone,
-//       website: formData.website,
-//     }));
-  
-//     if (images && images.length > 0) {
-//       images.forEach((image) => {
-//         data.append('images', image); // تأكد من استخدام 'images' (جمع) إذا كان multer يستخدم .array()
-//       });
-//     }
-
-  
-//     try {
-//       const response = await fetch("http://localhost:9527/api/places/", {
-//         method: "POST",
-//         body: data,
-//       });
-  
-//       if (!response.ok) {
-//         throw new Error("فشل في إرسال البيانات");
-//       }
-  
-//       const result = await response.json();
-//       console.log("تم الإرسال بنجاح:", result);
-//       setSubmitStatus("success");
-//       setFormData({
-//         name: "",
-//         short_description: "",
-//         detailed_description: "",
-//         city: "",
-//         working_hours: "",
-//         rating: "",
-//         ticket_price: "",
-//         best_season: "",
-//         is_free: false,
-//         map_link: "",
-//         categories: "",
-//         suitable_for: "",
-//         phone: "",
-//         website: "",
-//       });
-//       setImages(null);  // إعادة تعيين الصور بعد الإرسال
-//     } catch (error) {
-//       console.error("خطأ أثناء الإرسال:", error);
-//       setSubmitStatus("error");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-  
-//   return (
-//     <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg my-40">
-//       <h2 className="text-3xl font-bold text-center text-[#115173] mb-6">إضافة مكان جديد</h2>
-//       <div className="w-24 h-1 mx-auto bg-[#FFD700] mb-6 rounded"></div>
-
-//       {submitStatus === "success" && (
-//         <div className="mb-6 p-4 bg-green-100 text-green-800 border-l-4 border-green-500 rounded">
-//           تم إرسال معلومات المكان بنجاح!
-//         </div>
-//       )}
-//       {submitStatus === "error" && (
-//         <div className="mb-6 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded">
-//           حدث خطأ أثناء الإرسال. حاول مرة أخرى.
-//         </div>
-//       )}
-
-//       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-//         {/* Text inputs */}
-//         {[
-//           { name: "name", label: "اسم المكان" },
-//           { name: "short_description", label: "وصف قصير" },
-//           { name: "detailed_description", label: "وصف تفصيلي", type: "textarea" },
-//           { name: "city", label: "المدينة" },
-//           { name: "working_hours", label: "ساعات العمل" },
-//           { name: "rating", label: "التقييم", type: "number" },
-//           { name: "ticket_price", label: "سعر التذكرة", type: "number" },
-//           { name: "map_link", label: "رابط الخريطة" },
-//           { name: "categories", label: "التصنيفات (مفصولة بفواصل)" },
-//           { name: "suitable_for", label: "مناسب لـ (مفصول بفواصل)" },
-//           { name: "phone", label: "رقم الهاتف" },
-//           { name: "website", label: "الموقع الإلكتروني" },
-//         ].map(({ name, label, type = "text" }) => (
-//           <div key={name} className={`input-group ${name === "detailed_description" ? "col-span-2" : ""}`}>
-//             <label className="block mb-1 font-medium text-[#022C43]">{label}</label>
-//             {type === "textarea" ? (
-//               <textarea
-//                 name={name}
-//                 value={formData[name]}
-//                 onChange={handleInputChange}
-//                 className="w-full p-3 border rounded-lg"
-//                 rows={4}
-//               />
-//             ) : (
-//               <input
-//                 type={type}
-//                 name={name}
-//                 value={formData[name]}
-//                 onChange={handleInputChange}
-//                 className="w-full p-3 border rounded-lg"
-//               />
-//             )}
-//           </div>
-//         ))}
-
-//         {/* Best season */}
-//         <div className="input-group">
-//           <label className="block mb-1 font-medium text-[#022C43]">أفضل موسم</label>
-//           <select
-//             name="best_season"
-//             value={formData.best_season}
-//             onChange={handleInputChange}
-//             className="w-full p-3 border rounded-lg"
-//           >
-//             <option value="">اختر الموسم</option>
-//             <option value="الربيع">الربيع</option>
-//             <option value="الصيف">الصيف</option>
-//             <option value="الخريف">الخريف</option>
-//             <option value="الشتاء">الشتاء</option>
-//             <option value="جميع المواسم">جميع المواسم</option>
-//           </select>
-//         </div>
-
-//         {/* is_free checkbox */}
-//         <div className="input-group flex items-center gap-2 mt-6">
-//           <input
-//             type="checkbox"
-//             name="is_free"
-//             checked={formData.is_free}
-//             onChange={handleInputChange}
-//           />
-//           <label className="font-medium text-[#022C43]">هل الدخول مجاني؟</label>
-//         </div>
-
-//         {/* Images upload */}
-//         <input
-//   type="file"
-//   name="image"   // ✨✨✨
-//   multiple
-//   accept="image/*"
-//   onChange={(e) => handleFileChange(e, setImages)}
-//   className="w-full p-3 border rounded-lg"
-// />
-
-
-
-//         {/* Submit */}
-//         <div className="col-span-2 mt-6">
-//           <button
-//             type="submit"
-//             disabled={isSubmitting}
-//             className="w-full py-3 bg-[#115173] text-white font-bold rounded-lg hover:bg-[#0d3c57] transition"
-//           >
-//             {isSubmitting ? "جاري الإرسال..." : "إرسال"}
-//           </button>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default AddPlaceForm;
 
 
 

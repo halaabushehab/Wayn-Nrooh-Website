@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const reportController = require('../controllers/reportController');
-const { authMiddleware, isAdmin } = require('../middleware/authMiddleware'); 
+const { requireAuth, isAdmin } = require('../middleware/authMiddleware');
 
 // الإبلاغ عن تعليق
-router.post('/', authMiddleware, reportController.reportComment);
+router.post('/',  requireAuth, reportController.reportComment);
 
 // جلب جميع البلاغات (للمشرفين)
-router.get('/', authMiddleware, isAdmin, reportController.getAllReports);
+router.get('/',  requireAuth, isAdmin, reportController.getAllReports);
 
 // تحديث حالة البلاغ (للمشرفين)
-router.put('/:id/resolve', authMiddleware, isAdmin, reportController.resolveReport);
+router.put('/:id/resolve',  requireAuth, isAdmin, reportController.resolveReport);
 
 module.exports = router;

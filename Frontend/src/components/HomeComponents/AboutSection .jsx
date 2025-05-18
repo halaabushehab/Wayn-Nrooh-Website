@@ -105,7 +105,7 @@ const AboutSection = () => {
                 className="absolute -bottom-6 -left-6 sm:-bottom-10 sm:-left-10 w-[150px] h-[110px] sm:w-[200px] sm:h-[150px] rounded-xl overflow-hidden shadow-xl border-4 border-white"
               >
                 <img
-                  src="https://i.pinimg.com/736x/8d/36/fa/8d36fa2559d9575f79e2265e92c2597f.jpg"
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfCSOy-QoV_JNYST9KtMXlYWoeeou7nprwWq5sUDGZrxfcfe_Aqa43cr7vcF-4OREE0jo&usqp=CAU"
                   alt="مدينة عمان"
                   className="object-cover w-full h-full"
                 />

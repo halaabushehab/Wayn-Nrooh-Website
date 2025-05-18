@@ -4,7 +4,6 @@ const User = require('../models/User');
 require("dotenv").config();
 const mongoose = require('mongoose');
 const upload = require('../middleware/uploadMiddleware');
-const passport = require("passport");
 const Joi = require("joi");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -64,15 +63,6 @@ const googleLogin = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
-
-
-
-
-
-
-
 // تحقق من صحة بيانات التسجيل
 const validateRegisterInput = (data) => {
   const schema = Joi.object({
@@ -159,7 +149,6 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  // التحقق من الصحة باستخدام Joi
   const { error } = validateLoginInput(req.body);
   if (error) {
     return res.status(400).json({ 
@@ -169,7 +158,6 @@ const login = async (req, res) => {
   }
 
   const { email, password } = req.body;
-  console.log("🔵 Login attempt with email:", email);
 
   try {
     const user = await User.findOne({ email });
@@ -189,7 +177,6 @@ const login = async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    // إعداد الكوكيز بشكل آمن
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -215,7 +202,6 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  // مسح الكوكي
   res.clearCookie('token', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -234,10 +220,7 @@ const isAdmin = (req, res, next) => {
 
 const getUserById = async (req, res) => {
   try {
-    console.log("Requested ID:", req.params.id);
-    
-    // التحقق من أن المعرف صالح قبل البحث
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+       if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ 
         message: "معرف المستخدم غير صالح",
         code: "INVALID_USER_ID"
@@ -296,14 +279,12 @@ const updateUserData = async (req, res) => {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
-    // تحديث البيانات إن وُجدت
     user.username = username || user.username;
     user.email = email || user.email;
     user.phone = phone || user.phone;
     user.city = city || user.city;
     user.bio = bio || user.bio;
 
-    // تحديث الصورة فقط إن تم رفع صورة جديدة
     if (req.file) {
       const photoPath = `http://localhost:9527/uploads/${req.file.filename}`;
       user.photo = photoPath;
@@ -322,19 +303,16 @@ const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    // تأكد من وجود المستخدم
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // التحقق من كلمة المرور الحالية
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    // تشفير كلمة المرور الجديدة وحفظها
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
@@ -349,10 +327,8 @@ const changePassword = async (req, res) => {
 
 
 const authenticateToken = (req, res, next) => {
-  // محاولة الحصول على التوكن من الكوكيز أولاً
   let token = req.cookies.token;
   
-  // إذا لم يوجد في الكوكيز، جرب الهيدر
   if (!token) {
     const authHeader = req.header('Authorization');
     token = authHeader?.replace('Bearer ', '');
@@ -376,7 +352,7 @@ const authenticateToken = (req, res, next) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find(); // بدون شرط isDeleted
+    const users = await User.find(); 
     res.status(200).json({
       message: "Users fetched successfully",
       users,
@@ -388,10 +364,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-
-
-// controllers/authController.js
-
+// dashboard
 const deleteUser = async (req, res) => {
   const { id } = req.params;
 

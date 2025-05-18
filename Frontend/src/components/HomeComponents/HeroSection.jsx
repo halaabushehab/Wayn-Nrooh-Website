@@ -267,7 +267,7 @@
 //========================================================================================================================================
 
 import { useEffect, useRef, useState } from 'react';
-//  import ammanVideo from '../../components/img/AmmanNew.mp4'; // قم بتعديل المسار حسب مكان الفيديو في مشروعك
+ import ammanVideo from '../../components/img/AmmanHero.mp4'; // قم بتعديل المسار حسب مكان الفيديو في مشروعك
 import { Compass, Search, MapPin, Star, Menu, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -315,7 +315,7 @@ export default function WacoHeroSection() {
     {/* Hero Section */}
 <section className="relative min-h-screen w-full flex flex-col items-start sm:items-center justify-start sm:justify-center overflow-hidden bg-[#022C43] text-white py-8 sm:py-16">
       {/* Background Video */}
-       {/* <video
+        <video
         autoPlay
         muted
         loop
@@ -323,7 +323,7 @@ export default function WacoHeroSection() {
         className="absolute inset-0 h-full w-full object-cover"
       >
         <source src={ammanVideo} type="video/mp4" />
-      </video>  */}
+      </video>  
 
       {/* Dark Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#115173]/20 via-[#115173]/20 to-[#022C43]/20"></div>
