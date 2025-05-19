@@ -66,7 +66,7 @@ const Footer = () => {
         { name: "استفسارات عامة", href: "/general-questions" },
         { name: "شروط الحجز", href: "/booking-terms" },
         { name: "سياسة الخصوصية", href: "/privacy-policy" },
-        { name: "اتصل بنا", href: "/contact" }
+        { name: "تواصل معنا  ", href: "/contact" }
       ]
     },
     

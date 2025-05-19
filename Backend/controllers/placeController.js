@@ -2,17 +2,14 @@ const Place = require("../models/places");
 const User = require("../models/User"); // تأكد من وجود هذا الموديل
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
-const Suggestion = require('../models/Suggestion');
+// const Suggestion = require('../models/Suggestion');
 const haversine = require('haversine-distance'); // تأكد من تثبيت الحزمة أولاً
 const axios = require('axios');
-const Article = require('../models/Article');
+// const Article = require('../models/Article');
 const { db } = require("../config/db"); // تأكد أن هذا المسار صحيح حسب مشروعك
 
 
-
-
-
-// ✅ جلب عدد الأماكن
+//  جلب عدد الأماكن
 exports.getPlaceCount = async (req, res) => {
   try {
     const count = await Place.countDocuments();
@@ -22,7 +19,7 @@ exports.getPlaceCount = async (req, res) => {
   }
 };
 
-// ✅ جلب تفاصيل المكان حسب الـ ID
+//جلب تفاصيل المكان حسب  ID
 exports.getPlaceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -50,9 +47,7 @@ exports.getPlaceById = async (req, res) => {
   }
 };
 
-
 // ===============================================================
-// ✅ دالة ترجع الأماكن كلها مصنفة حسب المدينة + التصنيفات + suitable_for
 exports.getPlacesGrouped = async (req, res) => {
   try {
     const { city, category_id, suitable_for, search, page = 1, limit = 8 } = req.query;
@@ -60,7 +55,6 @@ exports.getPlacesGrouped = async (req, res) => {
     const limitNumber = parseInt(limit);
     const skip = (pageNumber - 1) * limitNumber;
 
-    // بناء استعلام الفلترة
     const filter = { status: "approved" };
 
     if (city) filter.city = city;
@@ -139,13 +133,9 @@ exports.getPlacesGrouped = async (req, res) => {
   }
 };
 
-
-
-
-
 // ===============================================================
 
-// ✅ جلب الأماكن حسب المدينة
+//  جلب الأماكن حسب المدينة
 exports.getPlacesByCity = async (req, res) => {
   try {
     const { city } = req.params;
@@ -156,7 +146,7 @@ exports.getPlacesByCity = async (req, res) => {
   }
 };
 
-// ✅ جلب الأماكن حسب التصنيف
+//  جلب الأماكن حسب التصنيف
 exports.getPlacesByCategory = async (req, res) => {
   try {
     const { category } = req.params;
@@ -172,8 +162,7 @@ exports.getPlacesByCategory = async (req, res) => {
   }
 };
 
-
-// ✅ جلب الأماكن حسب الموسم
+//  جلب الأماكن حسب الموسم
 exports.getPlacesBySeason = async (req, res) => {
   try {
     const { season } = req.params;
@@ -210,8 +199,7 @@ exports.getPlacesBySeason = async (req, res) => {
   }
 };
 
-
-// ✅ البحث + الفلترة
+//  البحث + الفلترة
 exports.getFilteredPlaces = async (req, res) => {
   try {
     const { city, category, season, freeOnly } = req.query;
@@ -228,9 +216,6 @@ exports.getFilteredPlaces = async (req, res) => {
     res.status(500).json({ message: "❌ خطأ في الفلترة والبحث", error: error.message });
   }
 };
-
-
-
 
 
 exports.createPlace = async (req, res) => {
@@ -298,10 +283,7 @@ exports.createPlace = async (req, res) => {
   }
 };
 
-
-
-
-// ✅ جلب جميع الأماكن بحالة approved فقط
+//  جلب جميع الأماكن بحالة approved فقط
 exports.getAllPlaces = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -315,15 +297,13 @@ exports.getAllPlaces = async (req, res) => {
       sort: { createdAt: -1 },
       populate: {
         path: 'createdBy',
-        strictPopulate: false // إذا كانت هناك مشكلة في الـ populate بسبب عدم وجود الحقل
+        strictPopulate: false 
       }
     };
 
-    // طباعة الخيارات للتحقق من استعلام الصفحة
 
     const places = await Place.paginate(query, options);
 
-    // طباعة النتيجة قبل إرسالها
 
     res.status(200).json({
       success: true,
@@ -338,39 +318,9 @@ exports.getAllPlaces = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// دالة لحساب المسافة بين نقطتين جغرافياً
-exports.getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // نصف قطر الأرض بالكيلومتر
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
-
-//  جلب الأماكن القريبة
 // تأكد من وجود الفهرس الجغرافي قبل تنفيذ الاستعلام
 function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // نصف قطر الأرض بالكيلومتر
+  const R = 6371; 
   const toRad = angle => (angle * Math.PI) / 180;
 
   const dLat = toRad(lat2 - lat1);
@@ -386,7 +336,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// ✅ الأماكن القريبة
+//  الأماكن القريبة
 exports.getNearbyPlaces = async (req, res) => {
   try {
     const { lat, lng, maxDistance = 2 } = req.query;
@@ -397,7 +347,7 @@ exports.getNearbyPlaces = async (req, res) => {
 
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
-    const distanceLimit = parseFloat(maxDistance); // بالكيلومتر
+    const distanceLimit = parseFloat(maxDistance); 
 
     const allPlaces = await Place.find({});
 
@@ -419,9 +369,8 @@ exports.getNearbyPlaces = async (req, res) => {
 
 exports.getPlacesByUser = async (req, res) => {
   try {
-    const userId = req.params.userId; // نستخدم req.params للحصول على الـ userId من الـ URL
+    const userId = req.params.userId; 
 
-    // التحقق من وجود الـ userId
     if (!userId) {
       return res.status(400).json({ message: "مفقود الـ userId في الرابط" });
     }
@@ -440,160 +389,3 @@ exports.getPlacesByUser = async (req, res) => {
 };
 
 
-exports.globalSearch = async (req, res) => {
-  try {
-    const { query, page = 1, limit = 10 } = req.query;
-    const skip = (page - 1) * limit;
-    
-    if (!query || query.trim().length < 2) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'يجب أن تكون كلمة البحث مكونة من حرفين على الأقل'
-      });
-    }
-    
-    // البحث في الأماكن مع pagination
-    const places = await Place.find({
-      status: 'approved',
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { short_description: { $regex: query, $options: 'i' } },
-        { detailed_description: { $regex: query, $options: 'i' } },
-        { city: { $regex: query, $options: 'i' } },
-        { categories: { $regex: query, $options: 'i' } }
-      ]
-    })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-    
-    // البحث في المقالات مع pagination
-    const articles = await Article.find({
-      status: 'published',
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { content: { $regex: query, $options: 'i' } }
-      ]
-    })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-    
-    // جلب المدن الفريدة من نتائج الأماكن
-    const cities = await Place.aggregate([
-      {
-        $match: {
-          status: 'approved',
-          $or: [
-            { name: { $regex: query, $options: 'i' } },
-            { city: { $regex: query, $options: 'i' } }
-          ]
-        }
-      },
-      {
-        $group: {
-          _id: "$city",
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $project: {
-          name: "$_id",
-          placesCount: "$count",
-          _id: 0
-        }
-      },
-      { $limit: 5 }
-    ]);
-    
-    res.json({
-      success: true,
-      results: {
-        places,
-        articles,
-        cities
-      },
-      total: places.length + articles.length + cities.length,
-      page: parseInt(page),
-      limit: parseInt(limit)
-    });
-    
-  } catch (err) {
-    console.error('Search error:', err);
-    res.status(500).json({ 
-      success: false,
-      message: 'حدث خطأ أثناء البحث',
-      error: err.message
-    });
-  }
-};
-// الاقتراحات التلقائية
-exports.searchSuggestions = async (req, res) => {
- try {
-    const searchQuery = req.query.search;
-    
-    // نفس منطق البحث المستخدم في Location.js
-    const results = await Place.aggregate([
-      {
-        $match: {
-          $or: [
-            { name: { $regex: searchQuery, $options: 'i' } },
-            { description: { $regex: searchQuery, $options: 'i' } },
-            { city: { $regex: searchQuery, $options: 'i' } },
-            { categories: { $regex: searchQuery, $options: 'i' } }
-          ]
-        }
-      },
-      // يمكنك إضافة المزيد من مراحل التجميع حسب الحاجة
-    ]);
-
-    // تنظيم النتائج بنفس طريقة Location.js إذا كنت تستخدم التجميع
-    res.json({
-      byCategory: {}, // املأ هذه القيم حسب منطقك
-      byCity: {},
-      bySuitable: {},
-      totalCount: results.length,
-      totalPages: Math.ceil(results.length / 10)
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// في ملف controller
-exports.searchPlaces = async (req, res) => {
-  try {
-    const { query } = req.query;
-
-    if (!query || query.trim().length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "يجب أن تحتوي كلمة البحث على حرفين على الأقل"
-      });
-    }
-
-    const decodedQuery = decodeURIComponent(query);
-    
-    const results = await Place.find({
-      $or: [
-        { name: { $regex: decodedQuery, $options: 'i' } },
-        { city: { $regex: decodedQuery, $options: 'i' } },
-        { categories: { $regex: decodedQuery, $options: 'i' } }
-      ],
-      status: "approved"
-    }).limit(20);
-
-    res.json({
-      success: true,
-      results,
-      count: results.length
-    });
-  } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({
-      success: false,
-      message: "حدث خطأ أثناء البحث",
-      error: error.message
-    });
-  }
-};

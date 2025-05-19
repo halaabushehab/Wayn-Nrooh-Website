@@ -237,86 +237,79 @@ return (
         )}
 
         {/* Places Grid */}
-        {!loading && !error && activePlaces.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 justify-items-center">
-            {activePlaces.map((place) => (
-              <div
-                key={place._id}
-                className="bg-white w-full max-w-xs sm:w-auto sm:max-w-none rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
-              >
-                <div className="relative">
-                  {/* Image with overlay gradient */}
-                  <div className="h-48 sm:h-52 overflow-hidden">
-                    <img
-                      src={place.images?.[0] || 'https://via.placeholder.com/500'}
-                      alt={place.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
-                  </div>
-                  
-                  {/* Season tag */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-[#FFD700] text-[#022C43] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-md">
-                    {place.best_season || 'الربيع والخريف'}
-                  </div>
-                  
-                  {/* Favorite button */}
-                  <button
-                    className={`absolute top-3 sm:top-4 left-3 sm:left-4 p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
-                      likedPlaces[place._id]
-                        ? 'animate-heartbeat'
-                        : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(place._id);
-                    }}
-                  >
-                    <HeartIcon 
-                      className={`w-6 h-6 sm:w-8 sm:h-8 transition-colors duration-300 ${
-                        likedPlaces[place._id] ? 'text-red-500 fill-red-500' : 'text-white'
-                      }`} 
-                    />
-                  </button>
-
-                  {/* Place name overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-5 py-3 sm:py-4">
-                    <h3 className="font-bold text-lg sm:text-xl text-white drop-shadow-lg">
-                      {place.name}
-                    </h3>
-                  </div>
-                </div>
-                
-                <div className="p-4 sm:p-5">
-                  {/* Location with icon */}
-                  <div className="flex items-center text-gray-600 mb-3 sm:mb-4">
-                    <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2 text-[#115173]" />
-                    <span className="text-xs sm:text-sm">{place.short_description}</span>
-                  </div>
-                  
-                  {/* City tag */}
-                  <div className="mb-3 sm:mb-4">
-                    <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-2 sm:px-3 py-1 rounded-full">
-                      {place.city || 'عمان'}
-                    </span>
-                  </div>
-                  
-                  {/* Action button */}
-                  <button
-                    onClick={() => handleDetails(place)}
-                    className="w-full bg-[#115173] text-white py-2 sm:py-3 rounded-xl hover:bg-[#022C43] transition-colors duration-300 flex items-center justify-center group"
-                  >
-                    <span className="text-sm sm:text-base">عرض التفاصيل</span>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
+      {!loading && !error && activePlaces.length > 0 && (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    {activePlaces.map((place) => (
+      <div
+        key={place._id}
+        className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col h-full" // Added flex and h-full
+      >
+        {/* Image section - fixed height */}
+        <div className="relative h-48"> {/* Fixed height */}
+          <img
+            src={place.images?.[0] || 'https://via.placeholder.com/500'}
+            alt={place.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#022C43]/80 to-transparent opacity-70"></div>
+          
+          {/* Season tag */}
+          <div className="absolute top-3 right-3 bg-[#FFD700] text-[#022C43] px-2 py-1 rounded-full text-xs font-bold shadow-md">
+            {place.best_season || 'الربيع والخريف'}
           </div>
-        )}
+          
+          {/* Favorite button */}
+          <button
+            className={`absolute top-3 left-3 p-2 rounded-full transition-all duration-300 ${
+              likedPlaces[place._id] ? 'animate-heartbeat' : ''
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLike(place._id);
+            }}
+          >
+            <HeartIcon 
+              className={`w-6 h-6 transition-colors duration-300 ${
+                likedPlaces[place._id] ? 'text-red-500 fill-red-500' : 'text-white'
+              }`} 
+            />
+          </button>
+
+          {/* Place name */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 py-3">
+            <h3 className="font-bold text-lg text-white drop-shadow-lg">
+              {place.name}
+            </h3>
+          </div>
+        </div>
+        
+        {/* Content section - flex-grow for consistent height */}
+        <div className="p-4 flex-grow flex flex-col"> {/* Added flex classes */}
+          {/* Location */}
+          <div className="flex items-center text-gray-600 mb-2">
+            <MapPinIcon className="w-4 h-4 ml-2 text-[#115173]" />
+            <span className="text-xs line-clamp-2">{place.short_description}</span>
+          </div>
+          
+          {/* City tag */}
+          <div className="mt-auto mb-3"> {/* Pushed to bottom */}
+            <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-2 py-1 rounded-full">
+              {place.city || 'عمان'}
+            </span>
+          </div>
+          
+          {/* Button */}
+          <button
+            onClick={() => handleDetails(place)}
+            className="w-full bg-[#115173] text-white py-2 rounded-lg hover:bg-[#022C43] transition-colors duration-300 text-sm"
+          >
+            عرض التفاصيل
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
         {!loading && !error && activePlaces.length === 0 && (
           <div className="text-center text-gray-500 py-8">لا توجد أماكن حالياً في هذا الموسم</div>

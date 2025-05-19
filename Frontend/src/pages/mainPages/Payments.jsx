@@ -364,55 +364,43 @@ const Pay = () => {
   // Add this at the top
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePayment = async () => {
-    if (!user) {
-      Swal.fire({
-        icon: "error",
-        title: "يجب تسجيل الدخول",
-        text: "يجب عليك تسجيل الدخول قبل إتمام الدفع",
-      });
-      return;
-    }
+const handlePayment = async () => {
+  if (!user) {
+    Swal.fire({
+      icon: "error",
+      title: "يجب تسجيل الدخول",
+      text: "يجب عليك تسجيل الدخول قبل إتمام الدفع",
+    });
+    return;
+  }
 
-    if (!selectedPlaceId || ticketCount <= 0) {
-      Swal.fire({
-        icon: "error",
-        title: "بيانات غير صالحة",
-        text: "الرجاء اختيار مكان وعدد تذاكر صحيح",
-      });
-      return;
-    }
+  setIsProcessing(true);
 
-    setIsProcessing(true);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:9527/api/payments/pay",
-        {
-          userId: user.userId,
-          placeId: selectedPlaceId,
-          ticketCount: total, // Send actual ticket count, not total
-        }
-      );
-
-      if (response.data.url) {
-        setTimeout(() => {
-          window.location.href = response.data.url;
-        }, 2000); // تأخير لمدة 2000 مللي ثانية (2 ثانية)
-      } else {
-        throw new Error("No payment URL received");
+  try {
+    const response = await axios.post(
+      "http://localhost:9527/api/payments/pay",
+      {
+        userId: user.userId,
+        placeId: selectedPlaceId,
+        ticketCount: ticketCount,
+        totalJOD: total, // Send JOD total
       }
-    } catch (error) {
-      console.error("Payment error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطأ في الدفع",
-        text: "حدث خطأ أثناء محاولة الدفع. الرجاء المحاولة مرة أخرى.",
-      });
-    } finally {
-      setIsProcessing(false);
+    );
+
+    if (response.data.url) {
+      window.location.href = response.data.url;
     }
-  };
+  } catch (error) {
+    console.error("Payment error:", error);
+    Swal.fire({
+      icon: "error",
+      title: "خطأ في الدفع",
+      text: error.response?.data?.error || "حدث خطأ أثناء الدفع",
+    });
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   // Update button in render:
   <button
@@ -535,27 +523,28 @@ const Pay = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 mb-8">
-                <h3 className="font-medium text-[#022C43] mb-4">ملخص الطلب</h3>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      {ticketCount} × تذكرة ({place.ticket_price} دينار)
-                    </span>
-                    {/* <span className="font-medium">{subtotal} دينار</span> */}
-                  </div>
-                  {/* <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">الضريبة</span>
-                    <span className="font-medium">{tax} دينار</span>
-                  </div> */}
-                </div>
-                <div className="border-t border-gray-200 pt-4 flex justify-between">
-                  <span className="font-bold text-[#022C43]">الإجمالي</span>
-                  <span className="font-bold text-xl text-[#115173]">
-                    {total} دينار
-                  </span>
-                </div>
-              </div>
+         <div className="bg-gray-50 rounded-lg p-4 mb-8">
+  <h3 className="font-medium text-[#022C43] mb-4">ملخص الطلب</h3>
+  <div className="space-y-2 mb-4">
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-600">
+        {ticketCount} × تذكرة ({place.ticket_price} دينار)
+      </span>
+      <span className="font-medium">{subtotal} دينار</span>
+    </div>
+    <div className="flex justify-between text-sm text-blue-600">
+      <span className="text-gray-600">السعر بالدولار</span>
+      <span className="font-medium">{(subtotal * 1.41).toFixed(2)} $</span>
+    </div>
+  </div>
+  <div className="border-t border-gray-200 pt-4 flex justify-between">
+    <span className="font-bold text-[#022C43]">الإجمالي</span>
+    <div className="flex flex-col items-end">
+      <span className="font-bold text-xl text-[#115173]">{total} دينار</span>
+      <span className="text-sm text-blue-600">≈ {(total * 1.41).toFixed(2)} $</span>
+    </div>
+  </div>
+</div>
               <div className="mb-8">
                 <h3 className="font-medium text-[#022C43] mb-4">
                   اختر طريقة الدفع

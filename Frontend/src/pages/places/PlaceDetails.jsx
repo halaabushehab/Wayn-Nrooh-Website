@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"
 import {MapPinIcon, StarIcon, Globe , HeartIcon, Clock,Ticket,  Map,CameraIcon, Share2, ChevronRight, ChevronLeft, MessageCircle,  Calendar, Info,  Compass,  ChevronUp,  MapPin ,  Zap , ExternalLink , AlertCircle , Bookmark , User ,} from "lucide-react"
 import { toast } from "sonner"
 import Cookies from "js-cookie"
-// import NearbyPlacesMap from './detailsplaces/NearbyPlacesMap';
+import NearbyPlacesModal  from './detailsplaces/NearbyPlacesMap';
 import SimilarPlaces from "./detailsplaces/SimilarPlaces";
 import LocationMap from './detailsplaces/LocationMap';     
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -38,6 +38,8 @@ const [reportDetails, setReportDetails] = useState('');
   const [ratings, setRatings] = useState([])
   const [averageRating, setAverageRating] = useState(0)
   const [comment, setComment] = useState("")
+  const [showNearbyPlaces, setShowNearbyPlaces] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
 
   const customIcon = new L.Icon({
     iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
@@ -280,6 +282,24 @@ const handleClick = () => {
       setLoading(false);
     }
   };
+
+
+const getUserLocation = () => {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setUserLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      setShowNearbyPlaces(true); // move this inside the success callback
+    },
+    (error) => {
+      console.error("Location error:", error);
+      alert("لم نتمكن من تحديد موقعك.");
+    }
+  );
+};
+
 
 
   const handleReportSubmit = async () => {
@@ -894,7 +914,24 @@ const handleClick = () => {
                           أماكن مشابهة
                         </span>
                       </button>
+     <button 
+        onClick={getUserLocation}
+                        className="group flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 hover:border-[#115173]/30 hover:bg-[#115173]/5 transition-all duration-300"
+      >
+                                <div className="w-10 h-10 rounded-full bg-[#115173]/10 flex items-center justify-center mb-2 group-hover:bg-[#115173]/20">
 
+        <MapPin className="w-5 h-5 text-[#115173] group-hover:text-[#022C43]" />
+        </div>
+       
+        <span className="text-sm font-medium text-[#022C43] group-hover:text-[#115173]">عرض الأماكن القريبة مني</span>
+      </button>
+
+      {showNearbyPlaces && userLocation && (
+        <NearbyPlacesModal 
+          userLocation={userLocation} 
+          onClose={() => setShowNearbyPlaces(false)} 
+        />
+      )}
                       {/* Website */}
                       {place?.contact?.website && (
                         <a
@@ -980,7 +1017,6 @@ const handleClick = () => {
 
             {/* Content */}
             <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-              {/* الخريطة - تأخذ 60% من المساحة */}
               <div className="w-full md:w-3/5 h-96 md:h-auto">
                 <MapContainer
                   center={[place.location.latitude, place.location.longitude]}
@@ -1092,6 +1128,15 @@ const handleClick = () => {
             </div>
           </div>
         </div>
+      )}
+
+   
+
+      {showNearbyPlaces && userLocation && (
+        <NearbyPlacesModal 
+          userLocation={userLocation} 
+          onClose={() => setShowNearbyPlaces(false)} 
+        />
       )}
 
       {/* Similar Places Modal */}

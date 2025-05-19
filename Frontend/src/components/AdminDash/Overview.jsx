@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js';
 
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale
+  ArcElement,
+  CategoryScale
 );
 
 function StatCard({ title, value, change }) {
   const isPositive = change.startsWith("+");
-
+  
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 text-right">
       <h3 className="text-md text-gray-600 font-medium">{title}</h3>
@@ -48,12 +46,29 @@ function ActivityItem({ title, description, time }) {
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
+  const [placesCount, setPlacesCount] = useState(0);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [latestPlace, setLatestPlace] = useState(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get("http://localhost:9527/dashboard/overview");
-        setDashboardData(response.data);
+        const dashboardResponse = await axios.get("http://localhost:9527/dashboard/overview");
+        setDashboardData(dashboardResponse.data);
+        
+        // جلب عدد الأماكن
+        const placesResponse = await axios.get("http://localhost:9527/api/places/count");
+        setPlacesCount(placesResponse.data.count);
+        
+        // جلب النشاط الأخير
+        const activitiesResponse = await axios.get("http://localhost:9527/api/activities/recent");
+        setRecentActivities(activitiesResponse.data);
+        
+        // جلب أحدث مكان مضاف
+        const latestPlaceResponse = await axios.get('http://localhost:9527/api/places?page=1&limit=1&sort=-createdAt');
+        if (latestPlaceResponse.data.data.docs.length > 0) {
+          setLatestPlace(latestPlaceResponse.data.data.docs[0]);
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -72,11 +87,10 @@ const Dashboard = () => {
 
   const totalRevenue = dashboardData.allData.totalRevenue || 0;
   const userCount = dashboardData.users.userCount;
-  const placesCount = dashboardData.places.data.docs.length;
   const bookingsCount = dashboardData.allData.payments.length;
   const messagesCount = dashboardData.messages.data.length;
 
-  const bookingGrowthData = prepareGraphData(dashboardData.allData.payments);
+  const userStatsData = prepareUserStatsData(dashboardData.users);
   const revenueByPlaceData = prepareRevenueByPlaceData(dashboardData.allData.payments, dashboardData.places.data.docs);
 
   return (
@@ -87,23 +101,23 @@ const Dashboard = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="إجمالي الإيرادات" value={`${totalRevenue.toLocaleString()} `} change="+5%" />
+        <StatCard title="إجمالي الإيرادات" value={`${totalRevenue.toLocaleString()} دينار `} change="+5%" />
         <StatCard title="عدد المستخدمين" value={userCount.toLocaleString()} change="+2%" />
-        <StatCard title="عدد الأماكن" value={placesCount.toLocaleString()} change="-1%" />
+        <StatCard title="عدد الأماكن" value={placesCount.toLocaleString()} change="+10%" />
         <StatCard title="عدد الحجوزات" value={bookingsCount.toLocaleString()} change="+3%" />
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-        <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">نمو الحجوزات (آخر 6 أشهر)</h3>
-        <div className="h-80">
-          <Line 
-            data={bookingGrowthData} 
+        <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">إحصائيات المستخدمين</h3>
+        <div className="h-80 flex justify-center">
+          <Pie 
+            data={userStatsData} 
             options={{
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: 'top',
+                  position: 'right',
                   rtl: true,
                   labels: {
                     padding: 20,
@@ -111,11 +125,6 @@ const Dashboard = () => {
                       family: 'Tajawal, sans-serif'
                     }
                   }
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true
                 }
               }
             }}
@@ -127,14 +136,14 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">الإيرادات حسب المكان</h3>
           <div className="h-64">
-            <Line 
+            <Pie 
               data={revenueByPlaceData} 
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'right',
                     rtl: true
                   }
                 }
@@ -143,28 +152,34 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">النشاط الأخير</h3>
-          <div className="space-y-4">
-            <ActivityItem 
-              title="حجز جديد" 
-              description="تم إجراء حجز جديد للمكان X" 
-              time="منذ ساعتين" 
-            />
-            <ActivityItem 
-              title="مستخدم جديد" 
-              description="قام المستخدم Y بالتسجيل في المنصة" 
-              time="منذ يوم" 
-            />
-            <ActivityItem 
-              title="دفعة جديدة" 
-              description="تم استلام دفعة بقيمة 500 ر.س" 
-              time="منذ 3 أيام" 
-            />
-          </div>
-        </div>
+      <div className="bg-white p-6 rounded-xl shadow-lg">
+  <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">النشاط الأخير</h3>
+  <div className="space-y-4">
+    {latestPlace ? (
+      <ActivityItem 
+        title="مكان جديد مضاف"
+        description={`تم إضافة المكان: ${latestPlace.name}`}
+        time={new Date(latestPlace.createdAt).toLocaleDateString('ar-EG')}
+      />
+    ) : (
+      <p className="text-gray-500 text-center py-4">جاري تحميل أحدث الأماكن...</p>
+    )}
+    
+    {recentActivities.length > 0 ? (
+      recentActivities.map((activity, index) => (
+        <ActivityItem 
+          key={index}
+          title={activity.title || "نشاط جديد"}
+          description={activity.description || "لا يوجد وصف"}
+          time={activity.time || new Date().toLocaleDateString('ar-EG')}
+        />
+      ))
+    ) : (
+      <p className="text-gray-500 text-center py-4">لا يوجد نشاط حديث</p>
+    )}
+  </div>
+</div>
       </div>
-
       <div className="bg-white p-6 rounded-xl shadow-lg">
         <h3 className="font-semibold text-xl mb-4 text-gray-800">الرسائل</h3>
         <div className="flex items-center justify-between">
@@ -176,27 +191,36 @@ const Dashboard = () => {
   );
 };
 
-const prepareGraphData = (payments) => {
-  const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-  const monthData = months.map((month, index) => {
-    const monthlyRevenue = payments
-      .filter(payment => new Date(payment.date).getMonth() === index)
-      .reduce((sum, payment) => sum + payment.amount, 0);
-    return monthlyRevenue;
-  });
+const prepareUserStatsData = (usersData) => {
+  const userTypes = {
+    'مسؤولين': usersData.adminsCount || 2,
+    'مستخدمين عاديين': usersData.normalUsersCount || 15,
+    'مزودي خدمات': usersData.providersCount || 8
+  };
+
+  const backgroundColors = [
+    'rgba(25, 81, 115, 0.7)',
+    'rgba(255, 215, 20, 0.7)',
+    'rgba(0, 44, 67, 0.7)'
+  ];
+
+  const borderColors = [
+    'rgba(17, 81, 115, 1)',
+    'rgba(255, 215, 0, 1)',
+    'rgba(2, 44, 67, 1)'
+  ];
 
   return {
-    labels: months.slice(0, 6),
+    labels: Object.keys(userTypes),
     datasets: [
       {
-        label: 'الحجوزات',
-        data: monthData.slice(0, 6),
-        borderColor: '#10B981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        fill: true,
-        tension: 0.3
-      },
-    ],
+        label: 'عدد المستخدمين',
+        data: Object.values(userTypes),
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }
+    ]
   };
 };
 
@@ -209,175 +233,34 @@ const prepareRevenueByPlaceData = (payments, places) => {
     return totalRevenue;
   });
 
+  const backgroundColors = [
+    'rgba(17, 81, 115, 1)',     
+    'rgba(255, 215, 0, 1)',     
+    'rgba(2, 44, 67, 1)',
+    'rgba(75, 192, 192, 0.7)',
+    'rgba(54, 162, 235, 0.7)'
+  ];
+
+  const borderColors = [
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(54, 162, 235, 1)'
+  ];
+
   return {
     labels: placeNames,
     datasets: [
       {
         label: 'الإيرادات',
         data: revenueByPlace,
-        borderColor: '#8B5CF6',
-        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-        fill: true,
-        tension: 0.3
-      },
-    ],
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }
+    ]
   };
 };
 
 export default Dashboard;
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { Line } from 'react-chartjs-2';
-// import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
-
-// ChartJS.register(
-//   Title,
-//   Tooltip,
-//   Legend,
-//   LineElement,
-//   PointElement,
-//   CategoryScale,
-//   LinearScale
-// );
-
-// function StatCard({ title, value, change }) {
-//   const isPositive = change.startsWith("+");
-
-//   return (
-//     <div className="bg-white p-4 rounded-lg shadow">
-//       <h3 className="text-sm text-gray-500">{title}</h3>
-//       <div className="flex items-end mt-2">
-//         <span className="text-2xl font-bold">{value}</span>
-//         <span className={`mr-2 text-sm ${isPositive ? "text-green-500" : "text-red-500"}`}>{change}</span>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function ActivityItem({ title, description, time }) {
-//   return (
-//     <div className="flex items-start pb-4 border-b border-gray-100">
-//       <div className="w-2 h-2 mt-2 rounded-full bg-[#FFD700] ml-3"></div>
-//       <div className="flex-1">
-//         <h4 className="font-medium">{title}</h4>
-//         <p className="text-sm text-gray-500">{description}</p>
-//       </div>
-//       <span className="text-xs text-gray-400">{time}</span>
-//     </div>
-//   );
-// }
-
-// const Dashboard = () => {
-//   const [dashboardData, setDashboardData] = useState(null);
-
-//   useEffect(() => {
-//     const fetchDashboardData = async () => {
-//       try {
-//         const response = await axios.get("http://localhost:9527/dashboard/overview");
-//         setDashboardData(response.data);
-//       } catch (error) {
-//         console.error("Error fetching dashboard data:", error);
-//       }
-//     };
-
-//     fetchDashboardData();
-//   }, []);
-
-//   if (!dashboardData) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const totalRevenue = dashboardData.allData.totalRevenue || 0;
-//   const userCount = dashboardData.users.userCount;
-//   const placesCount = dashboardData.places.data.docs.length;
-//   const bookingsCount = dashboardData.allData.payments.length;
-//   const messagesCount = dashboardData.messages.data.length;
-
-//   // تحضير البيانات للمخططات البيانية
-//   const bookingGrowthData = prepareGraphData(dashboardData.allData.payments);
-//   const revenueByPlaceData = prepareRevenueByPlaceData(dashboardData.allData.payments, dashboardData.places.data.docs);
-
-//   return (
-//     <div>
-//       <h1>Dashboard Overview</h1>
-//       <div className="grid grid-cols-2 gap-4 mb-8">
-//         <StatCard title="Total Revenue" value={`$${totalRevenue}`} change="+5%" />
-//         <StatCard title="Total Users" value={userCount} change="+2%" />
-//         <StatCard title="Total Places" value={placesCount} change="-1%" />
-//         <StatCard title="Total Bookings" value={bookingsCount} change="+3%" />
-//       </div>
-
-//       <div className="mb-8">
-//         <h3 className="font-semibold text-lg mb-4">Bookings Growth (Last 6 Months)</h3>
-//         <Line data={bookingGrowthData} />
-//       </div>
-
-//       <div className="mb-8">
-//         <h3 className="font-semibold text-lg mb-4">Revenue by Place</h3>
-//         <Line data={revenueByPlaceData} />
-//       </div>
-
-//       <div>
-//         <p>Number of Messages: {messagesCount}</p>
-//       </div>
-
-//       <div className="mt-8">
-//         <h3 className="font-semibold text-lg mb-4">Recent Activity</h3>
-//         <ActivityItem title="New Booking" description="A new booking was made for Place X." time="2 hours ago" />
-//         <ActivityItem title="New User Registered" description="User Y registered on the platform." time="1 day ago" />
-//       </div>
-//     </div>
-//   );
-// };
-
-// // تحضير البيانات للمخطط البياني (Bookings Growth)
-// const prepareGraphData = (payments) => {
-//   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-//   const monthData = months.map((month, index) => {
-//     const monthlyRevenue = payments
-//       .filter(payment => new Date(payment.date).getMonth() === index)
-//       .reduce((sum, payment) => sum + payment.amount, 0);
-//     return monthlyRevenue;
-//   });
-
-//   return {
-//     labels: months,
-//     datasets: [
-//       {
-//         label: 'Bookings',
-//         data: monthData,
-//         borderColor: 'rgba(75, 192, 192, 1)',
-//         fill: false,
-//       },
-//     ],
-//   };
-// };
-
-// // تحضير البيانات للمخطط البياني (Revenue by Place)
-// const prepareRevenueByPlaceData = (payments, places) => {
-//   const placeNames = places.map(place => place.name);
-//   const revenueByPlace = placeNames.map(name => {
-//     const totalRevenue = payments
-//       .filter(payment => payment.placeName === name)
-//       .reduce((sum, payment) => sum + payment.amount, 0);
-//     return totalRevenue;
-//   });
-
-//   return {
-//     labels: placeNames,
-//     datasets: [
-//       {
-//         label: 'Revenue by Place',
-//         data: revenueByPlace,
-//         borderColor: 'rgba(153, 102, 255, 1)',
-//         fill: false,
-//       },
-//     ],
-//   };
-// };
-
-// export default Dashboard;   
-

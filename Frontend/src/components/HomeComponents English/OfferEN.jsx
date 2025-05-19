@@ -90,7 +90,6 @@
 
 // export default Offer;
 
-
 import React, { useEffect, useState } from 'react';
 import { PercentIcon, TagIcon, Banknote } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -106,7 +105,7 @@ export function Offer() {
         const latest = response.data.data.docs[0];
         setLatestPlace(latest);
       } catch (error) {
-        console.error("حدث خطأ أثناء جلب أحدث مكان:", error);
+        console.error("Error fetching latest place:", error);
       }
     };
 
@@ -114,43 +113,43 @@ export function Offer() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center my-12 md:my-20">
-      <div className="w-full max-w-6xl rounded-lg overflow-hidden shadow-lg flex flex-col md:flex-row-reverse md:h-[400px]">
+    <div className="flex items-center justify-center my-6">
+      <div className=" max-w-4xl rounded-lg overflow-hidden shadow-lg flex flex-col md:flex-row-reverse">
         
         {/* Right Section */}
-        <div className="bg-[#0a2642] p-6 md:p-8 text-right md:w-1/2 flex flex-col justify-center relative md:h-full">
-          <Banknote className="absolute top-4 left-4 w-6 h-6 text-yellow-400 animate-pulse" />
-          <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-bold mb-4">
-            جديدنا لهذا الموسم
+        <div className="bg-[#0a2642] p-4 md:p-6 text-right md:w-1/2 flex flex-col justify-center relative">
+          <Banknote className="absolute top-3 left-3 w-5 h-5 text-yellow-400 animate-pulse" />
+          <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-2">
+            Our Latest This Season
           </h2>
-          <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-6">
-            تعرّف على أحدث وجهة تم إضافتها إلى منصتنا! مكان استثنائي يجمع بين التجربة الفريدة، المتعة، والجودة. لا تفوّت فرصة استكشافه قبل الجميع.
+          <p className="text-gray-300 text-xs sm:text-sm md:text-base mb-4">
+            Discover the newest destination added to our platform! An exceptional place combining unique experiences, fun, and quality.
           </p>
-          <Link to="/places?city=عمان">
-            <button className="bg-yellow-400 hover:bg-yellow-500 text-[#0a2642] font-bold py-2 px-6 rounded-full w-fit self-end flex items-center gap-2">
+          <Link to="/places?city=Amman">
+            <button className="bg-yellow-400 hover:bg-yellow-500 text-[#0a2642] font-bold py-1.5 px-4 rounded-full w-fit self-end flex items-center gap-2 text-sm">
               <TagIcon className="w-4 h-4" />
-              استعرض جميع وجهاتنا المميزة
+              Browse Featured
             </button>
           </Link>
         </div>
 
-        {/* Left Section - Dynamic Image */}
-        <div className="md:w-1/2 relative h-auto md:h-full">
+        {/* Left Section - Image */}
+        <div className="md:w-1/2 relative h-48 md:h-60">
           <img
-            src={latestPlace?.images?.[0] || "https://via.placeholder.com/800x500?text=Loading..."}
-            alt={latestPlace?.name || "مكان"}
-            className="w-full h-full object-cover md:object-cover"
+            src={latestPlace?.images?.[0] || "https://via.placeholder.com/600x350?text=Loading..."}
+            alt={latestPlace?.name || "Place"}
+            className="w-full h-full object-cover"
           />
-          <div className="absolute top-4 right-4 bg-white rounded-lg p-3 text-right shadow-md max-w-[70%] sm:max-w-[60%] md:max-w-[50%]">
-            <div className="text-[#0a2642] font-bold text-lg sm:text-xl">
-              {latestPlace?.name || "اسم الوجهة"}
+          <div className="absolute top-3 right-3 bg-white rounded-lg p-2 text-right shadow-md max-w-[75%] sm:max-w-[65%] md:max-w-[60%]">
+            <div className="text-[#0a2642] font-bold text-sm sm:text-base">
+              {latestPlace?.name || "Destination Name"}
             </div>
-            <div className="text-gray-500 text-xs sm:text-sm mt-1">
-              تم إضافتها مؤخرًا – اكتشف التجربة الآن!
+            <div className="text-gray-500 text-xs mt-1">
+              Recently added – check it out!
             </div>
           </div>
         </div>
-        
+
       </div>
     </div>
   );

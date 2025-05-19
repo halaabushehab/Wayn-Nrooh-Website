@@ -1,4 +1,3 @@
-
 // controllers/paymentController.js
 const Payment = require("../models/Payment");
 const User = require("../models/User");
@@ -36,12 +35,18 @@ exports.createCheckoutSession = async (req, res) => {
       return res.status(404).json({ error: "المستخدم أو المكان غير موجود" });
     }
 
-    // تحويل عدد التذاكر إلى دولار
+    // استخدام سعر التذكرة من قاعدة البيانات
+    const ticketPriceJOD = Number(place.ticket_price);
+    const totalJOD = ticketPriceJOD * ticketCount;
+
+    // تحويل الدينار الأردني إلى الدولار الأمريكي
     const JOD_TO_USD = 1.41;
-    const totalAmountUSD = ticketCount * JOD_TO_USD;
+    const totalAmountUSD = totalJOD * JOD_TO_USD;
     const ticketPriceUSD = totalAmountUSD / ticketCount;
 
     console.log(`🔹 عدد التذاكر: ${ticketCount}`);
+    console.log(`🔹 السعر لكل تذكرة بالدينار: ${ticketPriceJOD}`);
+    console.log(`🔹 المبلغ الكلي بالدينار: ${totalJOD}`);
     console.log(`🔹 المبلغ الكلي بالدولار: $${totalAmountUSD}`);
     console.log(`🔹 السعر لكل تذكرة بالدولار: $${ticketPriceUSD}`);
 
@@ -62,9 +67,8 @@ exports.createCheckoutSession = async (req, res) => {
       mode: "payment",
       success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
-      metadata: { userId, placeId, ticketCount: ticketCount.toString(), placeName: place.name },
+      metadata: { userId, placeId, ticketCount: ticketCount.toString(), placeName: place.name, totalJOD: totalJOD.toString() },
     });
-    
 
     console.log("✅ Stripe session created successfully:", session.id);
     res.status(200).json({ url: session.url });
@@ -72,8 +76,8 @@ exports.createCheckoutSession = async (req, res) => {
     console.error("❌ Error creating checkout session:", error);
     res.status(500).json({ error: "حدث خطأ أثناء إنشاء جلسة الدفع" });
   }
-  console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
 };
+
 
 // التعامل مع Webhook من Stripe للتحقق من الدفع
 exports.handleStripeWebhook = async (req, res) => {
@@ -86,20 +90,21 @@ exports.handleStripeWebhook = async (req, res) => {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      const { userId, placeId, ticketCount } = session.metadata;
+
+      const { userId, placeId, ticketCount, totalJOD } = session.metadata;
 
       const user = await User.findById(userId);
       const place = await Place.findById(placeId);
-      console.log("Webhook received session:", {
-        id: session.id,
-        metadata: session.metadata,
-        amount: session.amount_total
-      });
+
+      console.log("Webhook session metadata:", session.metadata);
+      console.log("Webhook amount total:", session.amount_total);
+
       const payment = new Payment({
         userId,
         placeId,
-        ticketCount,
-        amount: session.amount_total / 100, // Stripe يرجع القيمة بالسنتات
+        ticketCount: parseInt(ticketCount),
+        amount: session.amount_total / 100, // Stripe returns amount in cents
+        amountJOD: parseFloat(totalJOD), // حفظ المبلغ بالدينار أيضًا
         currency: session.currency,
         paymentStatus: session.payment_status,
         paymentMethod: session.payment_method_types[0],
@@ -110,14 +115,13 @@ exports.handleStripeWebhook = async (req, res) => {
 
       console.log("💰 Payment saved:", payment);
 
-      // إرسال بريد إلكتروني لتأكيد الدفع
       await transporter.sendMail({
         from: `"WaynNrooh" <${process.env.SMTP_USER}>`,
         to: user.email,
         subject: "تأكيد الدفع بنجاح",
         html: `
           <p>مرحباً <strong>${user.name}</strong>,</p>
-          <p>تم استلام دفعتك بقيمة <strong>${(session.amount_total / 100).toFixed(2)} USD</strong> للمكان <strong>${place.name}</strong>.</p>
+          <p>تم استلام دفعتك بقيمة <strong>${(session.amount_total / 100).toFixed(2)} USD</strong> (حوالي ${totalJOD} دينار أردني) للمكان <strong>${place.name}</strong>.</p>
           <p>شكراً لاستخدامك <em>WaynNrooh</em>!</p>
         `,
       });
@@ -161,16 +165,11 @@ exports.verifyPayment = async (req, res) => {
   const { session_id } = req.query;
 
   try {
-    const session = await stripe.checkout.sessions.retrieve(session_id, {
-      expand: ["payment_intent", "customer"]
-    });
-    
-    const paymentIntent = session.payment_intent;
-    const charge = paymentIntent.latest_charge
-      ? await stripe.charges.retrieve(paymentIntent.latest_charge)
-      : null;
+    // استرجاع جلسة الدفع من Stripe باستخدام session_id
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
     if (!session || session.payment_status !== "paid") {
-      return res.status(404).json({ message: "الدفع غير موجود" });
+      return res.status(404).json({ message: "الدفع غير موجود أو لم يتم الدفع بعد" });
     }
 
     // استخراج البيانات من metadata
@@ -208,6 +207,7 @@ exports.verifyPayment = async (req, res) => {
   }
 };
 
+
 // إضافة عملية الدفع إلى الـ Payment Collection
 exports.createPayment = async (req, res) => {
   try {
@@ -229,9 +229,10 @@ exports.createPayment = async (req, res) => {
     } = req.body;
 
     // التحقق من البيانات
-    if (!stripePaymentId || !stripeChargeId || !userEmail || !userName || !amountUSD || !currency || !paymentStatus || !cardBrand || !cardLast4 || !country || !ticketCount || !placeId || !userId) {
-      return res.status(400).json({ message: "بيانات غير مكتملة" });
-    }
+// In your createPayment function, change the validation to:
+if (!userEmail || !amountUSD || !currency || !paymentStatus || !ticketCount || !placeId || !userId) {
+  return res.status(400).json({ message: "بيانات غير مكتملة" });
+}
 
     // البحث عن المستخدم والمكان
     const user = await User.findById(userId);

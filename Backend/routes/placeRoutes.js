@@ -36,18 +36,10 @@ router.get("/category/:category", placeController.getPlacesByCategory);
 // ✅ جلب الأماكن حسب الموسم
 router.get("/season/:season", placeController.getPlacesBySeason);
 
-// ✅ فلترة + بحث
-router.get("/filtered/search", placeController.getFilteredPlaces);
-
-
 // routes/placeRoutes.js
 router.get("/user-places/:userId", placeController.getPlacesByUser);
 
-// البحث الأساسي
-router.get('/search', placeController.globalSearch);
 
-// اقتراحات البحث التلقائية
-router.get('/main-search', placeController.searchSuggestions);
 
 module.exports = router;
 

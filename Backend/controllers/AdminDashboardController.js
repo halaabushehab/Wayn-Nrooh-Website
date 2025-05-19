@@ -26,18 +26,15 @@ const getAllPlaces = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const search = req.query.search || '';
-    const filter = { isDeleted: false };
+    const statusFilter = req.query.status;
 
-
-    if (search) {
-      // ابحث مثلاً بالعنوان أو الاسم
-      filter.name = { $regex: search, $options: 'i' };
-    }
-    
-    const statusFilter = req.query.status; // ⬅️ إضافة هذا السطر
+    // ⬇️ فلترة موحدة
     const query = { isDeleted: false };
 
-    // 👇 تطبيق الفلترة حسب الحالة إذا تم إرسالها
+    if (search) {
+      query.name = { $regex: search, $options: 'i' }; // بحث بالاسم
+    }
+
     if (statusFilter && statusFilter !== 'all') {
       query.status = statusFilter;
     }
@@ -46,7 +43,7 @@ const getAllPlaces = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const totalPlaces = await Place.countDocuments(query);
+    const totalPlaces = await Place.countDocuments(query); // ✅ عدد النتائج حسب الفلترة
 
     res.status(200).json({
       places,
@@ -263,7 +260,6 @@ const getDashboardOverview = async (req, res) => {
 
 // Plog ==========================
 
-// جلب جميع المقالات
 const getAllArticles = async (req, res) => {
   try {
     // جلب المقالات التي لم يتم حذفها فقط

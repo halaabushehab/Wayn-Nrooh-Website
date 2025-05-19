@@ -8,7 +8,7 @@ import FormRegistration from "../components/FormRegistration";
 import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { FileHeart  } from "lucide-react";
+import { FileHeart } from "lucide-react";
 
 const Navbar = () => {
   const [isFormOpen, setFormOpen] = useState(false);
@@ -16,7 +16,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [language, setLanguage] = useState('ar'); // حالة اللغة
+  const [language, setLanguage] = useState('en'); // Default to English
   const userDropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -27,13 +27,12 @@ const Navbar = () => {
         try {
           const parsedUser = JSON.parse(userCookie);
           if (parsedUser.token) {
-        setUser({
-  username: parsedUser.username,
-  userId: parsedUser.userId,
-  isAdmin: parsedUser.isAdmin || false,
-  photo: parsedUser.photo || "", // أضف هذا السطر
-});
-
+            setUser({
+              username: parsedUser.username,
+              userId: parsedUser.userId,
+              isAdmin: parsedUser.isAdmin || false,
+              photo: parsedUser.photo || "",
+            });
             axios.defaults.headers.common["Authorization"] = `Bearer ${parsedUser.token}`;
           }
         } catch (error) {
@@ -45,20 +44,19 @@ const Navbar = () => {
     loadUserFromCookies();
   }, []);
 
-  // دالة تغيير اللغة
-const toggleLanguage = () => {
-  const newLanguage = language === 'ar' ? 'en' : 'ar';
-  setLanguage(newLanguage); // يحدّث الـ state
-  localStorage.setItem('language', newLanguage);
+  // Language toggle function
+  const toggleLanguage = () => {
+    const newLanguage = language === 'ar' ? 'en' : 'ar';
+    setLanguage(newLanguage);
+    localStorage.setItem('language', newLanguage);
 
-  if (newLanguage === 'en') {
-    navigate('/homeenglish');
-  } else {
-    navigate('/');
-  }
-};
+    if (newLanguage === 'en') {
+      navigate('/homeenglish');
+    } else {
+      navigate('/');
+    }
+  };
 
-  
   const handleLoginSuccess = (userData) => {
     const userToStore = {
       token: userData.token,
@@ -78,29 +76,28 @@ const toggleLanguage = () => {
     setFormOpen(false);
 
     Swal.fire({
-      title: `مرحباً ${userData.username}!`,
-      text: "تم إنشاء الحساب بنجاح",
+      title: `Welcome ${userData.username}!`,
+      text: "Account created successfully",
       icon: "success",
-       iconColor: '#FFD700',
+      iconColor: '#FFD700',
       confirmButtonColor: "#115173",
       background: "white",
       color: "#115173",
     });
   };
 
-
   const handleLogout = () => {
     Swal.fire({
-      title: "تأكيد تسجيل الخروج",
-      text: "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+      title: "Confirm Logout",
+      text: "Are you sure you want to logout?",
       icon: "question",
-        iconColor: '#FFD700',
+      iconColor: '#FFD700',
       showCancelButton: true,
       confirmButtonColor: "#115173",
       cancelButtonColor: "#115173",
-      confirmButtonText: "نعم، سجل خروج",
-      cancelButtonText: "إلغاء",
-      background: "#white",
+      confirmButtonText: "Yes, Logout",
+      cancelButtonText: "Cancel",
+      background: "white",
       color: "#115173",
     }).then((result) => {
       if (result.isConfirmed) {
@@ -108,7 +105,7 @@ const toggleLanguage = () => {
         delete axios.defaults.headers.common["Authorization"];
         setUser(null);
         setIsUserMenuOpen(false);
-        navigate("/");
+        navigate("/homeenglish");
       }
     });
   };
@@ -121,25 +118,65 @@ const toggleLanguage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-
-
-  
   return (
     <>
       <header
-        dir="rtl"
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isScrolled ? "bg-[#022C43] shadow-lg" : "bg-gradient-to-b from-[#022C43]/90 to-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between py-3">
-          {/* Logo with modern design */}
-          <Link to="/" className="flex items-center group">
-            <img className="h-14 md:h-15 w-auto transition-transform group-hover:scale-105" src={logo} alt="Logo" />
-            {/* <span className="hidden md:block text-[#FFD700] font-bold text-xl mr-2">EXPLORE</span> */}
-          </Link>
+          {/* Logo on the left */}
+          <div className="flex items-center gap-75">
+            <Link to="/homeenglish" className="flex items-center group">
+              <img className="h-14 md:h-15 w-auto transition-transform group-hover:scale-105" src={logo} alt="Logo" />
+            </Link>
 
-          {/* Mobile Menu Button with animation */}
+            {/* Navigation Links - Desktop */}
+              <nav className="hidden lg:flex items-center gap-6 text-lg">
+              
+              <Link
+                className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+                to="/about"
+              >
+                About
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+           
+             
+                  <Link
+                className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+                to="/article"
+              >
+                Blogs
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              
+              <Link
+                className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+                to="/seasonPage/:season"
+              >
+                Seasonal
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+                 <Link
+                className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+                to="/location"
+              >
+                Locations
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+                 <Link
+                className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+                to="/homeenglish"
+              >
+                Home
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            </nav>
+          </div>
+
+          {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2 focus:outline-none"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -152,128 +189,9 @@ const toggleLanguage = () => {
             </div>
           </button>
 
-          {/* Navigation Links with modern hover effects */}
-          <nav
-            className={`lg:flex items-center gap-8 text-lg transition-all duration-300 ${
-              menuOpen
-                ? "fixed top-20 right-0 w-full bg-[#022C43] p-6 shadow-xl flex flex-col rounded-b-lg"
-                : "hidden"
-            }`}
-          >
-            <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/"
-              onClick={() => setMenuOpen(false)}
-            >
-              الرئيسية
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/location"
-              onClick={() => setMenuOpen(false)}
-            >
-              الوجهات
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-    
-            <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/article"
-              onClick={() => setMenuOpen(false)}
-            >
-              المدونات
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/seasonPage/:season"
-              onClick={() => setMenuOpen(false)}
-            >
-             وجهات موسمية
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/about"
-              onClick={() => setMenuOpen(false)}
-            >
-              من نحن
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            {/* <Link
-              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
-              to="/contact"
-              onClick={() => setMenuOpen(false)}
-            >
-              تواصل معنا
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
-            </Link> */}
-
-            {/* Mobile User Actions */}
-            <div className="lg:hidden mt-4 flex flex-col gap-3 w-full">
-              {/* زر تغيير اللغة للجوال */}
-             <button
-      onClick={toggleLanguage}
-      className={`flex items-center justify-center px-4 py-2 rounded-lg ${
-        isScrolled 
-          ? "bg-[#115173] text-white" 
-          : "bg-[#115173] text-white"
-      }`}
-    >
-      <FaGlobe className="ml-2" />
-      {language === 'ar' ? 'English' : 'العربية'}
-    </button>
-
-              {user ? (
-                <div className="flex flex-col gap-2">
-                  {user.isAdmin && (
-                    <Link
-                      to="/AdminDash"
-                      className="flex items-center px-4 py-2.5 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-[#FFD700]/90 transition-colors justify-center"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaCog className="ml-2" />
-                      لوحة التحكم
-                    </Link>
-                  )}
-                  <Link
-                    to={`/ProfilePage/${user.userId}`}
-                    className="flex items-center px-4 py-2.5 bg-[#115173] text-white rounded-lg hover:bg-[#115173]/90 transition-colors justify-center"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <FaUser className="ml-2" />
-                    الملف الشخصي
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center px-4 py-2.5 bg-transparent border border-red-400 text-red-400 rounded-lg hover:bg-red-400/10 transition-colors justify-center"
-                  >
-                    <FaSignOutAlt className="ml-2" />
-                    تسجيل الخروج
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setFormOpen(true);
-                    setMenuOpen(false);
-                  }}
-                  className="w-full px-4 py-2.5 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-[#FFD700]/90 transition-colors font-medium"
-                >
-                  تسجيل الدخول
-                </button>
-              )}
-            </div>
-          </nav>
-
-          {/* Desktop User Actions */}
+          {/* User Actions - Right side */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* زر تغيير اللغة للشاشات الكبيرة */}
+            {/* Language toggle for desktop */}
             <button
               onClick={toggleLanguage}
               className={`flex items-center px-4 py-2 rounded transition-colors duration-200 ${
@@ -282,8 +200,8 @@ const toggleLanguage = () => {
                   : "bg-transparent text-white border-white hover:bg-white/10"
               }`}
             >
-              <FaGlobe className="ml-2" />
-              {language === 'ar' ? 'English' : 'العربية'}
+              <FaGlobe className="mr-2" />
+              {language === 'en' ? 'العربية' : 'English'}
             </button>
 
             {user ? (
@@ -320,8 +238,8 @@ const toggleLanguage = () => {
                       className="flex items-center px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      <FaUser className="ml-2 text-[#115173]" />
-                      {user.isAdmin ? "لوحة التحكم" : "الملف الشخصي"}
+                      <FaUser className="mr-2 text-[#115173]" />
+                      {user.isAdmin ? "Dashboard" : "Profile"}
                     </Link>
                
                     <button>
@@ -330,16 +248,16 @@ const toggleLanguage = () => {
                         className="w-full flex items-center px-4 py-3 text-[#022C43] hover:bg-[#F0F0F0] transition-colors border-t border-[#F0F0F0]"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <FileHeart className="ml-2 text-[#115173]" />
-                        المفضلة
+                        <FileHeart className="mr-2 text-[#115173]" />
+                        Favorites
                       </Link>
                     </button>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 transition-colors border-t border-[#F0F0F0]"
                     >
-                      <FaSignOutAlt className="ml-2" />
-                      تسجيل الخروج
+                      <FaSignOutAlt className="mr-2" />
+                      Logout
                     </button>
                   </div>
                 )}
@@ -353,17 +271,123 @@ const toggleLanguage = () => {
                     : "bg-[#022C43] text-[#ffffff] hover:bg-[#115173]/90"
                 } hover:scale-105 font-medium`}
               >
-                تسجيل الدخول
+                Login
               </button>
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {menuOpen && (
+          <div className="lg:hidden fixed top-20 left-0 w-full bg-[#022C43] p-6 shadow-xl flex flex-col rounded-b-lg z-40">
+            <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/homeenglish"
+              onClick={() => setMenuOpen(false)}
+            >
+              Home
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
+            <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/location"
+              onClick={() => setMenuOpen(false)}
+            >
+              Destinations
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+    
+            <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/article"
+              onClick={() => setMenuOpen(false)}
+            >
+              Blogs
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
+            <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/seasonPage/:season"
+              onClick={() => setMenuOpen(false)}
+            >
+              Seasonal
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
+            <Link
+              className="relative group py-2 px-1 text-white hover:text-[#FFD700] transition-colors"
+              to="/about"
+              onClick={() => setMenuOpen(false)}
+            >
+              About
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FFD700] transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
+            {/* Mobile User Actions */}
+            <div className="mt-4 flex flex-col gap-3 w-full">
+              {/* Language toggle button for mobile */}
+              <button
+                onClick={toggleLanguage}
+                className={`flex items-center justify-center px-4 py-2 rounded-lg ${
+                  isScrolled 
+                    ? "bg-[#115173] text-white" 
+                    : "bg-[#115173] text-white"
+                }`}
+              >
+                <FaGlobe className="mr-2" />
+                {language === 'en' ? 'العربية' : 'English'}
+              </button>
+
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  {user.isAdmin && (
+                    <Link
+                      to="/AdminDash"
+                      className="flex items-center px-4 py-2.5 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-[#FFD700]/90 transition-colors justify-center"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <FaCog className="mr-2" />
+                      Dashboard
+                    </Link>
+                  )}
+                  <Link
+                    to={`/ProfilePage/${user.userId}`}
+                    className="flex items-center px-4 py-2.5 bg-[#115173] text-white rounded-lg hover:bg-[#115173]/90 transition-colors justify-center"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <FaUser className="mr-2" />
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center px-4 py-2.5 bg-transparent border border-red-400 text-red-400 rounded-lg hover:bg-red-400/10 transition-colors justify-center"
+                  >
+                    <FaSignOutAlt className="mr-2" />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setFormOpen(true);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-2.5 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-[#FFD700]/90 transition-colors font-medium"
+                >
+                  Login
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Modern Login Form Modal */}
+      {/* Login Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* الخلفية */}
+          {/* Background */}
           <div 
             className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={(e) => {
@@ -372,7 +396,7 @@ const toggleLanguage = () => {
             }}
           />
           
-          {/* النموذج */}
+          {/* Form */}
           <div 
             className="relative z-50 bg-white rounded-xl w-full max-w-md overflow-hidden shadow-2xl"
             style={{
@@ -383,7 +407,7 @@ const toggleLanguage = () => {
           >
             {/* Header */}
             <div className="bg-[#022C43] p-4 text-white flex justify-between items-center">
-              <h2 className="text-xl font-bold">تسجيل الدخول / إنشاء حساب</h2>
+              <h2 className="text-xl font-bold">Login / Register</h2>
               <button
                 onClick={(e) => {
                   e.stopPropagation();

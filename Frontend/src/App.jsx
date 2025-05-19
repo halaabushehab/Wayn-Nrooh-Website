@@ -129,6 +129,7 @@ import {
 // Components (ثقيلة) - Lazy
 const Navbar = lazy(() => import("./components/Navbar.jsx"));
 const Footer = lazy(() => import("./components/Footer.jsx"));
+
 const PageNotFound = lazy(() => import("./components/PageNotFound.jsx"));
 const SeasonalDestinations = lazy(() =>
   import("./components/HomeComponents/SeasonalDestinations.jsx")
@@ -157,6 +158,7 @@ const PrivacyPolicy = lazy(() =>
 
 // Pages - Main - Lazy
 const Home = lazy(() => import("./pages/mainPages/Home.jsx"));
+const HomeEn = lazy(() => import("./pages/mainPages/HomeEn.jsx"));
 const Blog = lazy(() => import("./pages/mainPages/Blog.jsx"));
 const PlogDetails = lazy(() => import("./pages/mainPages/PlogDetails.jsx"));
 const About = lazy(() => import("./pages/mainPages/About.jsx"));
@@ -183,7 +185,9 @@ const ProfilePage = lazy(() => import("./pages/user/ProfilePage.jsx"));
 
 const AppContent = () => {
   const location = useLocation();
-  const hideLayout = location.pathname.startsWith("/AdminDash");
+  const hideLayout = location.pathname.startsWith("/AdminDash") || location.pathname === "/homeenglish";
+
+
 
   return (
     <>
@@ -193,6 +197,8 @@ const AppContent = () => {
           <Routes>
             {/* Main Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/homeenglish" element={<HomeEn />} />
+
             <Route path="/article" element={<Blog />} />
             <Route path="/article/:id" element={<PlogDetails />} />
             <Route path="/about" element={<About />} />

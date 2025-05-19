@@ -356,150 +356,150 @@ const PaymentsDashboard = () => {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       {/* Header */}
-      <header className="bg-white py-6 px-8 shadow-sm border-b border-gray-100">
-        <motion.div 
-          className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="text-right">
-            <h1 className="text-2xl font-bold text-[#022C43]">لوحة تحكم المدفوعات</h1>
-            <p className="text-gray-500">تتبع وتحليل معاملات الدفع</p>
-          </div>
-          <div className="flex items-center space-x-reverse space-x-3">
-            <button 
-              onClick={fetchPayments}
-              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-[#022C43] hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <RefreshCw size={16} className="ml-2" />
-              تحديث
-            </button>
-            <button 
-              onClick={handleExport}
-              className="flex items-center px-4 py-2 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-yellow-500 transition-colors shadow-sm font-medium"
-            >
-              <Download size={16} className="ml-2" />
-              تصدير CSV
-            </button>
-          </div>
-        </motion.div>
-      </header>
+  <header className="bg-white px-8 py-6 shadow-sm border-b border-gray-100">
+  <motion.div
+    className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-6"
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    {/* العنوان والوصف */}
+    <div className="text-right">
+      <h1 className="text-2xl font-bold text-[#022C43]">لوحة تحكم المدفوعات</h1>
+      <p className="text-gray-500">تتبع وتحليل معاملات الدفع</p>
+    </div>
+
+    {/* الأزرار */}
+    <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+      <button
+        onClick={fetchPayments}
+        className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-[#022C43] hover:bg-gray-50 transition shadow-sm"
+      >
+        <RefreshCw size={16} className="ml-2" />
+        تحديث
+      </button>
+      <button
+        onClick={handleExport}
+        className="flex items-center px-4 py-2 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-yellow-500 transition shadow-sm font-medium"
+      >
+        <Download size={16} className="ml-2" />
+        تصدير CSV
+      </button>
+    </div>
+  </motion.div>
+</header>
+
 
       {/* Main Content */}
-      <div className="p-8">
-        {/* Filters Section */}
-        <motion.div 
-          className="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          <div className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-6">
-            <div className="flex items-center">
-              <Filter size={20} className="ml-2 text-[#115173]" />
-              <h2 className="text-lg font-semibold text-[#022C43]">الفلاتر</h2>
-            </div>
-            <div className="flex flex-col md:flex-row-reverse gap-4 w-full md:w-auto">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="ابحث بالاسم، المكان أو الحالة..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-[#FFD700] w-full text-right"
-                />
-              </div>
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-[#FFD700] text-[#022C43] text-right"
-              >
-                <option value="all">كل الوقت</option>
-                <option value="today">اليوم</option>
-                <option value="week">آخر 7 أيام</option>
-                <option value="month">آخر 30 يوم</option>
-              </select>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tabs */}
-        <motion.div 
-          className="mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-        >
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`px-6 py-3 font-medium relative ${activeTab === "overview" ? 
-                "text-[#115173]" : 
-                "text-gray-500 hover:text-[#022C43]"}`}
-            >
-              نظرة عامة
-              {activeTab === "overview" && (
-                <motion.div 
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFD700]"
-                  layoutId="tabIndicator"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("payments")}
-              className={`px-6 py-3 font-medium relative ${activeTab === "payments" ? 
-                "text-[#115173]" : 
-                "text-gray-500 hover:text-[#022C43]"}`}
-            >
-              تفاصيل المدفوعات
-              {activeTab === "payments" && (
-                <motion.div 
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFD700]"
-                  layoutId="tabIndicator"
-                />
-              )}
-            </button>
-          </div>
-        </motion.div>
-
-        {activeTab === "overview" ? (
-          <>
-            {/* Stats Cards */}
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 1, staggerChildren: 0.1 }}
-            >
-              {renderStatCard(
-                <HandCoins 
- size={20} />, 
-                "إجمالي المبلغ", 
-`${(totalAmount * 0.7).toFixed(2)} دينار أردني`, 
-                "bg-[#115173]"
-              )}
-              {renderStatCard(
-                <Users size={20} />, 
-                "إجمالي التذاكر", 
-                totalTickets, 
-                "bg-[#022C43]"
-              )}
-              {renderStatCard(
-                <MapPin size={20} />, 
-                "أكثر الأماكن حجزًا", 
-                mostBookedPlace, 
-                "bg-[#FFD700]"
-              )}
-            </motion.div>
-
-            {/* Charts */}
-            {renderCharts()}
-          </>
-        ) : (
-          renderTable()
-        )}
+    <div className="p-8">
+  {/* ✅ Filters Section */}
+  <motion.div
+    className="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.2, duration: 0.8 }}
+  >
+    <div className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-6">
+      {/* العنوان والأيقونة */}
+      <div className="flex items-center text-[#022C43]">
+        <Filter size={20} className="ml-2 text-[#115173]" />
+        <h2 className="text-lg font-semibold">الفلاتر</h2>
       </div>
+
+      {/* الحقول */}
+      <div className="flex flex-col md:flex-row-reverse gap-4 w-full md:w-auto">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="ابحث بالاسم، المكان أو الحالة..."
+          className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-right"
+        />
+        <select
+          value={dateRange}
+          onChange={(e) => setDateRange(e.target.value)}
+          className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-[#022C43] text-right"
+        >
+          <option value="all">كل الوقت</option>
+          <option value="today">اليوم</option>
+          <option value="week">آخر 7 أيام</option>
+          <option value="month">آخر 30 يوم</option>
+        </select>
+      </div>
+    </div>
+  </motion.div>
+
+  {/* ✅ Tabs Section */}
+  <motion.div
+    className="mb-6"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.3, duration: 0.8 }}
+  >
+    <div className="flex border-b border-gray-200">
+      {[
+        { id: "overview", label: "نظرة عامة" },
+        { id: "payments", label: "تفاصيل المدفوعات" },
+      ].map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          className={`relative px-6 py-3 font-medium ${
+            activeTab === tab.id
+              ? "text-[#115173]"
+              : "text-gray-500 hover:text-[#022C43]"
+          }`}
+        >
+          {tab.label}
+          {activeTab === tab.id && (
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFD700]"
+              layoutId="tabIndicator"
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  </motion.div>
+
+  {/* ✅ Tab Content */}
+  {activeTab === "overview" ? (
+    <>
+      {/* Stats Cards */}
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 1 }}
+      >
+        {renderStatCard(
+          <HandCoins size={20} />,
+          "إجمالي المبلغ",
+          `${(totalAmount * 0.7).toFixed(2)} دينار أردني`,
+          "bg-[#115173]"
+        )}
+        {renderStatCard(
+          <Users size={20} />,
+          "إجمالي التذاكر",
+          totalTickets,
+          "bg-[#022C43]"
+        )}
+        {renderStatCard(
+          <MapPin size={20} />,
+          "أكثر الأماكن حجزًا",
+          mostBookedPlace,
+          "bg-[#FFD700]"
+        )}
+      </motion.div>
+
+      {/* Charts */}
+      {renderCharts()}
+    </>
+  ) : (
+    renderTable()
+  )}
+</div>
+
     </div>
   );
 };

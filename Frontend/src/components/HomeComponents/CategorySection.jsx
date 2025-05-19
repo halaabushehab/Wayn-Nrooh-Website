@@ -483,7 +483,7 @@ function ElegantCategoryCard({ category, index, onOpenPopup }) {
 
   return (
     <div
-      className={`h-80 rounded-lg overflow-hidden relative transition-all duration-1000 transform ${
+      className={`h-[400px] rounded-lg overflow-hidden relative transition-all duration-1000 transform ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -493,7 +493,8 @@ function ElegantCategoryCard({ category, index, onOpenPopup }) {
         boxShadow: isHovered
           ? '0 22px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(212, 175, 55, 0.1)'
           : '0 10px 30px rgba(0, 0, 0, 0.08)',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        minHeight: '400px' // إضافة حد أدنى للارتفاع
       }}
     >
       {/* Hover overlay */}
