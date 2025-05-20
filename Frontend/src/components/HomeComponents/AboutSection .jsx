@@ -33,7 +33,7 @@ const AboutSection = () => {
               className="text-right"
             >
               <h2 className="text-2xl sm:text-3xl font-bold text-[#022C43] mb-2">
-                عن وين نروح؟
+                 وين نروح؟
               </h2>
               <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#022C43] mb-4 sm:mb-6">
                 اكتشف أجمل الأماكن والأنشطة في الأردن بسهولة

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Calendar, HandCoins , Users, MapPin, Filter, Download, RefreshCw } from "lucide-react";
+import { Calendar, HandCoins, Users, MapPin, Filter, Download, RefreshCw } from "lucide-react";
 
 const PaymentsDashboard = () => {
   const [payments, setPayments] = useState([]);
@@ -91,7 +91,6 @@ const PaymentsDashboard = () => {
   const applyFilters = () => {
     let filtered = [...payments];
     
-    // Apply date range filter
     if (dateRange !== "all") {
       const now = new Date();
       let startDate;
@@ -118,7 +117,6 @@ const PaymentsDashboard = () => {
       }
     }
     
-    // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(item => 
@@ -151,7 +149,6 @@ const PaymentsDashboard = () => {
   const prepareChartData = () => {
     if (filteredPayments.length === 0) return [];
     
-    // For bar chart - top users by amount
     if (chartType === "bar") {
       const userSums = {};
       filteredPayments.forEach(item => {
@@ -163,40 +160,38 @@ const PaymentsDashboard = () => {
       return Object.keys(userSums)
         .map(name => ({ name, amount: userSums[name] }))
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 10); // Top 10 users
+        .slice(0, 10);
     }
     
-    // For pie chart - tickets by place
- if (chartType === "pie") {
-  const placeCount = {};
-  filteredPayments.forEach(item => {
-    if (item.userName) {
-      placeCount[item.userName] = (placeCount[item.userName] || 0) + item.ticketCount;
+    if (chartType === "pie") {
+      const placeCount = {};
+      filteredPayments.forEach(item => {
+        if (item.userName) {
+          placeCount[item.userName] = (placeCount[item.userName] || 0) + item.ticketCount;
+        }
+      });
+      
+      return Object.keys(placeCount)
+        .map(name => ({ name, value: placeCount[name] }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
     }
-  });
-  
-  return Object.keys(placeCount)
-    .map(name => ({ name, value: placeCount[name] }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5); // Top 5 places
-}
-
     
     return [];
   };
 
   const renderStatCard = (icon, title, value, color) => (
     <motion.div 
-      className={`bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center`}
+      className={`bg-white p-4 md:p-6 rounded-xl shadow-lg border border-gray-100 flex items-center`}
       whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
       transition={{ duration: 0.3 }}
     >
-      <div className={`rounded-xl p-3 ml-4 ${color} text-white`}>
-        {icon}
+      <div className={`rounded-xl p-2 md:p-3 ml-2 md:ml-4 ${color} text-white`}>
+        {React.cloneElement(icon, { size: 20 })}
       </div>
-      <div className="text-right">
-        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</h2>
-        <p className="text-2xl font-bold text-[#022C43]">{value}</p>
+      <div className="text-right flex-1">
+        <h2 className="text-xs md:text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</h2>
+        <p className="text-lg md:text-2xl font-bold text-[#022C43] truncate">{value}</p>
       </div>
     </motion.div>
   );
@@ -210,44 +205,45 @@ const PaymentsDashboard = () => {
 
   const renderCharts = () => (
     <motion.div 
-      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8"
+      className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-gray-100 mb-6 md:mb-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.5, duration: 1 }}
     >
-      <div className="flex flex-col md:flex-row-reverse md:items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-[#022C43] mb-2 md:mb-0 text-right">
+      <div className="flex flex-col md:flex-row-reverse md:items-center justify-between mb-4 md:mb-6">
+        <h2 className="text-lg md:text-xl font-semibold text-[#022C43] mb-2 md:mb-0 text-right">
           {chartType === "bar" ? "أعلى المستخدمين حسب قيمة الدفع" : "توزيع التذاكر حسب المكان"}
         </h2>
         <div className="flex space-x-reverse space-x-2 bg-gray-100 p-1 rounded-lg">
           <button 
             onClick={() => setChartType("bar")} 
-            className={`px-3 py-1 rounded-lg text-sm font-medium ${chartType === "bar" ? "bg-[#115173] text-white" : "text-gray-600 hover:text-[#022C43]"}`}
+            className={`px-3 py-1 rounded-lg text-xs md:text-sm font-medium ${chartType === "bar" ? "bg-[#115173] text-white" : "text-gray-600 hover:text-[#022C43]"}`}
           >
             رسم بياني
           </button>
           <button 
             onClick={() => setChartType("pie")} 
-            className={`px-3 py-1 rounded-lg text-sm font-medium ${chartType === "pie" ? "bg-[#115173] text-white" : "text-gray-600 hover:text-[#022C43]"}`}
+            className={`px-3 py-1 rounded-lg text-xs md:text-sm font-medium ${chartType === "pie" ? "bg-[#115173] text-white" : "text-gray-600 hover:text-[#022C43]"}`}
           >
             رسم دائري
           </button>
         </div>
       </div>
       
-      <div className="h-80">
+      <div className="h-64 md:h-80">
         {chartType === "bar" && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={prepareChartData()}>
-              <XAxis dataKey="name" tick={{ fill: '#6B7280' }} />
-              <YAxis tick={{ fill: '#6B7280' }} />
+              <XAxis dataKey="name" tick={{ fill: '#6B7280', fontSize: 12 }} />
+              <YAxis tick={{ fill: '#6B7280', fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: 'white', 
                   border: '1px solid #E5E7EB',
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  color: '#022C43'
+                  color: '#022C43',
+                  fontSize: 14
                 }} 
               />
               <Bar dataKey="amount" fill="#FFD700" radius={[4, 4, 0, 0]} />
@@ -263,7 +259,7 @@ const PaymentsDashboard = () => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                outerRadius={100}
+                outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
                 label={({name, percent}) => `${name} (${(percent * 100).toFixed(0)}%)`}
@@ -278,10 +274,16 @@ const PaymentsDashboard = () => {
                   border: '1px solid #E5E7EB',
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  color: '#022C43'
+                  color: '#022C43',
+                  fontSize: 14
                 }} 
               />
-              <Legend layout="vertical" align="left" verticalAlign="middle" />
+              <Legend 
+                layout="horizontal" 
+                verticalAlign="bottom" 
+                align="center"
+                wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
+              />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -291,21 +293,21 @@ const PaymentsDashboard = () => {
 
   const renderTable = () => (
     <motion.div 
-      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+      className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-gray-100 overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.7, duration: 1 }}
     >
       <div className="overflow-x-auto">
-        <table className="w-full text-[#022C43] border-collapse">
+        <table className="w-full text-[#022C43] border-collapse text-sm md:text-base">
           <thead className="bg-[#115173]">
             <tr>
-              <th className="py-3 px-4 text-right text-white font-medium">اسم المستخدم</th>
-              <th className="py-3 px-4 text-right text-white font-medium">المبلغ</th>
-              <th className="py-3 px-4 text-right text-white font-medium">عدد التذاكر</th>
-              <th className="py-3 px-4 text-right text-white font-medium">المكان</th>
-              <th className="py-3 px-4 text-right text-white font-medium">الحالة</th>
-              <th className="py-3 px-4 text-right text-white font-medium">التاريخ</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium">اسم المستخدم</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium">المبلغ</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium">عدد التذاكر</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium hidden sm:table-cell">المكان</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium">الحالة</th>
+              <th className="py-2 px-3 md:py-3 md:px-4 text-right text-white font-medium hidden md:table-cell">التاريخ</th>
             </tr>
           </thead>
           <tbody>
@@ -318,11 +320,11 @@ const PaymentsDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * idx, duration: 0.3 }}
                 >
-                  <td className="py-3 px-4 text-right">{item.userName || "غير متوفر"}</td>
-                  <td className="py-3 px-4 text-right font-medium">${item.amount.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-right">{item.ticketCount}</td>
-                  <td className="py-3 px-4 text-right">{item.placeId || "غير متوفر"}</td>
-                  <td className="py-3 px-4 text-right">
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right">{item.userName || "غير متوفر"}</td>
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right font-medium">${item.amount.toFixed(2)}</td>
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right">{item.ticketCount}</td>
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right hidden sm:table-cell">{item.placeId || "غير متوفر"}</td>
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       item.paymentStatus === "completed" || item.paymentStatus === "success" ? 
                       "bg-green-100 text-green-800" : 
@@ -335,12 +337,12 @@ const PaymentsDashboard = () => {
                        item.paymentStatus === "success" ? "ناجح" : item.paymentStatus}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-500">{item.formattedDate}</td>
+                  <td className="py-2 px-3 md:py-3 md:px-4 text-right text-gray-500 hidden md:table-cell">{item.formattedDate}</td>
                 </motion.tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="py-6 text-center text-gray-500">لا توجد مدفوعات تطابق عوامل التصفية الخاصة بك</td>
+                <td colSpan="6" className="py-4 md:py-6 text-center text-gray-500">لا توجد مدفوعات تطابق عوامل التصفية الخاصة بك</td>
               </tr>
             )}
           </tbody>
@@ -356,150 +358,144 @@ const PaymentsDashboard = () => {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       {/* Header */}
-  <header className="bg-white px-8 py-6 shadow-sm border-b border-gray-100">
-  <motion.div
-    className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-6"
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    {/* العنوان والوصف */}
-    <div className="text-right">
-      <h1 className="text-2xl font-bold text-[#022C43]">لوحة تحكم المدفوعات</h1>
-      <p className="text-gray-500">تتبع وتحليل معاملات الدفع</p>
-    </div>
+      <header className="bg-white px-4 py-4 md:px-8 md:py-6 shadow-sm border-b border-gray-100">
+        <motion.div
+          className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-4 md:gap-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="text-right">
+            <h1 className="text-xl md:text-2xl font-bold text-[#022C43]">لوحة تحكم المدفوعات</h1>
+            <p className="text-sm md:text-base text-gray-500">تتبع وتحليل معاملات الدفع</p>
+          </div>
 
-    {/* الأزرار */}
-    <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-      <button
-        onClick={fetchPayments}
-        className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-[#022C43] hover:bg-gray-50 transition shadow-sm"
-      >
-        <RefreshCw size={16} className="ml-2" />
-        تحديث
-      </button>
-      <button
-        onClick={handleExport}
-        className="flex items-center px-4 py-2 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-yellow-500 transition shadow-sm font-medium"
-      >
-        <Download size={16} className="ml-2" />
-        تصدير CSV
-      </button>
-    </div>
-  </motion.div>
-</header>
-
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
+            <button
+              onClick={fetchPayments}
+              className="flex items-center px-3 py-1 md:px-4 md:py-2 bg-white border border-gray-200 rounded-lg text-[#022C43] hover:bg-gray-50 transition shadow-sm text-sm md:text-base"
+            >
+              <RefreshCw size={16} className="ml-1 md:ml-2" />
+              تحديث
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center px-3 py-1 md:px-4 md:py-2 bg-[#FFD700] text-[#022C43] rounded-lg hover:bg-yellow-500 transition shadow-sm font-medium text-sm md:text-base"
+            >
+              <Download size={16} className="ml-1 md:ml-2" />
+              تصدير CSV
+            </button>
+          </div>
+        </motion.div>
+      </header>
 
       {/* Main Content */}
-    <div className="p-8">
-  {/* ✅ Filters Section */}
-  <motion.div
-    className="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 0.2, duration: 0.8 }}
-  >
-    <div className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-6">
-      {/* العنوان والأيقونة */}
-      <div className="flex items-center text-[#022C43]">
-        <Filter size={20} className="ml-2 text-[#115173]" />
-        <h2 className="text-lg font-semibold">الفلاتر</h2>
-      </div>
-
-      {/* الحقول */}
-      <div className="flex flex-col md:flex-row-reverse gap-4 w-full md:w-auto">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="ابحث بالاسم، المكان أو الحالة..."
-          className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-right"
-        />
-        <select
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value)}
-          className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-[#022C43] text-right"
+      <div className="p-4 md:p-6 lg:p-8">
+        {/* Filters Section */}
+        <motion.div
+          className="mb-6 md:mb-8 bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
         >
-          <option value="all">كل الوقت</option>
-          <option value="today">اليوم</option>
-          <option value="week">آخر 7 أيام</option>
-          <option value="month">آخر 30 يوم</option>
-        </select>
-      </div>
-    </div>
-  </motion.div>
+          <div className="flex flex-col md:flex-row-reverse md:items-center justify-between gap-4 md:gap-6">
+            <div className="flex items-center text-[#022C43]">
+              <Filter size={18} className="ml-1 md:ml-2 text-[#115173]" />
+              <h2 className="text-base md:text-lg font-semibold">الفلاتر</h2>
+            </div>
 
-  {/* ✅ Tabs Section */}
-  <motion.div
-    className="mb-6"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 0.3, duration: 0.8 }}
-  >
-    <div className="flex border-b border-gray-200">
-      {[
-        { id: "overview", label: "نظرة عامة" },
-        { id: "payments", label: "تفاصيل المدفوعات" },
-      ].map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
-          className={`relative px-6 py-3 font-medium ${
-            activeTab === tab.id
-              ? "text-[#115173]"
-              : "text-gray-500 hover:text-[#022C43]"
-          }`}
+            <div className="flex flex-col md:flex-row-reverse gap-3 w-full md:w-auto">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="ابحث بالاسم، المكان أو الحالة..."
+                className="flex-1 px-3 py-1 md:px-4 md:py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-right text-sm md:text-base"
+              />
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-3 py-1 md:px-4 md:py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#FFD700] text-[#022C43] text-right text-sm md:text-base"
+              >
+                <option value="all">كل الوقت</option>
+                <option value="today">اليوم</option>
+                <option value="week">آخر 7 أيام</option>
+                <option value="month">آخر 30 يوم</option>
+              </select>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Tabs Section */}
+        <motion.div
+          className="mb-4 md:mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
         >
-          {tab.label}
-          {activeTab === tab.id && (
+          <div className="flex border-b border-gray-200 overflow-x-auto">
+            {[
+              { id: "overview", label: "نظرة عامة" },
+              { id: "payments", label: "تفاصيل المدفوعات" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-4 py-2 md:px-6 md:py-3 font-medium text-sm md:text-base whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "text-[#115173]"
+                    : "text-gray-500 hover:text-[#022C43]"
+                }`}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFD700]"
+                    layoutId="tabIndicator"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Tab Content */}
+        {activeTab === "overview" ? (
+          <>
+            {/* Stats Cards */}
             <motion.div
-              className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFD700]"
-              layoutId="tabIndicator"
-            />
-          )}
-        </button>
-      ))}
-    </div>
-  </motion.div>
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 1 }}
+            >
+              {renderStatCard(
+                <HandCoins />,
+                "إجمالي المبلغ",
+                `${(totalAmount * 0.7).toFixed(2)} دينار أردني`,
+                "bg-[#115173]"
+              )}
+              {renderStatCard(
+                <Users />,
+                "إجمالي التذاكر",
+                totalTickets,
+                "bg-[#022C43]"
+              )}
+              {renderStatCard(
+                <MapPin />,
+                "أكثر الأماكن حجزًا",
+                mostBookedPlace,
+                "bg-[#FFD700]"
+              )}
+            </motion.div>
 
-  {/* ✅ Tab Content */}
-  {activeTab === "overview" ? (
-    <>
-      {/* Stats Cards */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 1 }}
-      >
-        {renderStatCard(
-          <HandCoins size={20} />,
-          "إجمالي المبلغ",
-          `${(totalAmount * 0.7).toFixed(2)} دينار أردني`,
-          "bg-[#115173]"
+            {/* Charts */}
+            {renderCharts()}
+          </>
+        ) : (
+          renderTable()
         )}
-        {renderStatCard(
-          <Users size={20} />,
-          "إجمالي التذاكر",
-          totalTickets,
-          "bg-[#022C43]"
-        )}
-        {renderStatCard(
-          <MapPin size={20} />,
-          "أكثر الأماكن حجزًا",
-          mostBookedPlace,
-          "bg-[#FFD700]"
-        )}
-      </motion.div>
-
-      {/* Charts */}
-      {renderCharts()}
-    </>
-  ) : (
-    renderTable()
-  )}
-</div>
-
+      </div>
     </div>
   );
 };

@@ -20,15 +20,18 @@ import FooterEN  from "../../components/FooterEN.jsx"
 const Home = () => {
 
   return (
-    <>
-    <NavbarEN />
-      <Helmet>
+      <div className="app-container">
+  <Helmet>
         <title>Home | Where To Go</title>
         <meta name="description" content="Discover amazing and unique tourist places in Jordan with Where To Go." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Helmet>
 
 
+    <NavbarEN />
+    
+    
+  <main>
       {/* ***** HERO Section ***** */}
       <HeroSection />
       
@@ -48,8 +51,9 @@ const Home = () => {
 
       {/* ***** Offer Section ***** */}
       <Offer />
+       </main>
        <FooterEN />
-    </>
+    </div>
   );
 };
 

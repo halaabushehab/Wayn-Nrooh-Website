@@ -200,7 +200,7 @@ if (!token || !decodedToken || decodedToken.exp * 1000 < Date.now()) {
           
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div className="relative group">
-              <div className={`w-32 h-32 rounded-full border-4 ${isEditing ? 'border-[#FFD700]' : 'border-white'} shadow-lg overflow-hidden transition-all duration-300`}>
+              <div className={`w-25 h-25 rounded-full border-4 ${isEditing ? 'border-[#FFD700]' : 'border-white'} shadow-lg overflow-hidden transition-all duration-300`}>
                 <img
                   src={tempProfileImage}
                   alt={userData.username}

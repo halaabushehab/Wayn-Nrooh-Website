@@ -12,6 +12,7 @@ import LocationMap from './detailsplaces/LocationMap';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import bgVideo from "../../components/img/AmmanHero.mp4";
 
 const PlaceDetails = () => {
   const [place, setPlace] = useState(null)
@@ -385,63 +386,89 @@ const getUserLocation = () => {
       </div>
 
       {/* Hero Section with Parallax */}
-      <div
-        className="relative h-[60vh] bg-cover bg-center flex items-end"
-        style={{
-          backgroundImage: `url(${place.images?.[1]})`,
-          backgroundAttachment: "fixed",
-        }}
-        dir="rtl"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#022C43]/10 via-[#022C43]/10 to-[#022C43]/10"></div>
+{/* <div
+  className="relative h-[50vh] bg-cover bg-center flex items-end"
+  style={{
+    backgroundImage: `url(https://i.pinimg.com/736x/ea/6c/d1/ea6cd10471ad18d5d77654d25f7d1007.jpg)`, // تأكد أن `place.image` هو رابط الصورة
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  }}
+  dir="rtl"
+>
+  <div className="absolute inset-0 bg-gradient-to-b from-[#115173]/20 via-[#115173]/20 to-[#022C43]/20 bg-[#115173]/20"></div>
 
-        {/* Floating Category Pills */}
-        <div className="absolute top-10 right-1/4 transform translate-x-1/2 flex gap-3 flex-wrap justify-center max-w-4xl px-4">
-          {place.categories.map((category, index) => (
-            <span
-              key={index}
-              className="bg-[#115173] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md
-                        animate-fadeIn opacity-0"
-              style={{ animationDelay: `${index * 0.1 + 0.5}s`, animationFillMode: "forwards" }}
-            >
-              {category}
-            </span>
-          ))}
+  <div className="container mx-auto px-8 md:px-16 pb-16 relative z-10 text-right">
+<div className="max-w-2xl mx-auto text-center">
+  <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-snug">
+    اكتشف سحر الوجهات المميزة بتفاصيل لا تُنسى
+  </h1>
+  <p className="text-base md:text-lg text-white/90 leading-relaxed">
+    نأخذك في جولة فريدة من نوعها لاكتشاف أبرز المعالم لتخطط لمغامرتك القادمة بكل سهولة.
+  </p>
+</div>
+
+
+  </div>
+</div> */}
+    <section className="relative w-full h-[50vh] flex items-center justify-center mb-20">
+        <video
+          className="absolute top-0 left-0 w-full h-full object-cover"
+          src={bgVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+  
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#115173]/70 via-[#022C43]/60 to-[#022C43]/90" />
+  
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+          <div className="absolute top-6 right-6 w-28 h-28 border-t-4 border-r-4 border-[#FFD700] rounded-tr-3xl animate-pulse"></div>
+          <div className="absolute bottom-6 left-6 w-28 h-28 border-b-4 border-l-4 border-[#FFD700] rounded-bl-3xl animate-pulse"></div>
         </div>
+  
+<div className="relative z-10 text-center px-4 max-w-3xl mx-auto animate-fade-in-up">
+  <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white drop-shadow-xl tracking-wide">
+    اكتشف سحر الوجهات المميزة بتفاصيل لا تُنسى
+  </h1>
+  <p className="text-base md:text-lg text-white/90 mb-8 leading-relaxed">
+    نأخذك في جولة فريدة من نوعها لاكتشاف أبرز المعالم لتخطط لمغامرتك القادمة بكل سهولة.
+  </p>
+</div>
 
-        <div className="container mx-auto px-10 relative z-10">
-          <div className="max-w-4xl">
-            {/* Price and Rating */}
-            <div className="flex items-center gap-3 mb-6">
-              <span className="bg-[#FFD700] text-[#022C43] px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                {place.is_free ? "مجاني" : `${place.ticket_price} دينار`}
-              </span>
-              <div className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full">
-                <StarIcon className="w-5 h-5 text-[#FFD700] fill-[#FFD700]" />
-                <span className="mr-1 text-white font-semibold">{averageRating || place.rating}</span>
-              </div>
+      </section>
 
-              <button
-                onClick={sharePlace}
-                className="bg-white/20 backdrop-blur-md p-2 rounded-full hover:bg-white/30 transition-all duration-300"
-              >
-                <Share2 className="w-5 h-5 text-white" />
-              </button>
-            </div>
 
-            {/* Title and Description */}
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 animate-fadeIn text-right">
-              {place.name}
-            </h1>
-            <p
-              className="text-xl text-white/90 max-w-2xl animate-fadeIn opacity-0 leading-relaxed text-right"
-              style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
-            >
-              {place.short_description}
-            </p>
-          </div>
-        </div>
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="text-center mt-8 mb-12">
+  <h2 class="text-2xl md:text-4xl font-bold text-[#022C43] mb-3 animate-fadeIn">
+    <span class="text-[#115173]">{place.name}</span>
+  </h2>
+  <div class="w-20 h-1 bg-[#FFD700] mx-auto mb-4"></div>
+  <p class="text-base md:text-lg text-[#022C43] max-w-lg mx-auto leading-relaxed">
+    {place.short_description}
+  </p>
+</div>
+
+
+
 
       {/* Main Content */}
       <div className="bg-white">

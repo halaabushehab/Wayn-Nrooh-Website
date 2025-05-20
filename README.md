@@ -187,15 +187,6 @@ We aim to help users explore Jordan from a fresh and authentic perspective by of
 - **Design Tools:**  
   - Figma (UI/UX design)
 
----
-
-## 🌐 Live Demo
-
-Experience the full platform by visiting our live website:  
-[**"وين نروح" - Discover Jordan**](#)  
-Explore now and start your adventure! 🌍
-
----
 
 ## 🎥 Project Presentation
 
@@ -232,3 +223,15 @@ Explore the project brief to get an overview of the platform’s objectives, tar
 [**View Brief**](https://docs.google.com/document/d/1iywDHIAkaHUpc0Qc4pq_EfRZCrsa6dCoIQEliDlAEOk/edit?tab=t.0#heading=h.9nvcibv3gama) 🖌️
 
 ---
+
+
+
+<!-- ---
+
+## 🌐 Live Demo
+
+Experience the full platform by visiting our live website:  
+[**"وين نروح" - Discover Jordan**](#)  
+Explore now and start your adventure! 🌍
+
+--- -->

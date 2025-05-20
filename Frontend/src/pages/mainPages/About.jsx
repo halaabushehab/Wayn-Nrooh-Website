@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Helmet } from "react-helmet";
 import SuggestedPlacesSection from '../../components/HomeComponents/SuggestedPlacesSection '
+import Image1 from '../../components/img/images1.jpeg';
+import Image2 from '../../components/img/images2.png';
+import Image3 from '../../components/img/images3.jpeg';
+import Video1 from '../../components/img/AmmanHero.mp4';
 
 
 
@@ -480,7 +484,7 @@ useEffect(() => {
       <div className="relative transform -rotate-10 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjXTnSzfl9sAJIQdC04JyqAbtUPSeM7__P-Q&s"
+           src={Image1}  
             alt="العائلة في عمان"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
@@ -489,20 +493,44 @@ useEffect(() => {
           <div className="absolute -top-3 -left-3 right-30">
             <Pin size={28} className="text-amber-600" />
           </div>
-          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+          <div className="absolute bottom-15 right-2 left-2 px-3 py-1 text-left">
             <p className="text-base font-serif font-semibold text-white">
-              عمان - مزرعة السوسنة السوداء
+              عمان - العاب غابة جينغو  
             </p>
           </div>
         </div>
       </div>
+      {/* <div className="relative transform -rotate-10 hover:rotate-0 transition-transform duration-500 w-64">
+  <div className="relative group">
+    <video
+      src={Video1} // ضع هنا رابط الفيديو أو متغير الاستيراد الخاص به
+      alt="العائلة في عمان"
+      className="w-full h-64 object-cover shadow-lg rounded-sm 
+      border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
+      border-white transition-all duration-300 group-hover:shadow-xl"
+      autoPlay
+      loop
+      muted
+      playsInline
+    />
+    <div className="absolute -top-3 -left-3 right-30">
+      <Pin size={28} className="text-amber-600" />
+    </div>
+    <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+      <p className="text-base font-serif font-semibold text-white">
+        عمان - مزرعة السوسنة السوداء
+      </p>
+    </div>
+  </div>
+</div> */}
+
 
       {/* Image 2 */}
       <div className="relative transform rotate-2 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://scontent.famm11-1.fna.fbcdn.net/v/t39.30808-6/481330689_1067330908532609_2988636775833769659_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2wutcEacT1cQ7kNvwFWEbac&_nc_oc=Adkn3Tkw0k3beJqaZ-SkP5dXVg2my4zSC2k7zN3hYaFRCV2ilgg0mW_HAMuS5DfAuqI&_nc_zt=23&_nc_ht=scontent.famm11-1.fna&_nc_gid=XxKJN3z0x34aIRUXStmYTg&oh=00_AfIyHfKh0ENsXDTFw6TJd-sI-jbt9BKXmKId3DK56dHgIg&oe=682ADBFC"
-            alt="العائلة في الزرقاء"
+          src={Image2}      
+      alt="العائلة في الزرقاء"
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
             border-white transition-all duration-300 group-hover:shadow-xl"
@@ -510,9 +538,9 @@ useEffect(() => {
           <div className="absolute -top-3 -left-3 right-30">
             <Pin size={28} className="text-amber-600" />
           </div>
-          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
+          <div className="absolute bottom-15 right-2 left-2 px-3 py-1 text-left">
             <p className="text-base font-serif font-semibold text-white">
-            الزرقاء - نادي اتحاد الزرقاء 
+            عمان-فيرست أرتشر
             </p>
           </div>
         </div>
@@ -522,8 +550,7 @@ useEffect(() => {
       <div className="relative transform -rotate-4 hover:rotate-0 transition-transform duration-500 w-64">
         <div className="relative group">
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGnG3_Zc2rtzFFqEnaU0I_F-T8GtvRoIDDap3EKHAbUn9MVPRm83kHfZgwDTejfHjMtl8&usqp=CAU"
-            alt="العائلة في عمان"
+          src={Image3}
             className="w-full h-64 object-cover shadow-lg rounded-sm 
             border-t-[15px] border-r-[15px] border-l-[15px] border-b-[60px] 
             border-white transition-all duration-300 group-hover:shadow-xl"
@@ -531,9 +558,9 @@ useEffect(() => {
           <div className="absolute -top-3 -left-3  right-30">
             <Pin size={28} className="text-amber-600" />
           </div>
-          <div className="absolute bottom-10 right-0 left-0 px-3 py-1 text-left">
-            <p className="text-base font-serif font-semibold text-amber-600">
-              اربد - متحف دار السرايا 
+          <div className="absolute bottom-15 right-2 left-2 px-3 py-1 text-left">
+            <p className="text-base font-serif font-semibold text-white">
+              عمان - معرض بانوراما عمان 
             </p>
           </div>
         </div>
@@ -620,6 +647,19 @@ useEffect(() => {
         <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">دعم السياحة المحلية</h3>
         <p className="text-[#115173] text-center text-sm leading-relaxed">نُبرز الأماكن المحلية ونشجع على استكشاف الجمال الموجود حولنا.</p>
       </div>
+            {/* <!-- Card 6 --> */}
+
+      <div className="bg-white p-6 rounded-xl border-2 border-[#FFD700] hover:border-[#022C43] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2">
+  <div className="w-12 h-12 bg-[#FFD700] rounded-full flex items-center justify-center mb-4 mx-auto">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#022C43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h3l3 8 4-16 3 8h3" />
+    </svg>
+  </div>
+  <h3 className="font-bold text-xl mb-3 text-[#022C43] text-center">الشراكة والتعاون</h3>
+  <p className="text-[#115173] text-center text-sm leading-relaxed">
+    نؤمن بقوة الشراكة مع المجتمعات المحلية  لتعزيز تجربة المستخدم وتطوير المنصة  .
+  </p>
+</div>
     </div>
   </div>
 </section>
@@ -681,9 +721,10 @@ useEffect(() => {
     <div class="mt-16 text-center">
       <a href="/contact" class="inline-flex items-center px-8 py-4 bg-[#022C43] hover:bg-[#022C43]/80 text-white font-bold rounded-full transition duration-300 shadow-lg">
         <span>زيارة صفحة الاتصال </span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
+     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" style={{ transform: "scaleX(-1)" }}>
+  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+</svg>
+
       </a>
     </div>
   </div>

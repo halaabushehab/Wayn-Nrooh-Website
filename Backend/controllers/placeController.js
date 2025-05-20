@@ -1,12 +1,7 @@
 const Place = require("../models/places");
-const User = require("../models/User"); // تأكد من وجود هذا الموديل
+const User = require("../models/User"); 
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
-// const Suggestion = require('../models/Suggestion');
-const haversine = require('haversine-distance'); // تأكد من تثبيت الحزمة أولاً
-const axios = require('axios');
-// const Article = require('../models/Article');
-const { db } = require("../config/db"); // تأكد أن هذا المسار صحيح حسب مشروعك
 
 
 //  جلب عدد الأماكن
@@ -173,9 +168,6 @@ exports.getPlacesBySeason = async (req, res) => {
       return res.status(400).json({ message: "الموسم غير صالح." });
     }
 
-    // نبني الاستعلام ليشمل الأماكن التي:
-    // 1) حالتها approved
-    // 2) موسمها مطابق للموسم المطلوب أو طوال السنة
     const query = {
       status: "approved",
       $or: [
@@ -287,8 +279,6 @@ exports.createPlace = async (req, res) => {
 exports.getAllPlaces = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-
-    // query يتم ضبطه ليشمل فقط الأماكن ذات الحالة "approved"
     const query = { status: 'approved' };
 
     const options = {

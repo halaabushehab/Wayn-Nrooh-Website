@@ -1,8 +1,7 @@
 const Contact = require("../models/contact_messages");
-const transporter = require("../mailer");  // استيراد الوحدة
+const transporter = require("../mailer");  
 const { Message } = require('../models/contact_messages'); // تأكد من المسار الصحيح
-const User = require("../models/user"); // ❓ هل هذا موجود؟
-
+const User = require("../models/user"); 
 
 
 const addMessages = async (req, res) => {
@@ -40,7 +39,7 @@ const updateMessageStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updatedMessage = await Contact.findByIdAndUpdate(
+    const updatedMessage = await User.findByIdAndUpdate(
       id,
       { status: "Read" },
       { new: true }
@@ -57,7 +56,6 @@ const updateMessageStatus = async (req, res) => {
   }
 };
 
-
 const replyToContact = async (req, res) => {
   try {
     const { messageId, replyMessage } = req.body;
@@ -66,61 +64,28 @@ const replyToContact = async (req, res) => {
       return res.status(400).json({ error: "يجب إدخال كل من المعرف والرد" });
     }
 
-    let contact;
-    try {
-      contact = await Contact.findById(messageId);
-    } catch (error) {
-      console.error("خطأ في استعلام قاعدة البيانات:", error);
-      return res.status(500).json({ error: "خطأ في استعلام قاعدة البيانات" });
-    }
-
+    const contact = await Contact.findById(messageId);
     if (!contact) {
       return res.status(404).json({ error: "لم يتم العثور على الرسالة" });
     }
 
-    try {
-      contact.adminReply = replyMessage;
-      await contact.save();
-    } catch (error) {
-      console.error("خطأ في حفظ الرسالة:", error);
-      return res.status(500).json({ error: "خطأ في حفظ الرسالة" });
+    contact.adminReply = replyMessage;
+    await contact.save();
+
+    // ✅ ألغينا الإرسال مؤقتًا
+
+    const user = await User.findOne({ email: contact.email });
+    if (user) {
+      await user.save();
     }
 
-    // إرسال البريد الإلكتروني
-    const mailOptions = {
-      from: 'hala.abushiihab@gmail.com', // بريدك الإلكتروني
-      to: contact.email, // البريد الإلكتروني للمرسل
-      subject: 'رد على رسالتك', // موضوع البريد
-      text: replyMessage, // نص البريد
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("خطأ في إرسال البريد:", error);
-        return res.status(500).json({ error: "خطأ في إرسال البريد" });
-      }
-      console.log('تم إرسال البريد:', info.response);
-    });
-
-    // تحديث ملف تعريف المستخدم
-    try {
-      const user = await User.findOne({ email: contact.email });
-      if (user) {
-        // يمكنك تحديث أي حقل في ملف تعريف المستخدم إذا لزم الأمر
-        // على سبيل المثال، يمكنك إضافة حقل لتخزين الردود
-        // user.replies.push(replyMessage); // إذا كان لديك حقل replies في نموذج المستخدم
-        await user.save();
-      }
-    } catch (error) {
-      console.error("خطأ في تحديث ملف تعريف المستخدم:", error);
-    }
-
-    return res.status(200).json({ success: true, message: "تم إرسال الرد بنجاح" });
+    return res.status(200).json({ success: true, message: "تم حفظ الرد بنجاح بدون إرسال بريد" });
   } catch (error) {
     console.error("خطأ في replyToContact:", error);
     return res.status(500).json({ error: "خطأ داخلي في السيرفر" });
   }
 };
+
 
 
 

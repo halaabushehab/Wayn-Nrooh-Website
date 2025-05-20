@@ -192,7 +192,7 @@ const AppContent = () => {
   return (
     <>
       {!hideLayout && <Navbar />}
-      <div style={{ minHeight: "100vh", paddingBottom: "80px" }}>
+      <div>
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
             {/* Main Routes */}

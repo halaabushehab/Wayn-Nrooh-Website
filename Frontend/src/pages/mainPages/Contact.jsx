@@ -30,7 +30,9 @@ const ContactSection = () => {
       Swal.fire({
         title: "تم الإرسال بنجاح!",
         text: "سنتواصل معك قريبًا",
+        textColor:"115173",
         icon: "success",
+        iconColor:"FFD700",
         confirmButtonColor: "#115173",
       });
   

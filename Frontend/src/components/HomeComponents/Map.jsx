@@ -59,7 +59,62 @@ const touristSpots = [
     name: ' فايف بي مول  ',
     position: [31.9182847, 35.9044993],
     description: ' وجهة التسوق الجديدة في عمّان',
-  }
+  },
+   {
+    name: 'قلعة الكرك',
+    position: [31.1804, 35.7013],
+    description: 'قلعة تاريخية تعود للعصور الصليبية وتطل على مدينة الكرك.',
+  },
+  {
+    name: 'شاطئ العقبة الجنوبي',
+    position: [29.4772, 34.9802],
+    description: 'مكان مميز للسباحة والغطس في البحر الأحمر.',
+  },
+  {
+    name: 'متحف آثار إربد',
+    position: [32.5556, 35.8462],
+    description: 'يضم مجموعة مميزة من القطع الأثرية التي تعكس تاريخ المنطقة.',
+  },
+  {
+    name: 'محمية ضانا الطبيعية',
+    position: [30.6672, 35.6169],
+    description: 'واحدة من أجمل المحميات الطبيعية في الأردن، تجمع بين الطبيعة والتنوع الحيوي.',
+  },
+  {
+    name: 'متحف السلط التاريخي',
+    position: [32.0362, 35.7283],
+    description: 'يقدم لمحة عن تاريخ وثقافة مدينة السلط القديمة.',
+  },
+  {
+    name: 'مقام النبي شعيب',
+    position: [32.6795, 35.7414],
+    description: 'موقع ديني مهم في محافظة البلقاء، يجذب الزوار من داخل الأردن وخارجه.',
+  },
+  {
+    name: 'منتزه مادبا الأثري',
+    position: [31.7181, 35.7939],
+    description: 'يحتوي على فسيفساء بيزنطية مدهشة، من بينها خريطة مادبا الشهيرة.',
+  },
+  {
+    name: 'وادي الهيدان',
+    position: [31.5333, 35.7167],
+    description: 'مكان مغامرات مثالي لعشاق التخييم والمشي والسباحة بين الشلالات.',
+  },
+  {
+    name: 'مقام النبي هارون',
+    position: [30.3167, 35.4333],
+    description: 'يقع بالقرب من البتراء على قمة جبل ويعد من الأماكن الدينية والتاريخية.',
+  },
+  {
+  name: 'قصر عمرة',
+  position: [31.8014, 36.5816],
+  description: 'أحد القصور الأموية الصحراوية في الأزرق، يتميز بجدرانه المزينة بالرسومات.',
+},
+{
+  name: 'البتراء',
+  position: [30.3285, 35.4444],
+  description: 'المدينة الوردية المنحوتة بالصخر، أحد عجائب الدنيا السبع وتقع في محافظة معان.',
+}
 ];
 
 // RoadSign Component
@@ -133,136 +188,7 @@ function TravelStamp({ text, color, size }) {
   )
 }
 
-// TravelAnimation Component
-function TravelAnimation() {
-  const canvasRef = useRef(null)
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Set canvas to full window size
-    const handleResize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-
-    window.addEventListener("resize", handleResize)
-    handleResize()
-
-    // Create map points
-    const points = []
-    const pointCount = 30
-
-    for (let i = 0; i < pointCount; i++) {
-      points.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 4 + 2,
-        pulse: 0,
-        opacity: Math.random() * 0.5 + 0.2,
-        speed: Math.random() * 0.02 + 0.01,
-      })
-    }
-
-    // Draw a map pin
-    const drawMapPin = (x, y, size, opacity) => {
-      ctx.save()
-      ctx.globalAlpha = opacity
-
-      // Pin head
-      ctx.beginPath()
-      ctx.arc(x, y - size, size, 0, Math.PI * 2)
-      ctx.fillStyle = "#FFD700"
-      ctx.fill()
-
-      // Pin body
-      ctx.beginPath()
-      ctx.moveTo(x, y - size)
-      ctx.lineTo(x + size, y + size)
-      ctx.lineTo(x - size, y + size)
-      ctx.closePath()
-      ctx.fillStyle = "#FFD700"
-      ctx.fill()
-
-      ctx.restore()
-    }
-
-    // Draw a pulsing circle
-    const drawPulse = (x, y, radius, opacity) => {
-      ctx.beginPath()
-      ctx.arc(x, y, radius, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`
-      ctx.fill()
-    }
-
-    // Animation function
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Update and draw points
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i]
-
-        // Update pulse
-        p.pulse += p.speed
-        if (p.pulse > 1) p.pulse = 0
-
-        // Draw pulse effect
-        if (p.pulse < 0.5) {
-          const pulseSize = p.size * (1 + p.pulse * 5)
-          const pulseOpacity = (0.5 - p.pulse) * 0.5
-          drawPulse(p.x, p.y, pulseSize, pulseOpacity)
-        }
-
-        // Draw map pin
-        drawMapPin(p.x, p.y, p.size, p.opacity)
-      }
-
-      // Draw connecting lines between nearby points
-      ctx.strokeStyle = "rgba(255, 215, 0, 0.1)"
-      ctx.lineWidth = 1
-
-      for (let i = 0; i < points.length; i++) {
-        for (let j = i + 1; j < points.length; j++) {
-          const dx = points[i].x - points[j].x
-          const dy = points[i].y - points[j].y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 150) {
-            ctx.globalAlpha = (1 - distance / 150) * 0.3
-            ctx.beginPath()
-            ctx.moveTo(points[i].x, points[i].y)
-            ctx.lineTo(points[j].x, points[j].y)
-            ctx.stroke()
-          }
-        }
-      }
-
-      ctx.globalAlpha = 1
-
-      requestAnimationFrame(animate)
-    }
-
-    const animationId = requestAnimationFrame(animate)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationId)
-    }
-  }, [])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      style={{ background: "linear-gradient(to bottom, #022C43, #053F5E)" }}
-    />
-  )
-}
 
 // Custom Marker Icon
 const customIcon = new L.Icon({
@@ -276,7 +202,6 @@ const customIcon = new L.Icon({
 
 // Map Section Component
 function MapSection() {
-  const [showAnimation, setShowAnimation] = useState(false)
   const mapRef = useRef(null)
 
   // Default center and zoom for Jordan

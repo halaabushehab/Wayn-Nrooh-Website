@@ -1,197 +1,6 @@
-// "use client"
-
-// import { useEffect, useState } from "react"
-// import axios from "axios"
-
-// export default function MessagesTab() {
-//   const [messages, setMessages] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [filter, setFilter] = useState("all"); // "all", "read", "unread"
-//   const [selectedMessage, setSelectedMessage] = useState(null);
-//   const [replyText, setReplyText] = useState("");
-
-//   // جلب الرسائل من الخادم عند تحميل المكون
-//   useEffect(() => {
-//     const fetchMessages = async () => {
-//       try {
-//         const response = await axios.get("http://localhost:9527/api/message");
-//         setMessages(response.data.data || response.data);
-//       } catch (error) {
-//         console.error("Error fetching messages:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchMessages();
-//   }, []);
-
-//   // فلترة الرسائل حسب الحالة
-//   const filteredMessages = messages.filter((msg) => {
-//     if (filter === "all") return true;
-//     if (filter === "read") return msg.status === "Read";
-//     if (filter === "unread") return msg.status === "Unread";
-//     return true;
-//   });
-
-//   // دالة لتحديث حالة الرسالة كمقروءة عبر الخادم
-//   const markAsRead = async (id) => {
-//     try {
-//       await axios.put(`http://localhost:9527/api/message/${id}`, {
-//         status: "Read",
-//       });
-//       setMessages((prev) =>
-//         prev.map((msg) => (msg._id === id ? { ...msg, status: "Read", read: true } : msg))
-//       );
-//     } catch (error) {
-//       console.error("Error updating message status:", error);
-//     }
-//   };
-
-//   // اختيار رسالة وعرضها، وتحديدها كمقروءة إذا لم تكن كذلك
-//   const selectMessage = (message) => {
-//     setSelectedMessage(message);
-//     if (message.status !== "Read") {
-//       markAsRead(message._id);
-//     }
-//   };
-
-//   const sendReply = async () => {
-//     if (replyText.trim() === "" || !selectedMessage) return;
-//     try {
-//       const res = await axios.post("http://localhost:9527/api/message/reply", {
-//         messageId: selectedMessage._id, 
-//         replyMessage: replyText,
-//       });
-//       alert(`تم إرسال الرد إلى ${selectedMessage.from}: ${replyText}`);
-//       setReplyText("");
-//       // إعادة تحميل الرسائل لتحديث الحالة بعد الرد
-//       const updated = await axios.get("http://localhost:9527/api/message");
-//       setMessages(updated.data.data || updated.data);
-//     } catch (error) {
-//       console.error("Error sending reply:", error);
-//       alert("حدث خطأ أثناء إرسال الرد.");
-//     }
-//   };
-
-//   if (loading) {
-//     return <div>جارٍ التحميل...</div>;
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <h2 className="text-2xl font-bold">الرسائل</h2>
-
-//       {/* أزرار الفلتر */}
-//       <div className="flex space-x-4">
-//         <button
-//           className={`px-3 py-1 ${filter === "all" ? "font-bold" : ""}`}
-//           onClick={() => setFilter("all")}
-//         >
-//           الكل
-//         </button>
-//         <button
-//           className={`px-3 py-1 ${filter === "read" ? "font-bold" : ""}`}
-//           onClick={() => setFilter("read")}
-//         >
-//           مقروءة
-//         </button>
-//         <button
-//           className={`px-3 py-1 ${filter === "unread" ? "font-bold" : ""}`}
-//           onClick={() => setFilter("unread")}
-//         >
-//           غير مقروءة
-//         </button>
-//       </div>
-
-//       <div className="bg-white rounded-lg shadow overflow-hidden">
-//         <div className="grid grid-cols-1 md:grid-cols-3">
-//           {/* قائمة الرسائل */}
-//           <div className="md:col-span-1 border-l">
-//             <div className="p-4 border-b">
-//               <h3 className="font-medium">صندوق الوارد</h3>
-//             </div>
-//             <div className="divide-y">
-//               {filteredMessages.map((msg) => (
-//                 <div
-//                   key={msg._id}
-//                   className={`p-4 cursor-pointer hover:bg-gray-50 
-//                     ${selectedMessage && selectedMessage._id === msg._id ? "bg-gray-50" : ""}
-//                     ${msg.status === "Unread" ? "font-semibold text-black" : "text-gray-500"}`}
-//                   onClick={() => selectMessage(msg)}
-//                 >
-//                   <div className="flex justify-between">
-//                     <span>{msg.from}</span>
-//                     <span className="text-xs">
-//                       {new Date(msg.createdAt).toLocaleString()}
-//                     </span>
-//                   </div>
-//                   <div className="text-sm truncate">
-//                     {msg.title}
-//                     {msg.adminReply && (
-//                       <span className="ml-2 text-xs text-green-600 font-bold">
-//                         (تم الرد)
-//                       </span>
-//                     )}
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-
-//           {/* محتوى الرسالة */}
-//           <div className="md:col-span-2 flex flex-col h-[70vh]">
-//             {selectedMessage ? (
-//               <>
-//                 <div className="p-4 border-b">
-//                   <h3 className="font-medium">{selectedMessage.title}</h3>
-//                   <div className="flex justify-between text-sm text-gray-500 mt-1">
-//                     <span>من: {selectedMessage.from}</span>
-//                     <span>{new Date(selectedMessage.createdAt).toLocaleString()}</span>
-//                   </div>
-//                 </div>
-//                 <div className="p-4 flex-1 overflow-auto">
-//                   <p>{selectedMessage.message}</p>
-//                   {selectedMessage.adminReply && (
-//                     <div className="mt-4 p-4 border rounded bg-gray-100">
-//                       <h4 className="font-medium">رد الأدمن:</h4>
-//                       <p>{selectedMessage.adminReply}</p>
-//                     </div>
-//                   )}
-//                 </div>
-//                 <div className="p-4 border-t">
-//                   <textarea
-//                     className="w-full p-2 border rounded-md"
-//                     rows="3"
-//                     placeholder="اكتب ردك هنا..."
-//                     value={replyText}
-//                     onChange={(e) => setReplyText(e.target.value)}
-//                   ></textarea>
-//                   <button
-//                     className="mt-2 px-4 py-2 bg-[#115173] text-white rounded-md hover:bg-[#022C43]"
-//                     onClick={sendReply}
-//                   >
-//                     إرسال الرد
-//                   </button>
-//                 </div>
-//               </>
-//             ) : (
-//               <div className="flex items-center justify-center h-full text-gray-500">
-//                 اختر رسالة لعرضها
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { Mail, MailOpen, Reply, Filter, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Mail, MailOpen, Reply, Filter, Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 export default function MessagesTab() {
   const [messages, setMessages] = useState([]);
@@ -200,6 +9,18 @@ export default function MessagesTab() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -216,18 +37,16 @@ export default function MessagesTab() {
   }, []);
 
   const filteredMessages = messages.filter((msg) => {
-    // تطبيق الفلتر حسب الحالة
     if (filter === "read" && msg.status !== "Read") return false;
     if (filter === "unread" && msg.status !== "Unread") return false;
     
-    // تطبيق البحث
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (
-        msg.name.toLowerCase().includes(query) ||
-        msg.from.toLowerCase().includes(query) ||
-        msg.title.toLowerCase().includes(query) ||
-        msg.message.toLowerCase().includes(query)
+        (msg.name?.toLowerCase().includes(query) || '') ||
+        (msg.from?.toLowerCase().includes(query) || '') ||
+        (msg.title?.toLowerCase().includes(query) || '') ||
+        (msg.message?.toLowerCase().includes(query) || '')
       );
     }
     
@@ -255,20 +74,37 @@ export default function MessagesTab() {
   };
 
   const sendReply = async () => {
-    if (replyText.trim() === "" || !selectedMessage) return;
+    if (!replyText.trim() || !selectedMessage) {
+      alert("الرجاء إدخال نص الرد");
+      return;
+    }
+
+    setSendingReply(true);
     try {
       const res = await axios.post("http://localhost:9527/api/message/reply", {
         messageId: selectedMessage._id, 
         replyMessage: replyText,
       });
-      alert(`تم إرسال الرد إلى ${selectedMessage.from}: ${replyText}`);
+      
+      alert(`تم إرسال الرد بنجاح إلى ${selectedMessage.from}`);
+      
       setReplyText("");
       const updated = await axios.get("http://localhost:9527/api/message");
       setMessages(updated.data.data || updated.data);
+      
+      if (selectedMessage) {
+        setSelectedMessage(updated.data.data.find(m => m._id === selectedMessage._id));
+      }
     } catch (error) {
       console.error("Error sending reply:", error);
-      alert("حدث خطأ أثناء إرسال الرد.");
+      alert(`حدث خطأ أثناء إرسال الرد: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setSendingReply(false);
     }
+  };
+
+  const closeMessageView = () => {
+    setSelectedMessage(null);
   };
 
   if (loading) {
@@ -280,9 +116,10 @@ export default function MessagesTab() {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 rounded-xl">
+    <div className="space-y-6 p-4 md:p-6 bg-gray-50 rounded-xl">
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
           <Mail className="text-[#115173]" size={24} />
           <span>إدارة الرسائل</span>
         </h2>
@@ -295,16 +132,16 @@ export default function MessagesTab() {
             <input
               type="text"
               placeholder="ابحث في الرسائل..."
-              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#053F5E] focus:border-[#053F5E]"
+              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#053F5E] focus:border-[#053F5E] text-sm md:text-base"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.value)}
             />
           </div>
           
           <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3">
             <Filter className="h-5 w-5 text-gray-500" />
             <select
-              className="py-2 pr-1 bg-transparent focus:outline-none"
+              className="py-2 pr-1 bg-transparent focus:outline-none text-sm md:text-base"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             >
@@ -316,22 +153,27 @@ export default function MessagesTab() {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 h-[70vh]">
-          {/* قائمة الرسائل */}
-          <div className="md:col-span-1 border-l border-gray-200 overflow-y-auto">
-            <div className="p-4 border-b border-gray-200 bg-[#f8fafc]">
-              <h3 className="font-medium text-gray-700">صندوق الوارد ({filteredMessages.length})</h3>
+        <div className={`flex flex-col md:flex-row h-[calc(100vh-180px)] md:h-[70vh]`}>
+          {/* Messages List */}
+          <div className={`${selectedMessage && isMobileView ? 'hidden' : 'block'} md:block w-full md:w-1/3 border-l border-gray-200 overflow-y-auto`}>
+            <div className="p-3 md:p-4 border-b border-gray-200 bg-[#f8fafc] sticky top-0 z-10">
+              <h3 className="font-medium text-gray-700 text-sm md:text-base">
+                صندوق الوارد ({filteredMessages.length})
+              </h3>
             </div>
             <div className="divide-y divide-gray-200">
               {filteredMessages.length > 0 ? (
                 filteredMessages.map((msg) => (
                   <div
                     key={msg._id}
-                    className={`p-4 cursor-pointer transition-colors ${selectedMessage?._id === msg._id ? "bg-[#f0f7ff]" : "hover:bg-gray-50"} ${msg.status === "Unread" ? "bg-blue-50" : ""}`}
+                    className={`p-3 md:p-4 cursor-pointer transition-colors ${
+                      selectedMessage?._id === msg._id ? "bg-[#f0f7ff]" : "hover:bg-gray-50"
+                    } ${msg.status === "Unread" ? "bg-blue-50" : ""}`}
                     onClick={() => selectMessage(msg)}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           {msg.status === "Unread" ? (
@@ -339,14 +181,18 @@ export default function MessagesTab() {
                           ) : (
                             <MailOpen className="h-4 w-4 text-gray-400" />
                           )}
-                          <p className={`truncate font-medium ${msg.status === "Unread" ? "text-gray-900" : "text-gray-600"}`}>
+                          <p className={`truncate font-medium text-sm md:text-base ${
+                            msg.status === "Unread" ? "text-gray-900" : "text-gray-600"
+                          }`}>
                             {msg.from}
                           </p>
                         </div>
                         <p className="text-sm font-medium text-gray-900 truncate mt-1">{msg.title}</p>
-                        <p className="text-xs text-gray-500 truncate mt-1">{msg.message.substring(0, 60)}...</p>
+                        <p className="text-xs text-gray-500 truncate mt-1">
+                          {msg.message.substring(0, isMobileView ? 30 : 60)}...
+                        </p>
                       </div>
-                      <div className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                      <div className="text-xs text-gray-400 whitespace-nowrap">
                         {new Date(msg.createdAt).toLocaleDateString('ar-EG')}
                       </div>
                     </div>
@@ -360,39 +206,45 @@ export default function MessagesTab() {
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-6 text-center text-gray-500">
                   <Search className="mx-auto h-8 w-8 text-gray-300" />
-                  <p className="mt-2">لا توجد رسائل متطابقة مع بحثك</p>
+                  <p className="mt-2 text-sm md:text-base">لا توجد رسائل متطابقة مع بحثك</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* محتوى الرسالة */}
-          <div className="md:col-span-2 flex flex-col border-t md:border-t-0 border-gray-200">
+          {/* Message Content */}
+          <div className={`${!selectedMessage && isMobileView ? 'hidden' : 'block'} flex-1 flex flex-col border-t md:border-t-0 border-gray-200`}>
             {selectedMessage ? (
               <>
-                <div className="p-4 border-b border-gray-200">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">{selectedMessage.title}</h3>
-                      <div className="mt-1 text-sm text-gray-500">
-                        من: <span className="font-medium">{selectedMessage.from}</span>
-                      </div>
+                <div className="p-3 md:p-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                  <button 
+                    onClick={closeMessageView}
+                    className="md:hidden p-1 rounded-full hover:bg-gray-100"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-gray-500" />
+                  </button>
+                  <div className="flex-1 ml-2">
+                    <h3 className="text-base md:text-lg font-medium text-gray-900 truncate">
+                      {selectedMessage.title}
+                    </h3>
+                    <div className="text-xs md:text-sm text-gray-500 mt-1">
+                      من: <span className="font-medium">{selectedMessage.from}</span>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(selectedMessage.createdAt).toLocaleString('ar-EG')}
-                    </div>
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-500">
+                    {new Date(selectedMessage.createdAt).toLocaleString('ar-EG')}
                   </div>
                 </div>
                 
-                <div className="flex-1 p-6 overflow-y-auto bg-white">
-                  <div className="prose max-w-none">
+                <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white">
+                  <div className="prose max-w-none text-sm md:text-base">
                     <p className="whitespace-pre-line">{selectedMessage.message}</p>
                   </div>
                   
                   {selectedMessage.adminReply && (
-                    <div className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="mt-4 md:mt-8 p-3 md:p-4 border border-gray-200 rounded-lg bg-gray-50">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                         <Reply className="h-4 w-4 text-[#115173]" />
                         <span>رد الإدارة</span>
@@ -404,30 +256,37 @@ export default function MessagesTab() {
                   )}
                 </div>
                 
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="p-3 md:p-4 border-t border-gray-200 bg-gray-50 sticky bottom-0">
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#053F5E] focus:border-[#053F5E]"
+                    className="w-full p-2 md:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#053F5E] focus:border-[#053F5E] text-sm md:text-base"
                     rows="3"
                     placeholder="اكتب ردك هنا..."
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                   ></textarea>
-                  <div className="mt-3 flex justify-end">
+                  <div className="mt-2 md:mt-3 flex justify-end">
                     <button
-                      className="px-4 py-2 bg-[#115173] text-white rounded-lg hover:bg-[#053F5E] transition-colors flex items-center gap-2"
+                      className={`px-3 md:px-4 py-1 md:py-2 rounded-lg transition-colors flex items-center gap-2 text-sm md:text-base ${
+                        sendingReply 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-[#115173] hover:bg-[#053F5E] text-white'
+                      }`}
                       onClick={sendReply}
+                      disabled={sendingReply}
                     >
-                      <Reply className="h-5 w-5" />
-                      <span>إرسال الرد</span>
+                      <Reply className="h-4 w-4 md:h-5 md:w-5" />
+                      {sendingReply ? 'جاري الإرسال...' : 'إرسال الرد'}
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
-                <MailOpen className="h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-lg">اختر رسالة لعرضها</p>
-                <p className="text-sm mt-2">اضغط على أي رسالة من القائمة لقراءتها والرد عليها</p>
+              <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6 md:p-8">
+                <MailOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-300 mb-3 md:mb-4" />
+                <p className="text-base md:text-lg">اختر رسالة لعرضها</p>
+                <p className="text-xs md:text-sm mt-1 md:mt-2 text-center">
+                  اضغط على أي رسالة من القائمة لقراءتها والرد عليها
+                </p>
               </div>
             )}
           </div>

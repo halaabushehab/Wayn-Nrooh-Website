@@ -212,23 +212,36 @@ const Location = () => {
           <div className="absolute top-6 right-6 w-28 h-28 border-t-4 border-r-4 border-[#FFD700] rounded-tr-3xl animate-pulse"></div>
           <div className="absolute bottom-6 left-6 w-28 h-28 border-b-4 border-l-4 border-[#FFD700] rounded-bl-3xl animate-pulse"></div>
         </div>
-  
-        <div className="relative z-10 text-center px-6 max-w-4xl animate-fade-in-up">
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-xl tracking-wider">
+  <div className="relative z-10 text-center px-4 max-w-3xl mx-auto animate-fade-in-up">
+  <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white drop-shadow-xl tracking-wide">
             اكتشف أجمل الأماكن في الأردن
-          </h1>
-          <p className="text-lg md:text-2xl text-white mb-10 leading-relaxed">
+  </h1>
+  <p className="text-base md:text-lg text-white/90 mb-8 leading-relaxed">
             استكشف أفضل الوجهات السياحية والترفيهية في المملكة
-          </p>
-        </div>
+  </p>
+</div>
       </section>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-12">
         {/* Section Title */}
+
+<div class="text-center mb-16">
+  <h2 class="text-4xl md:text-5xl font-bold text-[#022C43] mb-4 animate-fadeIn">
+    <span class="text-[#115173]">الوجهات</span> المتوفرة لدينا
+  </h2>
+  <div class="w-24 h-1 bg-[#FFD700] mx-auto mb-6"></div>
+  <p class="text-xl text-[#022C43] max-w-2xl mx-auto leading-relaxed">
+    مجموعة مختارة من أجمل الوجهات التي يمكنك زيارتها في مختلف أنحاء الأردن، جميعها في مكان واحد.
+  </p>
+</div>
+
       {/* Section Header */}
+
 <div className="bg-white py-6 px-4 sm:px-6 rounded-xl shadow-sm mb-8">
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+  
+   
     {/* العنوان الرئيسي مع التصميم المعدل */}
     <div className="flex-1">
       <h2 className="text-3xl font-bold text-[#022C43] relative inline-block">
@@ -237,44 +250,45 @@ const Location = () => {
           <span className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#FFD700] transform -skew-x-12 z-0"></span>
         </span> */}
       </h2>
-      <p className="text-gray-600 mt-2 text-sm">اكتشف أفضل الأماكن للزيارة في الأردن</p>
+      {/* <p className="text-gray-600 mt-2 text-sm">اكتشف أفضل الأماكن للزيارة في الأردن</p> */}
     </div>
     
     {/* عناصر التحكم */}
-    <div className="w-full md:w-auto flex flex-col-reverse sm:flex-row gap-4 items-end sm:items-center">
-      {/* حقل البحث المعدل */}
-      <div className="relative flex-grow max-w-md w-full sm:w-64">
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-        </div>
-        <input
-          type="text"
-          placeholder="ابحث عن وجهة..."
-          className="w-full pr-10 pl-4 py-2.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#115173] focus:border-transparent text-right"
-          value={filters.search}
-          onChange={(e) => setFilters({...filters, search: e.target.value})}
-        />
-      </div>
-      
-      {/* زر المفضلة المعدل */}
-      <button
-        onClick={toggleFavorites}
-        className={`flex items-center justify-center px-5 py-2.5 rounded-full transition-all shadow-sm ${
-          showFavorites 
-            ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100'
-            : 'bg-white text-[#115173] border border-[#115173] hover:bg-gray-50'
-        } whitespace-nowrap`}
-      >
-        <HeartIcon 
-          className={`w-5 h-5 ml-2 ${showFavorites ? 'fill-red-500' : 'fill-transparent'}`}
-          strokeWidth={1.5}
-          stroke={showFavorites ? 'none' : 'currentColor'}
-        />
-        {showFavorites ? 'عرض الكل' : 'عرض المفضلة'}
-      </button>
+  <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white shadow-md rounded-lg">
+  {/* 🔍 حقل البحث */}
+  <div className="relative w-full sm:w-80">
+    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
     </div>
+    <input
+      type="text"
+      placeholder="ابحث عن وجهة..."
+      className="w-full pr-10 pl-4 py-2.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#115173] focus:border-transparent text-right"
+      value={filters.search}
+      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+    />
+  </div>
+
+  {/* ❤️ زر المفضلة */}
+  <button
+    onClick={toggleFavorites}
+    className={`flex items-center justify-center px-6 py-2.5 rounded-full transition-all shadow-sm text-sm font-medium ${
+      showFavorites 
+        ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100'
+        : 'bg-[#115173] text-white border border-[#115173] hover:bg-[#0e3e59]'
+    } whitespace-nowrap`}
+  >
+    <HeartIcon 
+      className={`w-5 h-5 ml-2 ${showFavorites ? 'fill-red-500' : 'fill-white'}`}
+      strokeWidth={1.5}
+      stroke="currentColor"
+    />
+    {showFavorites ? 'عرض الكل' : 'عرض المفضلة'}
+  </button>
+</div>
+
   </div>
   
   {/* الفلاتر المعدلة */}

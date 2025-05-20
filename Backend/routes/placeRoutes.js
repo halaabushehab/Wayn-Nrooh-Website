@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const placeController = require("../controllers/placeController");
-// const upload = require("../middleware/uploadMiddleware");
-// const authMiddleware = require("../middleware/authenticateToken");
 const { createPlace } = require("../controllers/placeController");
-// const { cloudinary } = require('../config/cloudinaryConfig');
 const { requireAuth } = require("../middleware/authMiddleware");
 const { upload } = require('../config/cloudinary');
 
@@ -21,7 +18,7 @@ router.get('/grouped', placeController.getPlacesGrouped);
 // POST route to create a place
 router.post('/', upload.array('images', 10), placeController.createPlace);
 
-// routes/placeRoutes.js
+ 
 router.get('/nearby', placeController.getNearbyPlaces);
 
 // ✅ جلب مكان حسب الـ ID

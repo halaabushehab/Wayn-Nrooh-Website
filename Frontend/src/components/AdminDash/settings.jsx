@@ -21,7 +21,6 @@ export default function SettingsTab() {
     updates: false
   });
 
-  // جلب بيانات المستخدم من الكوكيز بشكل صحيح
   const [userCookie, setUserCookie] = useState(null);
   const [decodedToken, setDecodedToken] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -59,7 +58,6 @@ export default function SettingsTab() {
     phone: '',
     city: '',
     bio: '',
-
     role: '',
   });
 
@@ -131,6 +129,7 @@ export default function SettingsTab() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       setTempProfileImage(URL.createObjectURL(file));
     }
   };
@@ -145,7 +144,7 @@ export default function SettingsTab() {
       formData.append('bio', tempData.bio);
       
       if (selectedFile) {
-        formData.append('image', selectedFile); // يجب أن يتطابق مع upload.single('image')
+        formData.append('image', selectedFile);
       }
   
       const response = await axios.put(
@@ -159,11 +158,10 @@ export default function SettingsTab() {
         }
       );
   
-      // تحديث الحالة مباشرةً بالبيانات الجديدة
       setUserData(prev => ({
         ...prev,
         ...response.data.user,
-        photo: response.data.user.photo + `?${Date.now()}` // إضافة timestamp لمنع الكاش
+        photo: response.data.user.photo + `?${Date.now()}`
       }));
       
       setTempProfileImage(response.data.user.photo + `?${Date.now()}`);
@@ -177,6 +175,8 @@ export default function SettingsTab() {
   const handleCancel = () => {
     setTempData(userData);
     setIsEditing(false);
+    setTempProfileImage(userData.photo || '/default-profile.png');
+    setSelectedFile(null);
   };
 
   const handleNotificationToggle = (setting) => {
@@ -189,11 +189,11 @@ export default function SettingsTab() {
   const saveNotificationSettings = async () => {
     try {
       await axios.put(
-        `http://localhost:9527/api/auth/notifications/${id}`,
+        `http://localhost:9527/api/auth/notifications/${userId}`,
         { notifications: notificationSettings },
         {
           headers: {
-            Authorization: `Bearer ${parsedCookie.token}`,
+            Authorization: `Bearer ${userCookie.token}`,
           },
         }
       );
@@ -205,7 +205,9 @@ export default function SettingsTab() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>;
   }
 
   const SettingsSidebarItem = ({ icon, text, active, onClick }) => (
@@ -217,15 +219,15 @@ export default function SettingsTab() {
     >
       <div className="flex items-center">
         <span className="ml-3">{icon}</span>
-        <span>{text}</span>
+        <span className="text-right">{text}</span>
       </div>
       <ChevronRight size={16} />
     </button>
   );
 
   const NotificationSetting = ({ title, description, settingKey }) => (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-      <div>
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-3">
+      <div className="text-right">
         <h4 className="font-medium">{title}</h4>
         <p className="text-sm text-gray-500">{description}</p>
       </div>
@@ -242,11 +244,28 @@ export default function SettingsTab() {
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <ToastContainer position="top-right" rtl={true} />
-      <div className="grid grid-cols-1 lg:grid-cols-4">
-        <div className="p-6 border-l border-gray-200">
-          <h1 className="text-2xl font-bold mb-6">الإعدادات</h1>
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden mx-2 md:mx-0">
+      <ToastContainer position="top-left" rtl={true} />
+      <div className="flex flex-col lg:flex-row">
+        {/* Mobile Menu Button (only visible on small screens) */}
+        <div className="lg:hidden p-4 border-b">
+          <select 
+            className="w-full p-2 border rounded-md"
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+          >
+            <option value="profile">الملف الشخصي</option>
+            <option value="notifications">الإشعارات</option>
+            <option value="security">الأمان</option>
+            <option value="language">اللغة</option>
+            <option value="payment">الدفع</option>
+            <option value="help">المساعدة</option>
+          </select>
+        </div>
+        
+        {/* Sidebar (hidden on mobile, shown on tablet and desktop) */}
+        <div className="hidden lg:block w-full lg:w-1/4 p-6 border-l border-gray-200">
+          {/* <h1 className="text-2xl font-bold mb-6">الإعدادات</h1> */}
           <div className="space-y-1">
             <SettingsSidebarItem
               icon={<User size={18} />}
@@ -254,19 +273,53 @@ export default function SettingsTab() {
               active={activeTab === 'profile'}
               onClick={() => setActiveTab('profile')}
             />
+            {/* <SettingsSidebarItem
+              icon={<Bell size={18} />}
+              text="الإشعارات"
+              active={activeTab === 'notifications'}
+              onClick={() => setActiveTab('notifications')}
+            /> */}
+            {/* <SettingsSidebarItem
+              icon={<Shield size={18} />}
+              text="الأمان"
+              active={activeTab === 'security'}
+              onClick={() => setActiveTab('security')}
+            /> */}
+            {/* <SettingsSidebarItem
+              icon={<Globe size={18} />}
+              text="اللغة"
+              active={activeTab === 'language'}
+              onClick={() => setActiveTab('language')}
+            /> */}
+            {/* <SettingsSidebarItem
+              icon={<CreditCard size={18} />}
+              text="الدفع"
+              active={activeTab === 'payment'}
+              onClick={() => setActiveTab('payment')}
+            /> */}
+            {/* <SettingsSidebarItem
+              icon={<HelpCircle size={18} />}
+              text="المساعدة"
+              active={activeTab === 'help'}
+              onClick={() => setActiveTab('help')}
+            /> */}
           </div>
         </div>
-        <div className="col-span-3 p-6">
+        
+        {/* Main Content Area */}
+        <div className="w-full lg:w-3/4 p-4 md:p-6">
           {activeTab === 'profile' && (
             <div>
               <h2 className="text-xl font-bold mb-6">إعدادات الملف الشخصي</h2>
-              <div className="flex items-center mb-8">
-                <div className="relative">
-                   <img
-        src={tempProfileImage}
-        alt={userData.username}
-        className="w-full h-full object-cover"
-      />
+              <div className="flex flex-col md:flex-row items-center mb-8">
+                <div className="relative mb-4 md:mb-0 md:mr-4">
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-200">
+                    <img
+                      src={tempProfileImage}
+                      alt={userData.username}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   {isEditing && (
                     <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer">
                       <input
@@ -298,12 +351,13 @@ export default function SettingsTab() {
                     </label>
                   )}
                 </div>
-                <div className="mr-4">
+                <div className="text-center md:text-right">
                   <h3 className="text-lg font-semibold">{tempData.username}</h3>
                   <p className="text-gray-600">{tempData.role === 'admin' ? 'مدير' : 'مستخدم'}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     اسم المستخدم
@@ -356,7 +410,7 @@ export default function SettingsTab() {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     نبذة عنك
                   </label>
@@ -370,7 +424,8 @@ export default function SettingsTab() {
                   />
                 </div>
               </div>
-              <div className="mt-6 flex justify-end space-x-2">
+              
+              <div className="mt-6 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                 {isEditing ? (
                   <>
                     <button
@@ -398,13 +453,162 @@ export default function SettingsTab() {
             </div>
           )}
 
+          {activeTab === 'notifications' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">إعدادات الإشعارات</h2>
+              <div className="space-y-3">
+                <NotificationSetting
+                  title="حجوزات جديدة"
+                  description="تلقي إشعارات عند استلام حجوزات جديدة"
+                  settingKey="newBookings"
+                />
+                <NotificationSetting
+                  title="المدفوعات"
+                  description="تلقي إشعارات عند استلام مدفوعات"
+                  settingKey="payments"
+                />
+                <NotificationSetting
+                  title="الرسائل"
+                  description="تلقي إشعارات عند استلام رسائل جديدة"
+                  settingKey="messages"
+                />
+                <NotificationSetting
+                  title="التقييمات"
+                  description="تلقي إشعارات عند استلام تقييمات جديدة"
+                  settingKey="reviews"
+                />
+                <NotificationSetting
+                  title="تنبيهات النظام"
+                  description="تلقي إشعارات حول تحديثات النظام"
+                  settingKey="systemAlerts"
+                />
+                <NotificationSetting
+                  title="أماكن جديدة"
+                  description="تلقي إشعارات عند إضافة أماكن جديدة"
+                  settingKey="newPlaces"
+                />
+                <NotificationSetting
+                  title="التحديثات"
+                  description="تلقي إشعارات حول التحديثات والإعلانات"
+                  settingKey="updates"
+                />
+              </div>
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={saveNotificationSettings}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  حفظ الإعدادات
+                </button>
+              </div>
+            </div>
+          )}
 
+          {activeTab === 'security' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">إعدادات الأمان</h2>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <p className="mb-4">قم بتغيير كلمة المرور الخاصة بك:</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      كلمة المرور الحالية
+                    </label>
+                    <input
+                      type="password"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="أدخل كلمة المرور الحالية"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      كلمة المرور الجديدة
+                    </label>
+                    <input
+                      type="password"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="أدخل كلمة المرور الجديدة"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      تأكيد كلمة المرور الجديدة
+                    </label>
+                    <input
+                      type="password"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="أعد إدخال كلمة المرور الجديدة"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    تغيير كلمة المرور
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'language' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">إعدادات اللغة</h2>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    اختر اللغة المفضلة
+                  </label>
+                  <select className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                  </select>
+                </div>
+                <div className="flex justify-end">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    حفظ التغييرات
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'payment' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">إعدادات الدفع</h2>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <p className="mb-4">لا توجد طرق دفع مسجلة حالياً</p>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                  إضافة طريقة دفع
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'help' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6">المساعدة والدعم</h2>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="mb-4">
+                  <h3 className="font-medium mb-2">الأسئلة الشائعة</h3>
+                  <p className="text-gray-600 mb-4">
+                    يمكنك الاطلاع على الأسئلة الشائعة في صفحة المساعدة.
+                  </p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-medium mb-2">اتصل بنا</h3>
+                  <p className="text-gray-600">
+                    البريد الإلكتروني: support@example.com
+                  </p>
+                  <p className="text-gray-600">
+                    الهاتف: +966 12 345 6789
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
