@@ -7,13 +7,11 @@ exports.reportComment = async (req, res) => {
     const { commentId, reason, details } = req.body;
     const userId = req.user.id;
 
-    // التحقق من وجود التعليق
     const comment = await Rating.findById(commentId);
     if (!comment) {
       return res.status(404).json({ error: "التعليق غير موجود" });
     }
 
-    // التحقق من عدم إرسال المستخدم للبلاغ سابقاً
     const existingReport = await Report.findOne({ commentId, userId });
     if (existingReport) {
       return res.status(400).json({ error: "لقد قمت بالإبلاغ عن هذا التعليق سابقاً" });

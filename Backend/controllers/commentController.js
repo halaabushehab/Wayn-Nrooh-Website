@@ -53,17 +53,16 @@ exports.addComment = async (req, res) => {
 exports.getCommentsForArticle = async (req, res) => {
   try {
     const { articleId } = req.params;
-    console.log('تم استلام طلب التعليقات للمقال ID:', articleId); // لتصحيح البيانات الواردة
 
     if (!mongoose.Types.ObjectId.isValid(articleId)) {
       return res.status(400).json({ error: "معرّف المقال غير صالح" });
     }
 
     const comments = await Comment.find({ articleId })
-      .populate('userId', 'username profilePicture') // تأكد أن الـ populate يعمل كما هو متوقع
+      .populate('userId', 'username profilePicture') 
       .sort({ createdAt: -1 });
 
-    console.log('التعليقات المسترجعة:', comments);  // تحقق من التعليقات المسترجعة من القاعدة
+    console.log('التعليقات المسترجعة:', comments);  
 
     if (!comments || comments.length === 0) {
       return res.status(200).json({ comments: [] });
