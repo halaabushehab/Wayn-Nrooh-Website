@@ -20,34 +20,31 @@ export default function TravelWebsite() {
   const [cityCount, setCityCount] = useState(3); // ثابت
   const [bookingCount, setBookingCount] = useState(0);
 
-  useEffect(() => {
-    // عدد الأماكن السياحية
-    axios.get('http://localhost:9527/api/places/count')
-      .then(res => {
-        console.log("Place count response:", res.data);
-        setPlaceCount(res.data.count);
-      })
-      .catch(err => console.error("Error fetching place count:", err));
-  
-    // عدد التقييمات
-    axios.get('http://localhost:9527/api/ratings/total/count')
+useEffect(() => {
+  // عدد الأماكن السياحية
+  axios.get('http://localhost:9527/api/places/count')
     .then(res => {
-      console.log("Rating count response:", res.data);
-      setRatingCount(res.data.totalRatings); // الوصول إلى totalRatings وتعيينها للحالة
+      setPlaceCount(res.data.count);
     })
-      .catch(err => console.error("Error fetching rating count:", err));
-  
-    // عدد الحجوزات
-    axios.get('http://localhost:9527/api/payments/stats/total-tickets')
-    .then(res => {
-      console.log("Booking count response:", res.data);
-      setBookingCount(res.data.totalTickets);
-    })
-      .catch(err => console.error("Error fetching booking count:", err));
-  }, []);
-  
+    .catch(err => console.error("Error fetching place count:", err));
 
-// لمراقبة تغييرات ratingCount
+  // عدد التقييمات
+  axios.get('http://localhost:9527/api/ratings/total/count')
+    .then(res => {
+      setRatingCount(res.data.totalRatings);
+    })
+    .catch(err => console.error("Error fetching rating count:", err));
+
+  // عدد المدفوعات (الحجوزات)
+  axios.get('http://localhost:9527/api/payments/payments')
+    .then(res => {
+      const payments = res.data.payments;
+      setBookingCount(payments.length);
+    })
+    .catch(err => console.error("Error fetching payments:", err));
+}, []);
+
+
 useEffect(() => {
   console.log("Updated Rating count:", ratingCount);
 }, [ratingCount]); // سيتم طباعة القيمة الجديدة لـ ratingCount عند تغييرها
@@ -290,9 +287,10 @@ useEffect(() => {
           </svg>
         </div>
         <div>
-          <h3 className="text-3xl font-bold text-[#022C43] mb-1">
-            <span className="counter" data-target="850">{bookingCount}</span>+
-          </h3>
+<h3 className="text-3xl font-bold text-[#022C43] mb-1">
+  <span className="counter" data-target="850">{bookingCount}</span>+
+</h3>
+
           <p className="text-[#115173] font-medium">حجز تم عبر المنصة</p>
         </div>
       </div>

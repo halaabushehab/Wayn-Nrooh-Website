@@ -47,35 +47,38 @@ function ActivityItem({ title, description, time }) {
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [placesCount, setPlacesCount] = useState(0);
-  const [recentActivities, setRecentActivities] = useState([]);
+  // const [recentActivities, setRecentActivities] = useState([]);
   const [latestPlace, setLatestPlace] = useState(null);
+  const [ratingCount, setRatingCount] = useState(0);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const dashboardResponse = await axios.get("http://localhost:9527/dashboard/overview");
-        setDashboardData(dashboardResponse.data);
-        
-        // جلب عدد الأماكن
-        const placesResponse = await axios.get("http://localhost:9527/api/places/count");
-        setPlacesCount(placesResponse.data.count);
-        
-        // جلب النشاط الأخير
-        const activitiesResponse = await axios.get("http://localhost:9527/api/activities/recent");
-        setRecentActivities(activitiesResponse.data);
-        
-        // جلب أحدث مكان مضاف
-        const latestPlaceResponse = await axios.get('http://localhost:9527/api/places?page=1&limit=1&sort=-createdAt');
-        if (latestPlaceResponse.data.data.docs.length > 0) {
-          setLatestPlace(latestPlaceResponse.data.data.docs[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      const dashboardResponse = await axios.get("http://localhost:9527/dashboard/overview");
+      setDashboardData(dashboardResponse.data);
+
+      const placesResponse = await axios.get("http://localhost:9527/api/places/count");
+      setPlacesCount(placesResponse.data.count);
+
+      // const activitiesResponse = await axios.get("http://localhost:9527/api/activities/recent");
+      // setRecentActivities(activitiesResponse.data);
+
+      const ratingsResponse = await axios.get('http://localhost:9527/api/ratings/total/count');
+      console.log("Ratings response:", ratingsResponse.data);
+      setRatingCount(ratingsResponse.data.totalRatings); // أو adjust حسب الاستجابة
+
+      const latestPlaceResponse = await axios.get('http://localhost:9527/api/places?page=1&limit=1&sort=-createdAt');
+      if (latestPlaceResponse.data.data.docs.length > 0) {
+        setLatestPlace(latestPlaceResponse.data.data.docs[0]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    }
+  };
 
-    fetchDashboardData();
-  }, []);
+  fetchDashboardData();
+}, []);
+
 
   if (!dashboardData) {
     return (
@@ -101,10 +104,11 @@ const Dashboard = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="إجمالي الإيرادات" value={`${totalRevenue.toLocaleString()} دينار `} change="+5%" />
         <StatCard title="عدد المستخدمين" value={userCount.toLocaleString()} change="+2%" />
         <StatCard title="عدد الأماكن" value={placesCount.toLocaleString()} change="+10%" />
         <StatCard title="عدد الحجوزات" value={bookingsCount.toLocaleString()} change="+3%" />
+              <StatCard title="إجمالي التقييمات" value={ratingCount.toLocaleString()} change="+4%" />
+
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
@@ -152,33 +156,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-lg">
-  <h3 className="font-semibold text-xl mb-6 text-gray-800 border-b pb-2">النشاط الأخير</h3>
-  <div className="space-y-4">
-    {latestPlace ? (
-      <ActivityItem 
-        title="مكان جديد مضاف"
-        description={`تم إضافة المكان: ${latestPlace.name}`}
-        time={new Date(latestPlace.createdAt).toLocaleDateString('ar-EG')}
-      />
-    ) : (
-      <p className="text-gray-500 text-center py-4">جاري تحميل أحدث الأماكن...</p>
-    )}
-    
-    {recentActivities.length > 0 ? (
-      recentActivities.map((activity, index) => (
-        <ActivityItem 
-          key={index}
-          title={activity.title || "نشاط جديد"}
-          description={activity.description || "لا يوجد وصف"}
-          time={activity.time || new Date().toLocaleDateString('ar-EG')}
-        />
-      ))
-    ) : (
-      <p className="text-gray-500 text-center py-4">لا يوجد نشاط حديث</p>
-    )}
-  </div>
-</div>
+  
       </div>
       <div className="bg-white p-6 rounded-xl shadow-lg">
         <h3 className="font-semibold text-xl mb-4 text-gray-800">الرسائل</h3>

@@ -17,29 +17,27 @@ const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Google token is required" });
     }
 
-    // التحقق من صحة التوكن
     const ticket = await client.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,  // التأكد من أن الـ client ID يتطابق مع الـ Google Client ID في البيئة
+      audience: process.env.GOOGLE_CLIENT_ID,  
     });
 
     const payload = ticket.getPayload();
-    const { email, name, sub, picture } = payload; // "sub" هو معرف المستخدم في Google
+    const { email, name, sub, picture } = payload; 
 
     // التحقق من وجود المستخدم في قاعدة البيانات باستخدام الـ googleId
     let user = await User.findOne({ googleId: sub });
 
     if (!user) {
-      // إذا لم يكن المستخدم موجودًا، قم بإنشاء حساب جديد باستخدام بيانات جوجل
       user = new User({
         username: name,
         email: email,
         googleId: sub,
-        photo: picture,  // تخزين الصورة من Google إذا كانت موجودة
-        isActivated: true,  // تعيين حالة التفعيل
+        photo: picture,  
+        isActivated: true,  
       });
 
-      await user.save();  // حفظ المستخدم في قاعدة البيانات
+      await user.save();  
     }
 
     // توليد الـ JWT

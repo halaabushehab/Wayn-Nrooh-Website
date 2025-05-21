@@ -440,23 +440,6 @@ const getUserLocation = () => {
       </section>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="text-center mt-8 mb-12">
   <h2 class="text-2xl md:text-4xl font-bold text-[#022C43] mb-3 animate-fadeIn">
     <span class="text-[#115173]">{place.name}</span>

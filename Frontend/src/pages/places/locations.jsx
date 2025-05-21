@@ -40,7 +40,6 @@ const Location = () => {
               userId: parsedUser.userId,
               isAdmin: parsedUser.isAdmin || false,
             });
-            axios.defaults.headers.common["Authorization"] = `Bearer ${parsedUser.token}`;
           }
         } catch (error) {
           console.error("Error parsing user cookie:", error);

@@ -255,7 +255,7 @@ const Navbar = () => {
 
           {/* Desktop User Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button
+            {/* <button
               onClick={toggleLanguage}
               className={`flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded transition-colors duration-200 ${
                 isScrolled
@@ -265,7 +265,7 @@ const Navbar = () => {
             >
               <FaGlobe className="ml-2 text-sm md:text-base" />
               <span className="text-sm md:text-base">{language === 'ar' ? 'English' : 'العربية'}</span>
-            </button>
+            </button> */}
 
             {user ? (
               <div className="relative" ref={userDropdownRef}>

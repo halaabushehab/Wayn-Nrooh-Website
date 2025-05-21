@@ -115,21 +115,18 @@
 // export default App;
 
 
-
-
-
 import React, { Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
+  Navigate,
 } from "react-router-dom";
+import Cookies from "js-cookie";
 
-// Components (ثقيلة) - Lazy
-const Navbar = lazy(() => import("./components/Navbar.jsx"));
-const Footer = lazy(() => import("./components/Footer.jsx"));
-
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 const PageNotFound = lazy(() => import("./components/PageNotFound.jsx"));
 const SeasonalDestinations = lazy(() =>
   import("./components/HomeComponents/SeasonalDestinations.jsx")
@@ -142,7 +139,6 @@ const UpdatePlace = lazy(() =>
 );
 const AdminDash = lazy(() => import("./components/AdminDash/AdminDash.jsx"));
 
-// Footer Pages - Lazy
 const OnlineInquiry = lazy(() =>
   import("./components/Footer/OnlineInquiry.jsx")
 );
@@ -156,7 +152,6 @@ const PrivacyPolicy = lazy(() =>
   import("./components/Footer/PrivacyPolicy.jsx")
 );
 
-// Pages - Main - Lazy
 const Home = lazy(() => import("./pages/mainPages/Home.jsx"));
 const HomeEn = lazy(() => import("./pages/mainPages/HomeEn.jsx"));
 const Blog = lazy(() => import("./pages/mainPages/Blog.jsx"));
@@ -183,11 +178,31 @@ const Login = lazy(() => import("./pages/user/Login.jsx"));
 const Register = lazy(() => import("./pages/user/Register.jsx"));
 const ProfilePage = lazy(() => import("./pages/user/ProfilePage.jsx"));
 
+// مكون لحماية المسارات الإدارية
+const AdminRoute = ({ children }) => {
+  const userCookie = Cookies.get("user");
+  
+  if (!userCookie) {
+    return <Navigate to="/" replace />;
+  }
+
+  try {
+    const user = JSON.parse(userCookie);
+    if (!user.isAdmin) {
+      return <Navigate to="/" replace />;
+    }
+  } catch (error) {
+    console.error("Error parsing user cookie:", error);
+    Cookies.remove("user");
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 const AppContent = () => {
   const location = useLocation();
   const hideLayout = location.pathname.startsWith("/AdminDash") || location.pathname === "/homeenglish";
-
-
 
   return (
     <>
@@ -217,7 +232,11 @@ const AppContent = () => {
             <Route path="/suggest" element={<ExploreJordanSection />} />
             <Route
               path="/dashboard/places/update/:id"
-              element={<UpdatePlace />}
+              element={
+                <AdminRoute>
+                  <UpdatePlace />
+                </AdminRoute>
+              }
             />
             <Route path="/location" element={<Locations />} />
             <Route path="/favorite" element={<FavoritesPage />} />
@@ -227,7 +246,14 @@ const AppContent = () => {
             <Route path="/ProfilePage/:id" element={<ProfilePage />} />
             <Route path="/Register" element={<Register />} />
             <Route path="/Login" element={<Login />} />
-            <Route path="/AdminDash" element={<AdminDash />} />
+            <Route
+              path="/AdminDash"
+              element={
+                <AdminRoute>
+                  <AdminDash />
+                </AdminRoute>
+              }
+            />
 
             {/* Footer Routes */}
             <Route path="/online-inquiry" element={<OnlineInquiry />} />

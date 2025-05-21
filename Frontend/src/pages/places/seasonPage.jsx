@@ -76,9 +76,7 @@ const SeasonalSection = () => {
 
   const activeSeasonObj = seasons.find((season) => season.id === activeSeason) || seasons[0];
   const activePlaces = seasonalPlaces[activeSeason] || [];
-  console.log("Active Season:", activeSeason); // تحقق من القيمة
-  console.log("Seasonal Places:", seasonalPlaces); // تحقق من شكل البيانات
-
+ 
   const seasonMap = {
     'صيف': 'summer',
     'شتاء': 'winter',
