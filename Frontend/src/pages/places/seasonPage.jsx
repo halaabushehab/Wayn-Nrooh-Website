@@ -285,13 +285,15 @@ return (
         <div className="p-4 flex-grow flex flex-col"> {/* Added flex classes */}
           {/* Location */}
           <div className="flex items-center text-gray-600 mb-2">
-            <MapPinIcon className="w-4 h-4 ml-2 text-[#115173]" />
             <span className="text-xs line-clamp-2">{place.short_description}</span>
           </div>
           
           {/* City tag */}
+          
           <div className="mt-auto mb-3"> {/* Pushed to bottom */}
+          
             <span className="inline-block bg-gray-100 text-[#115173] text-xs font-semibold px-2 py-1 rounded-full">
+             
               {place.city || 'عمان'}
             </span>
           </div>

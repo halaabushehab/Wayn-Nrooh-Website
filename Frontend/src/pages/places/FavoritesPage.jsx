@@ -214,63 +214,86 @@ const FavoritesPage = () => {
         {/* Favorites Grid */}
         {filteredFavorites.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-              {currentFavorites.map((place) => (
-                <div
-                  key={place._id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#115173]/20"
-                >
-                  <div className="relative">
-                    <img
-                      src={place.gallery[0] || '/placeholder-image.jpg'}
-                      alt={place.name}
-                      className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => goToPlaceDetails(place._id)}
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFavorite(place._id);
-                      }}
-                      className="absolute top-3 left-3 bg-white/90 p-2 rounded-full shadow-md hover:bg-red-100 transition-colors"
-                      title="إزالة من المفضلة"
-                      aria-label="Remove from favorites"
-                    >
-                      <X className="w-5 h-5 text-red-500" />
-                    </button>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h3 className="text-white font-semibold text-lg truncate">{place.name}</h3>
-                      <div className="flex items-center text-white/90">
-                        <MapPin className="w-4 h-4 ml-1" />
-                        <span className="text-sm">{place.city}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${i < place.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                          />
-                        ))}
-                        <span className="text-sm text-gray-500 mr-1">({place.rating})</span>
-                      </div>
-                      <span className="text-sm font-medium text-[#115173]">
-                        {place.category}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => goToPlaceDetails(place._id)}
-                      className="w-full bg-gradient-to-r from-[#115173] to-[#022C43] text-white py-2 rounded-lg hover:shadow-md transition-all"
-                    >
-                      عرض التفاصيل
-                    </button>
-                  </div>
-                </div>
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+  {currentFavorites.map((place) => (
+    <div
+      key={place._id}
+      className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#115173]/20"
+    >
+      <div className="relative">
+        <img
+          src={place.images[0] || '/placeholder-image.jpg'}
+          alt={place.name}
+          className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => goToPlaceDetails(place._id)}
+        />
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            removeFavorite(place._id);
+          }}
+          className="absolute top-3 left-3 bg-white/90 p-2 rounded-full shadow-md hover:bg-red-100 transition-colors"
+          title="إزالة من المفضلة"
+          aria-label="Remove from favorites"
+        >
+          <X className="w-5 h-5 text-red-500" />
+        </button>
+
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+          <h4 className="text-white font-semibold text-lg truncate">{place.name}</h4>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex flex-col flex-grow p-4">
+        <h4
+          className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 hover:text-[#115173] transition-colors cursor-pointer"
+          onClick={() => handleDetails(place)}
+        >
+          {place.name}
+        </h4>
+
+        <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+          {place.short_description || place.description}
+        </p>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {place.categories?.slice(0, 2).map((category, index) => (
+            <span key={index} className="bg-[#115173]/10 text-[#115173] text-xs px-2 py-1 rounded-full">
+              {category}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${i < place.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                />
               ))}
+              <span className="text-sm text-gray-500 mr-1">({place.rating})</span>
             </div>
+            <span className="text-sm font-medium text-[#115173]">
+              {place.category}
+            </span>
+          </div>
+
+          <button
+            onClick={() => goToPlaceDetails(place._id)}
+            className="w-full bg-gradient-to-r from-[#115173] to-[#022C43] text-white py-2 rounded-lg hover:shadow-md transition-all"
+          >
+            عرض التفاصيل
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
 
             {/* Pagination */}
             {totalPages > 1 && (

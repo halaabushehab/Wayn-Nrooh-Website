@@ -455,12 +455,12 @@ const Location = () => {
 
       {/* محتوى البطاقة */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3
+        <h4
           className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 hover:text-[#115173] transition-colors cursor-pointer"
           onClick={() => handleDetails(place)}
         >
           {place.name}
-        </h3>
+        </h4>
         
         <p className="text-gray-600 text-sm line-clamp-2 mb-3 flex-grow">
           {place.short_description || place.description}

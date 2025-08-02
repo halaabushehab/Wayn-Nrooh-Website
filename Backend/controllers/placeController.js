@@ -242,7 +242,10 @@ exports.createPlace = async (req, res) => {
     const parsedSuitableFor = typeof suitable_for === 'string' ? JSON.parse(suitable_for) : suitable_for;
 
     // الصور من Cloudinary URLs
-    const images = req.files.map(file => file.path);
+if (!req.files || req.files.length === 0) {
+  console.warn("Warning: No files uploaded!");
+}
+const images = req.files ? req.files.map(file => file.path) : [];
 
     const newPlace = new Place({
       createdBy: userId,
@@ -269,10 +272,12 @@ exports.createPlace = async (req, res) => {
 
     const savedPlace = await newPlace.save();
     res.status(201).json(savedPlace);
-  } catch (error) {
-    console.error("Error creating place:", error);
-    res.status(400).json({ message: "Failed to create place", error: error.message });
-  }
+} catch (error) {
+  console.error("Full error object:", JSON.stringify(error, null, 2));
+res.status(400).json({ message: "Failed to create place", error: error.message });
+
+}
+
 };
 
 //  جلب جميع الأماكن بحالة approved فقط
@@ -377,5 +382,4 @@ exports.getPlacesByUser = async (req, res) => {
     res.status(500).json({ message: "حدث خطأ أثناء جلب الأماكن", error });
   }
 };
-
 
